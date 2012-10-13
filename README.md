@@ -1,0 +1,1 @@
+This project uses Maven for most build tasks. Read up on Maven since there's no "Getting Started" stuff here yet.

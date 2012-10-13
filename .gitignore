@@ -1,0 +1,25 @@
+# ignore automatically generated files
+target/
+app/bin/
+app/gen/
+app/build/
+app/target/
+test/bin/
+test/gen/
+test/build/
+test/target/
+
+# ignore certain files
+test/proguard.cfg
+
+# ignore IDE project files
+.project
+.settings/
+.classpath
+.metadata
+.checkstyle
+
+# ignore temp files from various editors
+.DS_Store
+*~
+*.swp
