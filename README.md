@@ -5,6 +5,7 @@ This project uses Maven for most build tasks. Read up on Maven since there's not
 To be filled out.
 
 # Basic Maven Commands #
+Below are some basic Maven commands to do some common tasks.
 
     # debug build, with unit tests
     mvn clean install
