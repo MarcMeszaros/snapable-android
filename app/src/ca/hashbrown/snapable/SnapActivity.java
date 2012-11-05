@@ -1,7 +1,5 @@
 package ca.hashbrown.snapable;
 
-import java.util.ArrayList;
-
 import com.snapable.api.SnapClient;
 import com.snapable.api.model.*;
 import com.snapable.api.resources.EventResource;
@@ -12,14 +10,8 @@ import android.os.StrictMode;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.ArrayAdapter;
-import android.widget.ImageView;
-import android.widget.ListAdapter;
-import android.widget.SimpleAdapter;
-import android.app.Activity;
 import android.app.ListActivity;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.database.MatrixCursor;
 
 public class SnapActivity extends ListActivity implements OnClickListener {
 
@@ -46,15 +38,18 @@ public class SnapActivity extends ListActivity implements OnClickListener {
 	        // Get a StatusService instance
 	        EventResource eventsRes = this.snapClient.build(EventResource.class);
 	        Pager<Event[]> events = eventsRes.getEvents();
-
-	        Log.d("SnapActivity", events.getMeta().toString());
 	        
-	        ArrayList<String> titles = new ArrayList<String>(5);
+	        MatrixCursor cursor = new MatrixCursor(new String[] {"_id","title"}); 
+	        
+	        //ArrayList<String> titles = new ArrayList<String>(5);
 	        for (Event event : events.getObjects()) {
-				titles.add(event.getTitle());
+	        	Log.d("SnapActivity", event.toString());
+	        	cursor.addRow(new Object[] {event.getId(), event.getTitle()});
 			}
-
-	        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, titles);
+	        
+	        Log.d("SnapActivity", "Count: "+cursor.getCount());
+	        
+	        EventListAdapter adapter = new EventListAdapter(this, cursor);
 	        setListAdapter(adapter);
 	        
 	        break;

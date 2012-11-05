@@ -19,19 +19,7 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
         android:layout_toRightOf="@id/EventRow_event_cover"
-        android:textColor="#FFFFFFFF"
         android:textStyle="bold" >
-    </TextView>
-
-    <TextView
-        android:id="@+id/BookRow_book_author"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_below="@id/EventRow_event_title"
-        android:layout_toRightOf="@id/EventRow_event_cover"
-        android:ellipsize="marquee"
-        android:singleLine="true" >
     </TextView>
 
 </RelativeLayout>
