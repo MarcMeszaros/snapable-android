@@ -1,15 +1,11 @@
 package ca.hashbrown.snapable;
 
-import java.io.IOException;
-import java.io.InputStream;
-
 import com.snapable.api.SnapClient;
 import com.snapable.api.resources.EventResource;
 
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,18 +30,12 @@ public class EventListAdapter extends CursorAdapter {
 		// set the title
 		title.setText(cursor.getString(cursor.getColumnIndex("title")));
 		try {
-			InputStream photo = new SnapClient().build(EventResource.class).getEventPhotoBinary(cursor.getLong(cursor.getColumnIndex("_id")), "150x150");
-	 		if (photo != null) {
-					Log.i("SnapActivity", Integer.toString(photo.available()));
-					Bitmap bm = BitmapFactory.decodeStream(photo);
-					cover.setImageBitmap(bm);	
-			}
+			Bitmap photo = new SnapClient().build(EventResource.class).getEventPhotoBinary(cursor.getLong(cursor.getColumnIndex("_id")), "150x150");
+	 		cover.setImageBitmap(photo);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
-		//cover.setImageURI(Uri.parse(TNManager.getThumbnail(isbn10).getAbsolutePath()));
 	}
 
 	@Override

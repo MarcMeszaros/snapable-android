@@ -17,6 +17,7 @@ public class SnapClient {
 		CRestBuilder builder = new CRestBuilder(); // get a CRestBuilder
 		Authorization auth = new SnapAuthorization(); // get our custom auth class
 		builder.property(Authorization.class.getName(), auth); // set the auth class to the builder
+		builder.bindDeserializer(SnapDeserializer.class, "image/jpeg"); // tell CRest to use our custom image deserializer
 
         this.crest = builder.build(); // return the CRest object
 	}

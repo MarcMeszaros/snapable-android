@@ -3,25 +3,25 @@ package com.snapable.api.model;
 import org.codegist.common.lang.ToStringBuilder;
 import org.codehaus.jackson.annotate.JsonProperty;
 
-public class Event {
-    @JsonProperty("title")
-    private String title;
+public class Photo {
+    @JsonProperty("caption")
+    private String caption;
     @JsonProperty("resource_uri")
     private String resourceUri;
     
     public String toString() {
         return new ToStringBuilder(this)
-                .append("title", this.title)
+                .append("caption", this.caption)
                 .append("resourceUri", resourceUri)
                 .toString();
     }
 
-    public String getTitle() {
-        return this.title;
+    public String getCaption() {
+        return this.caption;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public void setCaption(String caption) {
+        this.caption = caption;
     }
     
     public String getResourceUri() {
@@ -39,3 +39,4 @@ public class Event {
     }
 
 }
+
