@@ -1,16 +1,14 @@
 package ca.hashbrown.snapable;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 
 import com.snapable.api.SnapClient;
+import com.snapable.api.model.*;
 import com.snapable.api.resources.EventResource;
 import com.snapable.api.resources.PhotoResource;
 
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -31,6 +29,8 @@ public class SnapActivity extends ListActivity implements OnClickListener {
     public void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_snap);
+        // TODO: remove this, it removes the runtime check for network activity on the main ui thread
+        StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder().permitNetwork().build());
         
         // hook up button to listener
         findViewById(R.id.get_events).setOnClickListener(this);
@@ -45,11 +45,13 @@ public class SnapActivity extends ListActivity implements OnClickListener {
 		case R.id.get_events:
 	        // Get a StatusService instance
 	        EventResource eventsRes = this.snapClient.build(EventResource.class);
-	        LinkedHashMap<String, Object> events = eventsRes.getEvents();
+	        Pager<Event[]> events = eventsRes.getEvents();
 
+	        Log.d("SnapActivity", events.getMeta().toString());
+	        
 	        ArrayList<String> titles = new ArrayList<String>(5);
-	        for (LinkedHashMap<String, Object> obj : (ArrayList<LinkedHashMap<String, Object>>) events.get("objects")) {
-				titles.add(obj.get("title").toString());
+	        for (Event event : events.getObjects()) {
+				titles.add(event.getTitle());
 			}
 
 	        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, titles);

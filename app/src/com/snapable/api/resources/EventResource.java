@@ -1,23 +1,24 @@
 package com.snapable.api.resources;
 
-import java.util.LinkedHashMap;
-
 import org.codegist.crest.annotate.*;
 
 import com.snapable.api.SnapApi;
+import com.snapable.api.model.*;
 
 @EndPoint(SnapApi.api_host)
-@Path("/private_v1/event/")
+@Path("/private_v1/"+EventResource.RESOURCE_NAME+"/")
 @Consumes("application/json")
 public interface EventResource {
+	
+	public static final String RESOURCE_NAME = "event";
 
     @GET
     @Path("/")
-    LinkedHashMap<String, Object> getEvents();
+    Pager<Event[]> getEvents();
     
     @GET
     @Path("/{id}/")
-    LinkedHashMap<String, Object> getEvent(
+    Event getEvent(
     	@PathParam("id") long id
     );
 }

@@ -8,9 +8,11 @@ import org.codegist.crest.annotate.*;
 import com.snapable.api.SnapApi;
 
 @EndPoint(SnapApi.api_host)
-@Path("/private_v1/photo/")
+@Path("/private_v1/"+PhotoResource.RESOURCE_NAME+"/")
 public interface PhotoResource {
-
+	
+	public static final String RESOURCE_NAME = "photo";
+	
     @GET
     @Path("/{id}/")
     @HeaderParam(value="Accept", defaultValue="image/jpeg")
