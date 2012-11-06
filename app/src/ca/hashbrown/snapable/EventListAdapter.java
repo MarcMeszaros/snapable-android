@@ -6,7 +6,6 @@ import com.snapable.api.resources.EventResource;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,7 +29,7 @@ public class EventListAdapter extends CursorAdapter {
 		// set the title
 		title.setText(cursor.getString(cursor.getColumnIndex("title")));
 		try {
-			Bitmap photo = new SnapClient().build(EventResource.class).getEventPhotoBinary(cursor.getLong(cursor.getColumnIndex("_id")), "150x150");
+			Bitmap photo = SnapClient.getInstance().build(EventResource.class).getEventPhotoBinary(cursor.getLong(cursor.getColumnIndex("_id")), "150x150");
 	 		cover.setImageBitmap(photo);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

@@ -1,7 +1,6 @@
 package com.snapable.api.resources;
 
 import java.io.InputStream;
-import java.util.LinkedHashMap;
 
 import org.codegist.crest.annotate.*;
 
