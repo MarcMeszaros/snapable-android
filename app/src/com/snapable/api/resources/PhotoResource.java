@@ -8,7 +8,7 @@ import com.snapable.api.SnapApi;
 import com.snapable.api.model.*;
 
 @EndPoint(SnapApi.api_host)
-@Path("/private_v1/"+PhotoResource.RESOURCE_NAME+"/")
+@Path("/"+SnapApi.api_version+"/"+PhotoResource.RESOURCE_NAME+"/")
 @Consumes("application/json")
 public interface PhotoResource {
 	

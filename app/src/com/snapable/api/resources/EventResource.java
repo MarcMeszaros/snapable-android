@@ -6,7 +6,7 @@ import com.snapable.api.SnapApi;
 import com.snapable.api.model.*;
 
 @EndPoint(SnapApi.api_host)
-@Path("/private_v1/"+EventResource.RESOURCE_NAME+"/")
+@Path("/"+SnapApi.api_version+"/"+EventResource.RESOURCE_NAME+"/")
 @Consumes("application/json")
 public interface EventResource {
 	
