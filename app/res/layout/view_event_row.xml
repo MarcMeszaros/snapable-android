@@ -10,7 +10,8 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentTop="true"
         android:padding="5dip"
-        android:scaleType="fitCenter" />
+        android:scaleType="fitCenter" 
+        android:src="@drawable/photo_blank"/>
 
     <TextView
         android:id="@+id/EventRow_event_title"

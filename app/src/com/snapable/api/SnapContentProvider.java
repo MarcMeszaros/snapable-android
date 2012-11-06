@@ -113,7 +113,7 @@ public class SnapContentProvider extends ContentProvider {
 		case EVENTS:
 			// set the column names or a default
 			//columnNames = (projection != null) ? projection : new String[]{"_id", "title"};
-			columnNames = new String[]{"_id", "title"};
+			columnNames = new String[]{"_id", "title", "photo_count"};
 			result = new MatrixCursor(columnNames);
 			
 			// make the api call
@@ -122,7 +122,7 @@ public class SnapContentProvider extends ContentProvider {
 			
 			// add the event objects to the resulting cursor
 			for (Event event : events.getObjects()) {
-				result.addRow(new Object[]{event.getId(), event.getTitle()});
+				result.addRow(new Object[]{event.getId(), event.getTitle(), event.getPhotoCount()});
 			}
 			
 			break;

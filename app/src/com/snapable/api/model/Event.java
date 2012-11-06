@@ -4,6 +4,8 @@ import org.codegist.common.lang.ToStringBuilder;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 public class Event {
+	@JsonProperty("photo_count")
+    private long photoCount;
     @JsonProperty("title")
     private String title;
     @JsonProperty("resource_uri")
@@ -16,6 +18,14 @@ public class Event {
                 .toString();
     }
 
+    public long getPhotoCount() {
+        return this.photoCount;
+    }
+
+    public void setPhotoCount(long photoCount) {
+        this.photoCount = photoCount;
+    }
+    
     public String getTitle() {
         return this.title;
     }

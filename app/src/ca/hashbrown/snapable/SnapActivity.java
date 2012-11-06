@@ -1,35 +1,20 @@
 package ca.hashbrown.snapable;
 
-import com.snapable.api.SnapableContract;
+import ca.hashbrown.snapable.fragments.EventListFragment;
 
 import android.os.Bundle;
-import android.os.StrictMode;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.app.ListActivity;
-import android.database.Cursor;
+import android.support.v4.app.FragmentActivity;
 
-public class SnapActivity extends ListActivity implements OnClickListener {
+public class SnapActivity extends FragmentActivity {
 
 	@Override
     public void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_snap);
-        // TODO: remove this, it removes the runtime check for network activity on the main ui thread
-        StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder().permitNetwork().build());
-        
-        // hook up button to listener
-        findViewById(R.id.get_events).setOnClickListener(this);    
-    }
 
-	public void onClick(View v) {
-		switch (v.getId()) {
-		case R.id.get_events:
-	        // the events
-	        Cursor cursor = getContentResolver().query(SnapableContract.Event.CONTENT_URI, null, null, null, null);
-	        EventListAdapter adapter = new EventListAdapter(this, cursor);
-	        setListAdapter(adapter);
-	        break;
-		}
-	}
+        // Create the list fragment and add it as our sole content.
+ 		if (getSupportFragmentManager().findFragmentById(android.R.id.content) == null) {
+ 			EventListFragment list = new EventListFragment();
+ 			getSupportFragmentManager().beginTransaction().add(android.R.id.content, list).commit();
+ 		}
+    }
 }
