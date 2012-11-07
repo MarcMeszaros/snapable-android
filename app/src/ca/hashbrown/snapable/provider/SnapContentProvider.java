@@ -1,6 +1,8 @@
-package com.snapable.api;
+package ca.hashbrown.snapable.provider;
 
-import com.snapable.api.model.*;
+
+import com.snapable.api.SnapClient;
+import com.snapable.api.models.*;
 import com.snapable.api.resources.*;
 
 import android.content.ContentProvider;

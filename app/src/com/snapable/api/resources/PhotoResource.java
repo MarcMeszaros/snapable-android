@@ -5,7 +5,7 @@ import java.io.InputStream;
 import org.codegist.crest.annotate.*;
 
 import com.snapable.api.SnapApi;
-import com.snapable.api.model.*;
+import com.snapable.api.models.*;
 
 @EndPoint(SnapApi.api_host)
 @Path("/"+SnapApi.api_version+"/"+PhotoResource.RESOURCE_NAME+"/")

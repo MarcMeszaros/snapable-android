@@ -1,9 +1,9 @@
 package ca.hashbrown.snapable.fragments;
 
-import com.snapable.api.SnapableContract;
 
-import ca.hashbrown.snapable.EventListAdapter;
 import ca.hashbrown.snapable.R;
+import ca.hashbrown.snapable.adapters.EventListAdapter;
+import ca.hashbrown.snapable.provider.SnapableContract;
 
 import android.database.Cursor;
 import android.os.Bundle;

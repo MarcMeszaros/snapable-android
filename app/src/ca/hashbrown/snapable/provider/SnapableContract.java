@@ -1,4 +1,4 @@
-package com.snapable.api;
+package ca.hashbrown.snapable.provider;
 
 import android.net.Uri;
 

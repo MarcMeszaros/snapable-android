@@ -1,4 +1,4 @@
-package com.snapable.api.model;
+package com.snapable.api.models;
 
 import org.codegist.common.lang.ToStringBuilder;
 import org.codehaus.jackson.annotate.JsonProperty;

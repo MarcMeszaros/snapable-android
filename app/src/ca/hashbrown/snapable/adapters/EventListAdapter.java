@@ -1,4 +1,9 @@
-package ca.hashbrown.snapable;
+package ca.hashbrown.snapable.adapters;
+
+import ca.hashbrown.snapable.R;
+import ca.hashbrown.snapable.R.drawable;
+import ca.hashbrown.snapable.R.id;
+import ca.hashbrown.snapable.R.layout;
 
 import com.snapable.api.SnapClient;
 import com.snapable.api.resources.EventResource;

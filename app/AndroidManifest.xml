@@ -22,7 +22,7 @@
         </activity>
 
         <provider
-            android:name="com.snapable.api.SnapContentProvider"
+            android:name=".provider.SnapContentProvider"
             android:authorities="ca.hashbrown.snapable.provider"
             android:exported="false" />
     </application>
