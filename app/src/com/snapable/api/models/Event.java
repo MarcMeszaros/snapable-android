@@ -5,7 +5,11 @@ import java.util.Date;
 import org.codegist.common.lang.ToStringBuilder;
 import org.codehaus.jackson.annotate.JsonProperty;
 
-public class Event {
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.provider.BaseColumns;
+
+public class Event implements Parcelable {
 	@JsonProperty("cover")
     private long cover;
 	@JsonProperty("enabled")
@@ -26,6 +30,34 @@ public class Event {
     private String title;
     @JsonProperty("url")
     private String url;
+    
+    // fields
+    public static final String FIELD_ID = BaseColumns._ID;
+    public static final String FIELD_COVER = "cover";
+    public static final String FIELD_ENABLED = "isEnabled";
+    public static final String FIELD_END = "end";
+    public static final String FIELD_PHOTO_COUNT = "photoCount";
+    public static final String FIELD_PIN = "pin";
+    public static final String FIELD_PUBLIC = "isPublic";
+    public static final String FIELD_RESOURCE_URI = "resourceUri";
+    public static final String FIELD_START = "start";
+    public static final String FIELD_TITLE = "title";
+    public static final String FIELD_URL = "url";
+    
+    // required for a Cursor implementation
+    public static final String[] COLUMN_NAMES = {
+    	FIELD_ID,
+    	FIELD_COVER,
+    	FIELD_ENABLED,
+    	FIELD_END,
+    	FIELD_PHOTO_COUNT,
+    	FIELD_PIN,
+    	FIELD_PUBLIC,
+    	FIELD_RESOURCE_URI,
+    	FIELD_START,
+    	FIELD_TITLE,
+    	FIELD_URL
+    };
     
     public String toString() {
         return new ToStringBuilder(this)
@@ -128,5 +160,61 @@ public class Event {
     	String[] resourceParts = this.resourceUri.split("/");
     	return Long.valueOf(resourceParts[resourceParts.length-1]);
     }
+
+    // Android parcelable
+	/*
+    private Event(Parcel in) {
+        this.setCover(in.readLong());
+        this.setIsEnabled((in.readInt() == 0) ? false : true);
+        this.setEnd(new Date(in.readLong()));
+        this.setPhotoCount(in.readLong());
+        this.setPin(in.readString());
+        this.setIsPublic((in.readInt() == 0) ? false : true);
+        this.setResourceUri(in.readString());
+        this.setStart(new Date(in.readLong()));
+        this.setTitle(in.readString());
+        this.setUrl(in.readString());
+    }
+    */
+    
+    public int describeContents() {
+		return 0;
+	}
+	
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeLong(this.getCover());
+		dest.writeInt(this.getIsEnabled() ? 1 : 0);
+		dest.writeLong(this.getEnd().getTime());
+		dest.writeLong(this.getPhotoCount());
+		dest.writeString(this.getPin());
+		dest.writeInt(this.getIsPublic() ? 1 : 0);
+		dest.writeString(this.getResourceUri());
+		dest.writeLong(this.getStart().getTime());
+		dest.writeString(this.getTitle());
+		dest.writeString(this.getUrl());
+	}
+	
+    public static final Parcelable.Creator<Event> CREATOR = new Parcelable.Creator<Event>() {
+        public Event createFromParcel(Parcel in) {
+            Event event = new Event();
+            
+            event.setCover(in.readLong());
+            event.setIsEnabled((in.readInt() == 0) ? false : true);
+            event.setEnd(new Date(in.readLong()));
+            event.setPhotoCount(in.readLong());
+            event.setPin(in.readString());
+            event.setIsPublic((in.readInt() == 0) ? false : true);
+            event.setResourceUri(in.readString());
+            event.setStart(new Date(in.readLong()));
+            event.setTitle(in.readString());
+            event.setUrl(in.readString());
+            
+            return event;
+        }
+
+        public Event[] newArray(int size) {
+            return new Event[size];
+        }
+    };
 
 }
