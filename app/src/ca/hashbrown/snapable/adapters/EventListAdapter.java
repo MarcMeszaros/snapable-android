@@ -23,12 +23,10 @@ import android.widget.TextView;
 public class EventListAdapter extends CursorAdapter {
 
 	private static final String TAG = "EventListAdapter";
-	Context context;
 	ArrayList<Bitmap> imagesList;
 	
 	public EventListAdapter(Context context, Cursor c) {
 		super(context, c);
-		this.context = context;
 		this.imagesList = new ArrayList<Bitmap>();
 	}
 	
@@ -36,6 +34,11 @@ public class EventListAdapter extends CursorAdapter {
         protected TextView title;
         protected ImageView cover;
     }
+	
+	@Override
+	public boolean hasStableIds() {
+		return true;
+	}
 
 	@Override
 	public void bindView(View view, Context context, Cursor cursor) {

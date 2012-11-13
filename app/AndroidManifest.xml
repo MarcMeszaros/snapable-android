@@ -21,6 +21,9 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".EventPhotoList">
+        </activity>
+
         <provider
             android:name=".provider.SnapContentProvider"
             android:authorities="ca.hashbrown.snapable.provider"

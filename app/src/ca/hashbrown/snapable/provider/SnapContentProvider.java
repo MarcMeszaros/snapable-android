@@ -1,11 +1,15 @@
 package ca.hashbrown.snapable.provider;
 
 
+import ca.hashbrown.snapable.cursors.EventCursor;
+
 import com.snapable.api.SnapClient;
 import com.snapable.api.models.*;
 import com.snapable.api.resources.*;
 
 import android.content.ContentProvider;
+import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
@@ -76,17 +80,17 @@ public class SnapContentProvider extends ContentProvider {
 	public String getType(Uri uri) {
 		switch (uriMatcher.match(uri)) {
 		case EVENTS:
-			return "vnd.android.cursor.dir/vnd.com.snapable.api.event";
+			return ContentResolver.CURSOR_DIR_BASE_TYPE+"/vnd.com.snapable.api.event";
 		case EVENT_ID:
-			return "vnd.android.cursor.item/vnd.com.snapable.api.event";
+			return ContentResolver.CURSOR_ITEM_BASE_TYPE+"/vnd.com.snapable.api.event";
 		case GUESTS:
-			return "vnd.android.cursor.dir/vnd.com.snapable.api.guest";
+			return ContentResolver.CURSOR_DIR_BASE_TYPE+"/vnd.com.snapable.api.guest";
 		case GUEST_ID:
-			return "vnd.android.cursor.item/vnd.com.snapable.api.guest";
+			return ContentResolver.CURSOR_ITEM_BASE_TYPE+"/vnd.com.snapable.api.guest";
 		case PHOTOS:
-			return "vnd.android.cursor.dir/vnd.com.snapable.api.photo";
+			return ContentResolver.CURSOR_DIR_BASE_TYPE+"/vnd.com.snapable.api.photo";
 		case PHOTO_ID:
-			return "vnd.android.cursor.item/vnd.com.snapable.api.photo";
+			return ContentResolver.CURSOR_ITEM_BASE_TYPE+"/vnd.com.snapable.api.photo";
 		default:
 			throw new IllegalArgumentException("Unsupported URI: " + uri);
 		}
@@ -107,28 +111,43 @@ public class SnapContentProvider extends ContentProvider {
 	@Override
 	public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
 		// create the empty results cursor
-		String[] columnNames = null;
 		MatrixCursor result = null;
+		EventResource eventRes = snapClient.build(EventResource.class);
 		
 		switch (uriMatcher.match(uri)) {
-		// handle the case for all events
-		case EVENTS:
-			// set the column names or a default
-			//columnNames = (projection != null) ? projection : new String[]{"_id", "title"};
-			columnNames = new String[]{"_id", "title", "photo_count"};
-			result = new MatrixCursor(columnNames);
-			
-			// make the api call
-			EventResource eventRes = snapClient.build(EventResource.class);
-			Pager<Event[]> events = eventRes.getEvents();
-			
-			// add the event objects to the resulting cursor
-			for (Event event : events.getObjects()) {
-				result.addRow(new Object[]{event.getId(), event.getTitle(), event.getPhotoCount()});
-			}
-			
-			break;
+			// handle the case for all events
+			case EVENTS:
+				// set the column names or a default
+				EventCursor eventsCursor = (projection != null) ? new EventCursor(projection) : new EventCursor();
+				
+				// make the api call
+				Pager<Event[]> events = eventRes.getEvents();
+				
+				// add the event objects to the resulting cursor
+				for (Event event : events.getObjects()) {
+					eventsCursor.add(event);
+				}
+	
+				// set or temporary cursor as the return cursor
+				result = eventsCursor;
+				break;
+				
+			case EVENT_ID:
+				// set the column names or a default
+				EventCursor eventCursor = (projection != null) ? new EventCursor(projection) : new EventCursor();
+				
+				// make the api call
+				Event event = eventRes.getEvent(ContentUris.parseId(uri));
+				
+				// add the event objects to the resulting cursor
+				eventCursor.add(event);
+	
+				// set or temporary cursor as the return cursor
+				result = eventCursor;
+				break;
 		}
+		
+		result.setNotificationUri(getContext().getContentResolver(), uri);
 		return result;
 	}
 

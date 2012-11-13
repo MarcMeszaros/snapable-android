@@ -1,10 +1,13 @@
 package ca.hashbrown.snapable.fragments;
 
 
+import ca.hashbrown.snapable.EventPhotoList;
 import ca.hashbrown.snapable.R;
 import ca.hashbrown.snapable.adapters.EventListAdapter;
+import ca.hashbrown.snapable.cursors.EventCursor;
 import ca.hashbrown.snapable.provider.SnapableContract;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
@@ -14,8 +17,10 @@ import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 
-public class EventListFragment extends ListFragment implements LoaderCallbacks<Cursor> {
+public class EventListFragment extends ListFragment implements LoaderCallbacks<Cursor>, OnItemClickListener {
 	
 	private static final String TAG = "EventListFragment";
 	
@@ -27,6 +32,8 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 
+		getListView().setOnItemClickListener(this);
+		
 		eventAdapter = new EventListAdapter(getActivity(), null);
 		setListAdapter(eventAdapter);
 		
@@ -78,6 +85,20 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 		default:
 			break;
 		}
+	}
+
+	// click
+	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {	
+		Cursor c = eventAdapter.getCursor();
+		c.moveToPosition(position);
+		
+		EventCursor eventCursor = new EventCursor(c);
+
+		// store the event as data to be passed
+		Intent intent = new Intent(getActivity(), EventPhotoList.class);
+		intent.putExtra("event", eventCursor.getEvent());
+		startActivity(intent);
+		
 	}
 
 }
