@@ -61,16 +61,16 @@ public class Event implements Parcelable {
     
     public String toString() {
         return new ToStringBuilder(this)
-        	.append("cover", this.cover)
-        	.append("isEnabled", this.isEnabled)
-        	.append("end", this.end)
-        	.append("photoCount", this.photoCount)
-        	.append("pin", this.pin)
-        	.append("isPublic", this.isPublic)
-            .append("resourceUri", this.resourceUri)
-            .append("start", start)
-            .append("title", this.title)
-            .append("url", this.url)
+        	.append(FIELD_COVER, this.cover)
+        	.append(FIELD_ENABLED, this.isEnabled)
+        	.append(FIELD_END, this.end)
+        	.append(FIELD_PHOTO_COUNT, this.photoCount)
+        	.append(FIELD_PIN, this.pin)
+        	.append(FIELD_PUBLIC, this.isPublic)
+            .append(FIELD_RESOURCE_URI, this.resourceUri)
+            .append(FIELD_START, start)
+            .append(FIELD_TITLE, this.title)
+            .append(FIELD_URL, this.url)
             .toString();
     }
 

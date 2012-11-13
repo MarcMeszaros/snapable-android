@@ -47,12 +47,12 @@ public class Photo {
 
     public String toString() {
         return new ToStringBuilder(this)
-        	.append("authorName", this.authorName)
-        	.append("caption", this.caption)
-            .append("eventUri", this.eventUri)
-            .append("resourceUri", this.resourceUri)
-            .append("timestamp", this.timestamp)
-            .append("typeUri", this.typeUri)
+        	.append(FIELD_AUTHOR_NAME, this.authorName)
+        	.append(FIELD_CAPTION, this.caption)
+            .append(FIELD_EVENT_URI, this.eventUri)
+            .append(FIELD_RESOURCE_URI, this.resourceUri)
+            .append(FIELD_TIMESTAMP, this.timestamp)
+            .append(FIELD_TYPE_URI, this.typeUri)
             .toString();
     }
 
