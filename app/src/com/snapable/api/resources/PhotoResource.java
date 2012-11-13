@@ -14,11 +14,28 @@ public interface PhotoResource {
 	
 	public static final String RESOURCE_NAME = "photo";
 	
+	@GET
+    @Path("/")
+    Pager<Photo[]> getPhotos();
+    
+    @GET
+    @Path("/")
+    Pager<Photo[]> getPhotos(
+    	@QueryParam("event") long eventId
+    );
+    
+    @GET
+    @Path("/{id}/")
+    Photo getPhoto(
+    	@PathParam("id") long id
+    );
+	
     @GET
     @Path("/{id}/")
     @Consumes("image/jpeg")
     android.graphics.Bitmap getPhotoBinary(
-    	@PathParam("id") long id
+    	@PathParam("id") long id,
+    	@QueryParam("size") String size
     );
     
     @POST

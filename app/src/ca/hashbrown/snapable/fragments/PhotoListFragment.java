@@ -1,13 +1,11 @@
 package ca.hashbrown.snapable.fragments;
 
+import com.snapable.api.models.Event;
 
-import ca.hashbrown.snapable.EventPhotoList;
 import ca.hashbrown.snapable.R;
-import ca.hashbrown.snapable.adapters.EventListAdapter;
-import ca.hashbrown.snapable.cursors.EventCursor;
+import ca.hashbrown.snapable.adapters.PhotoListAdapter;
 import ca.hashbrown.snapable.provider.SnapableContract;
 
-import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
@@ -17,28 +15,29 @@ import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 
-public class EventListFragment extends ListFragment implements LoaderCallbacks<Cursor>, OnItemClickListener {
+public class PhotoListFragment extends ListFragment implements LoaderCallbacks<Cursor> {
 	
-	private static final String TAG = "EventListFragment";
+	private static final String TAG = "PhotoListFragment";
 	
-	private static final int EVENTS = 0x01;
+	private static final int PHOTOS = 0x01;
 	
-	EventListAdapter eventAdapter;
+	PhotoListAdapter photoAdapter;
+	Event event;
+	
+	public PhotoListFragment(Event event) {
+		this.event = event;
+	}
 	
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
-
-		getListView().setOnItemClickListener(this);
 		
-		eventAdapter = new EventListAdapter(getActivity(), null);
-		setListAdapter(eventAdapter);
+		photoAdapter = new PhotoListAdapter(getActivity(), null);
+		setListAdapter(photoAdapter);
 		
 		// Prepare the loader. (Re-connect with an existing one, or start a new one.)
-		getLoaderManager().initLoader(EVENTS, null, this);
+		getLoaderManager().initLoader(PHOTOS, null, this);
 	}
 
 	@Override
@@ -51,8 +50,10 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 		// First, pick the base URI to use depending on whether we are
 		// currently filtering.
 		switch (id) {
-		case EVENTS:
-			return new CursorLoader(getActivity(), SnapableContract.Event.CONTENT_URI, null, null, null, null);
+		case PHOTOS:
+			String selection = "event=?";
+			String[] selectionArgs = {String.valueOf(event.getId())};
+			return new CursorLoader(getActivity(), SnapableContract.Photo.CONTENT_URI, null, selection, selectionArgs, null);
 		
 		default:
 			return null;
@@ -63,8 +64,8 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 		// Swap the new cursor in. (The framework will take care of closing the
 		// old cursor once we return.)
 		switch (loader.getId()) {
-		case EVENTS:
-			eventAdapter.changeCursor(data);
+		case PHOTOS:
+			photoAdapter.changeCursor(data);
 			break;
 		
 		default:
@@ -78,27 +79,13 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 		// above is about to be closed. We need to make sure we are no
 		// longer using it.
 		switch (loader.getId()) {
-		case EVENTS:
-			eventAdapter.changeCursor(null);
+		case PHOTOS:
+			photoAdapter.changeCursor(null);
 			break;
 
 		default:
 			break;
 		}
-	}
-
-	// click
-	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {	
-		Cursor c = eventAdapter.getCursor();
-		c.moveToPosition(position);
-		
-		EventCursor eventCursor = new EventCursor(c);
-
-		// store the event as data to be passed
-		Intent intent = new Intent(getActivity(), EventPhotoList.class);
-		intent.putExtra("event", eventCursor.getEvent());
-		startActivity(intent);
-		
 	}
 
 }

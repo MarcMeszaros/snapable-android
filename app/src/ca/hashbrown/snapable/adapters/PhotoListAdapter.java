@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import ca.hashbrown.snapable.R;
 
 import com.snapable.api.SnapClient;
-import com.snapable.api.models.Event;
-import com.snapable.api.resources.EventResource;
+import com.snapable.api.models.Photo;
+import com.snapable.api.resources.PhotoResource;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -20,19 +20,20 @@ import android.widget.CursorAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class EventListAdapter extends CursorAdapter {
+public class PhotoListAdapter extends CursorAdapter {
 
-	private static final String TAG = "EventListAdapter";
+	private static final String TAG = "PhotoListAdapter";
 	ArrayList<Bitmap> imagesList;
 	
-	public EventListAdapter(Context context, Cursor c) {
+	public PhotoListAdapter(Context context, Cursor c) {
 		super(context, c);
 		this.imagesList = new ArrayList<Bitmap>();
 	}
 	
 	static class ViewHolder {
-        protected TextView title;
-        protected ImageView cover;
+        protected ImageView photo;
+        protected TextView caption;
+        protected TextView authorName;
     }
 	
 	@Override
@@ -43,48 +44,50 @@ public class EventListAdapter extends CursorAdapter {
 	@Override
 	public void bindView(View view, Context context, Cursor cursor) {
 		ViewHolder viewHolder = (ViewHolder) view.getTag();
-
-		// set the title
-		viewHolder.title.setText(cursor.getString(cursor.getColumnIndex(Event.FIELD_TITLE)));
-
+		
+		// set the text
+		viewHolder.caption.setText(cursor.getString(cursor.getColumnIndex(Photo.FIELD_CAPTION)));
+		viewHolder.authorName.setText(cursor.getString(cursor.getColumnIndex(Photo.FIELD_AUTHOR_NAME)));
+		
 		// get the image, if there is one
 		if (this.imagesList.size()-1 >= cursor.getPosition()) {
-			Bitmap cover = (Bitmap) this.imagesList.get(cursor.getPosition());
-			if (cover != null) {
-				viewHolder.cover.setImageBitmap(cover);
+			Bitmap photo = (Bitmap) this.imagesList.get(cursor.getPosition());
+			if (photo != null) {
+				viewHolder.photo.setImageBitmap(photo);
 			} else {
-				viewHolder.cover.setImageResource(R.drawable.photo_blank);
+				viewHolder.photo.setImageResource(R.drawable.photo_blank);
 			}
 			
 		} else {
-			viewHolder.cover.setImageResource(R.drawable.photo_blank);
-			LoadCoverTask task = new LoadCoverTask(this, this.imagesList, cursor.getPosition());
-			task.execute(cursor.getLong(cursor.getColumnIndex(Event.FIELD_ID)));
+			viewHolder.photo.setImageResource(R.drawable.photo_blank);
+			LoadPhotoTask task = new LoadPhotoTask(this, this.imagesList, cursor.getPosition());
+			task.execute(cursor.getLong(cursor.getColumnIndex(Photo.FIELD_ID)));
 		}
 	}
 
 	@Override
 	public View newView(Context context, Cursor cursor, ViewGroup parent) {
 		LayoutInflater inflater = LayoutInflater.from(context);
-		View v = inflater.inflate(R.layout.listview_row_event, parent, false);
+		View v = inflater.inflate(R.layout.listview_row_eventphoto, parent, false);
 		
 		// bind the various views to the viewholder
 		final ViewHolder viewHolder = new ViewHolder();
-		viewHolder.title = (TextView) v.findViewById(R.id.EventRow_event_title);
-		viewHolder.cover = (ImageView) v.findViewById(R.id.EventRow_event_cover);
+		viewHolder.photo = (ImageView) v.findViewById(R.id.listview_row_eventphoto_photo);
+		viewHolder.caption = (TextView) v.findViewById(R.id.listview_row_eventphoto_caption);
+		viewHolder.authorName = (TextView) v.findViewById(R.id.listview_row_eventphoto_author_name);
 		v.setTag(viewHolder);
 		
 		bindView(v, context, cursor);
 		return v;
 	}
 	
-	private class LoadCoverTask extends AsyncTask<Long, Void, Bitmap> {
+	private class LoadPhotoTask extends AsyncTask<Long, Void, Bitmap> {
 		
-		private EventListAdapter adapter;
+		private PhotoListAdapter adapter;
 		private ArrayList<Bitmap> imagesList;
 		private int position;
 		
-		public LoadCoverTask(EventListAdapter adapter, ArrayList<Bitmap> imagesList, int position) {
+		public LoadPhotoTask(PhotoListAdapter adapter, ArrayList<Bitmap> imagesList, int position) {
 			this.adapter = adapter;
 			this.imagesList = imagesList;
 			this.position = position;
@@ -93,7 +96,7 @@ public class EventListAdapter extends CursorAdapter {
 		@Override
 		protected Bitmap doInBackground(Long... params) {
 			try{
-				return SnapClient.getInstance().build(EventResource.class).getEventPhotoBinary(params[0], "150x150");
+				return SnapClient.getInstance().build(PhotoResource.class).getPhotoBinary(params[0], "150x150");
 			} catch (Exception e) {
 				return null;
 			}
@@ -110,4 +113,5 @@ public class EventListAdapter extends CursorAdapter {
 		}
 		
 	}
+
 }

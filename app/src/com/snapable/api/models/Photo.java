@@ -5,6 +5,8 @@ import java.util.Date;
 import org.codegist.common.lang.ToStringBuilder;
 import org.codehaus.jackson.annotate.JsonProperty;
 
+import android.provider.BaseColumns;
+
 public class Photo {
 	@JsonProperty("author_name")
     private String authorName;
@@ -20,7 +22,29 @@ public class Photo {
     private Date timestamp;
     @JsonProperty("type")
     private String typeUri;
+
+    // fields
+    public static final String FIELD_ID = BaseColumns._ID;
+    public static final String FIELD_AUTHOR_NAME = "authorName";
+    public static final String FIELD_CAPTION = "caption";
+    public static final String FIELD_EVENT_URI = "eventUri";
+    public static final String FIELD_RESOURCE_URI = "resourceUri";
+    public static final String FIELD_STREAMABLE = "streamable";
+    public static final String FIELD_TIMESTAMP = "timestamp";
+    public static final String FIELD_TYPE_URI = "typeUri";
     
+    // required for a Cursor implementation
+    public static final String[] COLUMN_NAMES = {
+    	FIELD_ID,
+    	FIELD_AUTHOR_NAME,
+    	FIELD_CAPTION,
+    	FIELD_EVENT_URI,
+    	FIELD_RESOURCE_URI,
+    	FIELD_STREAMABLE,
+    	FIELD_TIMESTAMP,
+    	FIELD_TYPE_URI
+    };
+
     public String toString() {
         return new ToStringBuilder(this)
         	.append("authorName", this.authorName)

@@ -5,7 +5,7 @@ import ca.hashbrown.snapable.fragments.EventListFragment;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 
-public class SnapActivity extends FragmentActivity {
+public class EventList extends FragmentActivity {
 
 	@Override
     public void onCreate(Bundle savedInstanceState) {

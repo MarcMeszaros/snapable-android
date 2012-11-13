@@ -1,13 +1,13 @@
 package ca.hashbrown.snapable;
 
+import ca.hashbrown.snapable.fragments.PhotoListFragment;
+
 import com.snapable.api.models.Event;
 
-import android.app.Activity;
 import android.os.Bundle;
-import android.util.Log;
-import android.widget.TextView;
+import android.support.v4.app.FragmentActivity;
 
-public class EventPhotoList extends Activity {
+public class EventPhotoList extends FragmentActivity {
 	
 	@Override
     public void onCreate(Bundle savedInstanceState) {
@@ -15,12 +15,12 @@ public class EventPhotoList extends Activity {
     	
     	Bundle bundle = getIntent().getExtras();
 		Event event = bundle.getParcelable("event");
-		Log.d("EventDetails", event.toString());
-		
-		TextView title = new TextView(this);
-		title.setText(event.getTitle());
-		
-		setContentView(title);
+
+		// Create the list fragment and add it as our sole content.
+ 		if (getSupportFragmentManager().findFragmentById(android.R.id.content) == null) {
+ 			PhotoListFragment list = new PhotoListFragment(event);
+ 			getSupportFragmentManager().beginTransaction().add(android.R.id.content, list).commit();
+ 		}
     }
 
 }

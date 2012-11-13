@@ -1,7 +1,7 @@
 package ca.hashbrown.snapable.provider;
 
 
-import ca.hashbrown.snapable.cursors.EventCursor;
+import ca.hashbrown.snapable.cursors.*;
 
 import com.snapable.api.SnapClient;
 import com.snapable.api.models.*;
@@ -113,6 +113,7 @@ public class SnapContentProvider extends ContentProvider {
 		// create the empty results cursor
 		MatrixCursor result = null;
 		EventResource eventRes = snapClient.build(EventResource.class);
+		PhotoResource photoRes = snapClient.build(PhotoResource.class);
 		
 		switch (uriMatcher.match(uri)) {
 			// handle the case for all events
@@ -131,7 +132,7 @@ public class SnapContentProvider extends ContentProvider {
 				// set or temporary cursor as the return cursor
 				result = eventsCursor;
 				break;
-				
+
 			case EVENT_ID:
 				// set the column names or a default
 				EventCursor eventCursor = (projection != null) ? new EventCursor(projection) : new EventCursor();
@@ -144,6 +145,25 @@ public class SnapContentProvider extends ContentProvider {
 	
 				// set or temporary cursor as the return cursor
 				result = eventCursor;
+				break;
+
+			case PHOTOS:
+				// set tge column names or a default
+				PhotoCursor photosCursor = new PhotoCursor();
+			
+				// make the API call
+				Pager<Photo[]> photos = (selectionArgs.length == 1) ? photoRes.getPhotos(Long.valueOf(selectionArgs[0])) : photoRes.getPhotos();
+				
+				// add the event objects to the resulting cursor
+				for (Photo photo : photos.getObjects()) {
+					photosCursor.add(photo);
+				}
+	
+				// set or temporary cursor as the return cursor
+				result = photosCursor;
+				break;
+
+			case PHOTO_ID:
 				break;
 		}
 		
