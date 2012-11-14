@@ -47,7 +47,8 @@ public class PhotoListAdapter extends CursorAdapter {
 		
 		// set the text
 		viewHolder.caption.setText(cursor.getString(cursor.getColumnIndex(Photo.FIELD_CAPTION)));
-		viewHolder.authorName.setText(cursor.getString(cursor.getColumnIndex(Photo.FIELD_AUTHOR_NAME)));
+		String authorName = cursor.getString(cursor.getColumnIndex(Photo.FIELD_AUTHOR_NAME));
+		viewHolder.authorName.setText((authorName.isEmpty()) ? "Anonymous" : authorName);
 		
 		// get the image, if there is one
 		if (this.imagesList.size()-1 >= cursor.getPosition()) {
@@ -96,7 +97,7 @@ public class PhotoListAdapter extends CursorAdapter {
 		@Override
 		protected Bitmap doInBackground(Long... params) {
 			try{
-				return SnapClient.getInstance().build(PhotoResource.class).getPhotoBinary(params[0], "150x150");
+				return SnapClient.getInstance().build(PhotoResource.class).getPhotoBinary(params[0], "480x480");
 			} catch (Exception e) {
 				return null;
 			}
