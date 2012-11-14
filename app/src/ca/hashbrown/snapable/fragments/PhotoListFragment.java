@@ -42,7 +42,7 @@ public class PhotoListFragment extends ListFragment implements LoaderCallbacks<C
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		return inflater.inflate(R.layout.fragment_event_list, null);
+		return inflater.inflate(R.layout.fragment_photo_list, null);
 	}
 	
 	public Loader<Cursor> onCreateLoader(int id, Bundle args) {

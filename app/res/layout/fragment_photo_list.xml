@@ -15,7 +15,7 @@
         android:paddingLeft="10dip"
         android:paddingRight="10dip"
         android:scrollbars="none"
-        tools:listitem="@layout/listview_row_event" >
+        tools:listitem="@layout/listview_row_eventphoto" >
     </ListView>
 
 </LinearLayout>
