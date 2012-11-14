@@ -12,14 +12,15 @@ public class EventPhotoList extends FragmentActivity {
 	@Override
     public void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
-    	
+    	setContentView(R.layout.activity_photo_list);
+
     	Bundle bundle = getIntent().getExtras();
 		Event event = bundle.getParcelable("event");
-
+		
 		// Create the list fragment and add it as our sole content.
- 		if (getSupportFragmentManager().findFragmentById(android.R.id.content) == null) {
- 			PhotoListFragment list = new PhotoListFragment(event);
- 			getSupportFragmentManager().beginTransaction().add(android.R.id.content, list).commit();
+		PhotoListFragment photoListFragment = (PhotoListFragment) getSupportFragmentManager().findFragmentById(R.id.activity_photo_list__fragment_photo_list);
+ 		if (photoListFragment != null) {
+ 			photoListFragment.setEvent(event);
  		}
     }
 

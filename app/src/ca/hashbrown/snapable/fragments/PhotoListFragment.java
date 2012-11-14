@@ -25,6 +25,9 @@ public class PhotoListFragment extends ListFragment implements LoaderCallbacks<C
 	PhotoListAdapter photoAdapter;
 	Event event;
 	
+	public PhotoListFragment() {
+	}
+	
 	public PhotoListFragment(Event event) {
 		this.event = event;
 	}
@@ -51,9 +54,13 @@ public class PhotoListFragment extends ListFragment implements LoaderCallbacks<C
 		// currently filtering.
 		switch (id) {
 		case PHOTOS:
-			String selection = "event=?";
-			String[] selectionArgs = {String.valueOf(event.getId())};
-			return new CursorLoader(getActivity(), SnapableContract.Photo.CONTENT_URI, null, selection, selectionArgs, null);
+			if (this.event != null) {
+				String selection = "event=?";
+				String[] selectionArgs = {String.valueOf(event.getId())};
+				return new CursorLoader(getActivity(), SnapableContract.Photo.CONTENT_URI, null, selection, selectionArgs, null);
+			} else {
+				return null;
+			}
 		
 		default:
 			return null;
@@ -86,6 +93,11 @@ public class PhotoListFragment extends ListFragment implements LoaderCallbacks<C
 		default:
 			break;
 		}
+	}
+	
+	public void setEvent(Event event) {
+		this.event = event;
+		this.getLoaderManager().initLoader(PHOTOS, null, this);
 	}
 
 }
