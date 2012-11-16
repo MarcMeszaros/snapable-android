@@ -26,6 +26,8 @@
         </activity>
         <activity android:name=".EventPhotoList" >
         </activity>
+        <activity android:name=".PhotoShare" >
+        </activity>
 
         <provider
             android:name=".provider.SnapContentProvider"

@@ -6,7 +6,10 @@ import java.util.Date;
 
 import ca.hashbrown.snapable.fragments.PhotoListFragment;
 
+import com.snapable.api.SnapClient;
 import com.snapable.api.models.Event;
+import com.snapable.api.resources.EventResource;
+import com.snapable.api.resources.PhotoResource;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -17,10 +20,13 @@ import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.Toast;
 
 public class EventPhotoList extends FragmentActivity implements OnClickListener {
 	
 	private static final String TAG = "EventPhotoList";
+	
+	private Uri imageUri;
 	
 	@Override
     public void onCreate(Bundle savedInstanceState) {
@@ -46,7 +52,7 @@ public class EventPhotoList extends FragmentActivity implements OnClickListener 
 		case R.id.activity_photo_list__photo_button:
 			Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 			
-			Uri imageUri = getOutputMediaFileUri(MEDIA_TYPE_IMAGE);
+			imageUri = getOutputMediaFileUri(MEDIA_TYPE_IMAGE);
 			intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
 			
 			startActivityForResult(intent, 0);
@@ -60,7 +66,21 @@ public class EventPhotoList extends FragmentActivity implements OnClickListener 
 	
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		super.onActivityResult(requestCode, resultCode, data);
+		//super.onActivityResult(requestCode, resultCode, data);
+		switch (requestCode) {
+		case 0:
+			if (resultCode == RESULT_OK) {
+				//PhotoResource photoRes = SnapClient.getInstance().build(PhotoResource.class);
+				
+				//photoRes.uploadPhoto(photo, event, guest, type, caption)
+				Intent upload = new Intent(this, PhotoShare.class);
+				startActivity(upload);
+			}
+			break;
+
+		default:
+			break;
+		}
 	}
 	
 	public static final int MEDIA_TYPE_IMAGE = 1;
