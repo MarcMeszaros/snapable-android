@@ -24,10 +24,11 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="25dp"
         android:layout_toRightOf="@id/fragment_photo_share__image"
+        android:indeterminate="true"
         android:padding="5dp" />
 
     <EditText
-        android:id="@+id/editText1"
+        android:id="@+id/fragment_photo_share__caption"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/fragment_photo_share__image"
@@ -39,10 +40,10 @@
     </EditText>
 
     <Button
-        android:id="@+id/button1"
+        android:id="@+id/fragment_photo_share__button_done"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/editText1"
+        android:layout_below="@id/fragment_photo_share__caption"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="26dp"
         android:text="Done" />

@@ -12,6 +12,8 @@ import com.snapable.api.resources.EventResource;
 import com.snapable.api.resources.PhotoResource;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -26,6 +28,7 @@ public class EventPhotoList extends FragmentActivity implements OnClickListener 
 	
 	private static final String TAG = "EventPhotoList";
 	
+	private Event event;
 	private Uri imageUri;
 	
 	@Override
@@ -38,7 +41,7 @@ public class EventPhotoList extends FragmentActivity implements OnClickListener 
     	
     	// get the extra bundle data for the fragment
     	Bundle bundle = getIntent().getExtras();
-		Event event = bundle.getParcelable("event");
+		event = bundle.getParcelable("event");
 		
 		// Create the list fragment and add it as our sole content.
 		PhotoListFragment photoListFragment = (PhotoListFragment) getSupportFragmentManager().findFragmentById(R.id.activity_photo_list__fragment_photo_list);
@@ -70,10 +73,10 @@ public class EventPhotoList extends FragmentActivity implements OnClickListener 
 		switch (requestCode) {
 		case 0:
 			if (resultCode == RESULT_OK) {
-				//PhotoResource photoRes = SnapClient.getInstance().build(PhotoResource.class);
-				
 				//photoRes.uploadPhoto(photo, event, guest, type, caption)
 				Intent upload = new Intent(this, PhotoShare.class);
+				upload.putExtra("event", event);
+				upload.putExtra("imageUri", imageUri);
 				startActivity(upload);
 			}
 			break;

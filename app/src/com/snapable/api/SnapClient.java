@@ -20,6 +20,7 @@ public class SnapClient {
 		Authorization auth = new SnapAuthorization(); // get our custom auth class
 		builder.property(Authorization.class.getName(), auth); // set the auth class to the builder
 		builder.bindDeserializer(SnapDeserializer.class, "image/jpeg"); // tell CRest to use our custom image deserializer
+		builder.bindSerializer(SnapBitmapSerializer.class, android.graphics.Bitmap.class); // tell CRest how to serialize Bitmap
 
         this.crest = builder.build(); // return the CRest object
 	}
