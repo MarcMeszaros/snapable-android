@@ -1,8 +1,11 @@
 package com.snapable.api.resources;
 
+import java.io.File;
 import java.io.InputStream;
 
 import org.codegist.crest.annotate.*;
+
+import android.graphics.Bitmap;
 
 import com.snapable.api.SnapApi;
 import com.snapable.api.models.*;
@@ -33,7 +36,7 @@ public interface PhotoResource {
     @GET
     @Path("/{id}/")
     @Consumes("image/jpeg")
-    android.graphics.Bitmap getPhotoBinary(
+    Bitmap getPhotoBinary(
     	@PathParam("id") long id,
     	@QueryParam("size") String size
     );
@@ -51,10 +54,11 @@ public interface PhotoResource {
     @POST
     @Path("/")
     Photo postPhoto(
-    	@MultiPartParam(value="image", contentType="image/jpeg", fileName="image.jpg") android.graphics.Bitmap photo,
+    	@MultiPartParam(value="image", contentType="image/jpeg", fileName="image.jpg") Bitmap photo,
     	@MultiPartParam(value="event") String event,
     	//@MultiPartParam(value="guest") String guest,
     	@MultiPartParam(value="type", defaultValue="/private_v1/type/6/") String type,
     	@MultiPartParam(value="caption", defaultValue="") String caption
     );
+
 }

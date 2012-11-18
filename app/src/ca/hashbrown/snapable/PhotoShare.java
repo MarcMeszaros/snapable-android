@@ -54,9 +54,9 @@ public class PhotoShare extends FragmentActivity implements OnClickListener {
 		switch (v.getId()) {
 		case R.id.fragment_photo_share__button_done:
 			// get the image data ready for uploading via the API
-	        PhotoUloadTask uploadTask = new PhotoUloadTask(event);
-	        uploadTask.execute(imageBitmap);
-			
+			EditText caption = (EditText) findViewById(R.id.fragment_photo_share__caption);
+	        PhotoUloadTask uploadTask = new PhotoUloadTask(event, caption.getText().toString(), imageBitmap);
+	        uploadTask.execute();	
 			break;
 
 		default:
@@ -65,29 +65,40 @@ public class PhotoShare extends FragmentActivity implements OnClickListener {
 		
 	}
 	
-	private class PhotoUloadTask extends AsyncTask<Bitmap, Void, Void> {
+	private class PhotoUloadTask extends AsyncTask<Void, Void, Void> {
 
 		private Event event;
+		private String caption;
+		private Bitmap photo;
 		
-		public PhotoUloadTask(Event event) {
+		public PhotoUloadTask(Event event, String caption, Bitmap photo) {
 			this.event = event;
+			this.caption = caption;
+			this.photo = photo;
 		}
 		
 		@Override
-		protected Void doInBackground(Bitmap... params) {
-			/*
-			byte[] imageData = null;
-	    	ByteArrayOutputStream baos = new ByteArrayOutputStream();  
-	        params[0].compress(Bitmap.CompressFormat.JPEG, 50, baos);
-	        imageData = baos.toByteArray();
-	        
-	        // upload via the 
-	        ByteArrayInputStream inStream = new ByteArrayInputStream(imageData);
-			*/
+		protected void onPreExecute() {
+			super.onPreExecute();
+			ProgressBar pb = (ProgressBar) findViewById(R.id.fragment_photo_share__progressBar);
+			pb.setVisibility(View.VISIBLE);
+		}
+		
+		@Override
+		protected Void doInBackground(Void... params) {
+			//pb.setVisibility(View.VISIBLE);
+			
+			this.photo = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher);
+			
+			// turn the bitmap into an input stream
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();  
+	        photo.compress(Bitmap.CompressFormat.JPEG, 50, baos);
+	        ByteArrayInputStream inStream = new ByteArrayInputStream(baos.toByteArray());
+			
 	        // upload via the API
 	        try {
 				PhotoResource photoRes = SnapClient.getInstance().build(PhotoResource.class);
-				photoRes.postPhoto(params[0], event.getResourceUri(), "/private_v1/type/6/", "awesome hardcoded android caption");
+				photoRes.postPhoto(inStream, event.getResourceUri(), "/private_v1/type/6/", caption);
 	        } catch (org.codegist.crest.CRestException e) {
 	        	Log.e(TAG, "problem with the response?", e);
 	        }
@@ -97,7 +108,10 @@ public class PhotoShare extends FragmentActivity implements OnClickListener {
 		@Override
 		protected void onPostExecute(Void result) {
 			super.onPostExecute(result);
+			ProgressBar pb = (ProgressBar) findViewById(R.id.fragment_photo_share__progressBar);
+			pb.setVisibility(View.INVISIBLE);
 			Log.d(TAG, "upload complete");
 		}
+
 	}
 }

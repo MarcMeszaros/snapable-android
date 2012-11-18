@@ -5,6 +5,8 @@ import org.codegist.crest.CRestBuilder;
 import org.codegist.crest.CRestException;
 import org.codegist.crest.security.Authorization;
 
+import android.graphics.Bitmap;
+
 public class SnapClient {
 	
 	private static volatile SnapClient instance = null;
@@ -20,7 +22,7 @@ public class SnapClient {
 		Authorization auth = new SnapAuthorization(); // get our custom auth class
 		builder.property(Authorization.class.getName(), auth); // set the auth class to the builder
 		builder.bindDeserializer(SnapDeserializer.class, "image/jpeg"); // tell CRest to use our custom image deserializer
-		builder.bindSerializer(SnapBitmapSerializer.class, android.graphics.Bitmap.class); // tell CRest how to serialize Bitmap
+		builder.bindSerializer(SnapBitmapSerializer.class, Bitmap.class); // tell CRest how to serialize Bitmap
 
         this.crest = builder.build(); // return the CRest object
 	}
