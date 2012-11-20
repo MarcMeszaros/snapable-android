@@ -7,26 +7,34 @@ import ca.hashbrown.snapable.adapters.EventListAdapter;
 import ca.hashbrown.snapable.cursors.EventCursor;
 import ca.hashbrown.snapable.provider.SnapableContract;
 
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 
-public class EventListFragment extends ListFragment implements LoaderCallbacks<Cursor>, OnItemClickListener {
+public class EventListFragment extends ListFragment implements LoaderCallbacks<Cursor>, OnItemClickListener, LocationListener {
 	
 	private static final String TAG = "EventListFragment";
 	
 	private static final int EVENTS = 0x01;
+	private static final int EVENTS_GPS = 0x02;
 	
 	EventListAdapter eventAdapter;
+	LocationManager locationManager;
 	
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
@@ -37,8 +45,23 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 		eventAdapter = new EventListAdapter(getActivity(), null);
 		setListAdapter(eventAdapter);
 		
+		// Retrieve a list of location providers that have fine accuracy, no monetary cost, etc
+    	Criteria criteria = new Criteria();
+    	criteria.setAccuracy(Criteria.ACCURACY_FINE);
+    	criteria.setCostAllowed(false);
+    	
+    	locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+    	String providerName = locationManager.getBestProvider(criteria, true);
+
+    	// If no suitable provider is found, null is returned.
+    	//LocationProvider provider = null;
+    	if (providerName != null) {
+    	   //provider = locationManager.getProvider(providerName);
+    	   locationManager.requestLocationUpdates(providerName, 1000, 1, this);
+    	}
+		
 		// Prepare the loader. (Re-connect with an existing one, or start a new one.)
-		getLoaderManager().initLoader(EVENTS, null, this);
+		//getLoaderManager().initLoader(EVENTS_GPS, null, this);
 	}
 
 	@Override
@@ -54,6 +77,11 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 		case EVENTS:
 			return new CursorLoader(getActivity(), SnapableContract.Event.CONTENT_URI, null, null, null, null);
 		
+		case EVENTS_GPS:
+			String selection = "lat=? lng=?";
+			String[] selectionArgs = {args.getString("lat"), args.getString("lng")};
+			return new CursorLoader(getActivity(), SnapableContract.Event.CONTENT_URI, null, selection, selectionArgs, null);
+		
 		default:
 			return null;
 		}
@@ -68,6 +96,7 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 			break;
 		
 		default:
+			eventAdapter.changeCursor(data);
 			break;
 		}
 		
@@ -83,6 +112,7 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 			break;
 
 		default:
+			eventAdapter.changeCursor(null);
 			break;
 		}
 	}
@@ -98,6 +128,34 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 		Intent intent = new Intent(getActivity(), EventPhotoList.class);
 		intent.putExtra("event", eventCursor.getEvent());
 		startActivity(intent);
+		
+	}
+
+	public void onLocationChanged(Location location) {
+		// TODO Auto-generated method stub
+		Log.d(TAG, location.getLatitude() + " | " + location.getLongitude());
+		
+		Bundle args = new Bundle(2);
+		args.putString("lat", String.valueOf(location.getLatitude()));
+		args.putString("lng", String.valueOf(location.getLongitude()));
+		
+		// Prepare the loader. (Re-connect with an existing one, or start a new one.)
+		getLoaderManager().initLoader(EVENTS_GPS, args, this);
+		locationManager.removeUpdates(this); // stop updates
+	}
+
+	public void onProviderDisabled(String provider) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void onProviderEnabled(String provider) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void onStatusChanged(String provider, int status, Bundle extras) {
+		// TODO Auto-generated method stub
 		
 	}
 

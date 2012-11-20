@@ -17,6 +17,13 @@ public interface EventResource {
     Pager<Event[]> getEvents();
     
     @GET
+    @Path("/")
+    Pager<Event[]> getEvents(
+    	@QueryParam("lat") float lat,
+    	@QueryParam("lng") float lng
+    );
+    
+    @GET
     @Path("/{id}/")
     Event getEvent(
     	@PathParam("id") long id

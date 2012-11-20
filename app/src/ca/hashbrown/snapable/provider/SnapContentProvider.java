@@ -1,6 +1,10 @@
 package ca.hashbrown.snapable.provider;
 
 
+import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import ca.hashbrown.snapable.cursors.*;
 
 import com.snapable.api.SnapClient;
@@ -121,9 +125,17 @@ public class SnapContentProvider extends ContentProvider {
 				// set the column names or a default
 				EventCursor eventsCursor = (projection != null) ? new EventCursor(projection) : new EventCursor();
 				
-				// make the api call
-				Pager<Event[]> events = eventRes.getEvents();
-				
+				Pager<Event[]> events = null;
+				if (selection != null && selectionArgs != null) {
+					HashMap<String, String> hMap = getHashmap(selection, selectionArgs);
+					float lat =  Float.parseFloat(hMap.get("lat"));
+					float lng =  Float.parseFloat(hMap.get("lng"));
+
+					events = eventRes.getEvents(lat, lng);
+				} else {
+					// make the api call
+					events = eventRes.getEvents();
+				}
 				// add the event objects to the resulting cursor
 				for (Event event : events.getObjects()) {
 					eventsCursor.add(event);
@@ -175,6 +187,24 @@ public class SnapContentProvider extends ContentProvider {
 	public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+	
+	
+	// http://stackoverflow.com/questions/12949730/contentprovider-implementation-how-to-convert-selection-and-selectionargs
+	public static HashMap<String, String> getHashmap(String selection, String[] selectionArgs) {
+		HashMap<String, String> result = new HashMap<String, String>();
+
+	    Pattern pattern = Pattern.compile("[a-z]*(\\s)*=\\?", Pattern.CASE_INSENSITIVE);
+	    Matcher matcher = pattern.matcher(selection);
+
+	    int pos = 0;
+	    while (matcher.find()) {
+	        String[] selParts = matcher.group(0).split("=");
+	        result.put(selParts[0], selectionArgs[pos]);
+	        pos++;
+	    }
+
+	    return result;
 	}
 
 }
