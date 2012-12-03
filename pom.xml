@@ -11,6 +11,17 @@
     <packaging>pom</packaging>
     <name>Snapable</name>
 
+    <repositories>
+        <repository>
+            <id>snapable.thirtparty</id>
+            <url>http://nexus.snapable.com/content/repositories/thirdparty</url>
+        </repository>
+        <repository>
+            <id>snapable.thirtparty-snapshots</id>
+            <url>http://nexus.snapable.com/content/repositories/thirdparty-snapshots</url>
+        </repository>
+    </repositories>
+
     <dependencyManagement>
         <dependencies>
             <!-- the Android SDK library -->
@@ -39,6 +50,12 @@
                 <version>1.9.10</version>
             </dependency>
 
+            <dependency>
+              <groupId>android.support</groupId>
+              <artifactId>compatibility-v4</artifactId>
+              <version>10</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -49,7 +66,7 @@
                 <plugin>
                     <groupId>com.jayway.maven.plugins.android.generation2</groupId>
                     <artifactId>android-maven-plugin</artifactId>
-                    <version>3.3.2</version>
+                    <version>3.4.1</version>
                     <extensions>true</extensions>
                     <configuration>
                         <sdk>
