@@ -2,7 +2,15 @@
 This project uses Maven for most build tasks. Read up on Maven since there's not much info here.
 
 # Getting Started #
-To be filled out.
+1. Make sure to uninstall/reinstall the Android SDK (SDK folder/file layouts have changed and setup is based on SDK r21+)
+2. Install the Android 2.3.3 (API 10) and Android Support Package from the SDK tools
+3. Proceed with any of the setup instructions below
+
+## Eclipse ##
+TBD
+
+## Maven ##
+TBD
 
 # Basic Maven Commands #
 Below are some basic Maven commands to do some common tasks.
