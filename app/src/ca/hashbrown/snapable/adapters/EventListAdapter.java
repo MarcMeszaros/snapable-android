@@ -5,19 +5,15 @@ import java.util.ArrayList;
 
 import ca.hashbrown.snapable.R;
 import ca.hashbrown.snapable.provider.SnapCache;
-import ca.hashbrown.snapable.provider.SnapableContract;
+import ca.hashbrown.snapable.provider.SnapCache.AsyncDrawable;
+import ca.hashbrown.snapable.provider.SnapCache.EventWorkerTask;
 
-import com.snapable.api.SnapClient;
 import com.snapable.api.models.Event;
-import com.snapable.api.resources.EventResource;
 
-import android.content.ContentUris;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.net.Uri.Builder;
-import android.os.AsyncTask;
-import android.util.Log;
+import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,10 +25,11 @@ public class EventListAdapter extends CursorAdapter {
 
 	private static final String TAG = "EventListAdapter";
 	ArrayList<Bitmap> imagesList;
+	private final Bitmap placeholder;
 	
 	public EventListAdapter(Context context, Cursor c) {
 		super(context, c);
-		this.imagesList = new ArrayList<Bitmap>();
+		this.placeholder = BitmapFactory.decodeResource(context.getResources(), R.drawable.photo_blank);
 	}
 	
 	static class ViewHolder {
@@ -53,9 +50,16 @@ public class EventListAdapter extends CursorAdapter {
 		viewHolder.title.setText(cursor.getString(cursor.getColumnIndex(Event.FIELD_TITLE)));
 
 		// get the image, if there is one
-		viewHolder.cover.setImageResource(R.drawable.photo_blank);
-		LoadCoverTask task = new LoadCoverTask(viewHolder.cover);
-		task.execute(cursor.getLong(cursor.getColumnIndex(Event.FIELD_ID)));
+		final String imageKey = cursor.getLong(cursor.getColumnIndex(Event.FIELD_ID)) + "_480x480";
+		Bitmap bm = SnapCache.PhotoWorkerTask.getBitmapFromCache(imageKey);
+		if (bm != null) {
+			viewHolder.cover.setImageBitmap(bm);
+		} else if (SnapCache.EventWorkerTask.cancelPotentialWork(cursor.getLong(cursor.getColumnIndex(Event.FIELD_ID)), viewHolder.cover)) {
+            final EventWorkerTask task = new EventWorkerTask(viewHolder.cover);
+            final AsyncDrawable asyncDrawable = new AsyncDrawable(context.getResources(), this.placeholder, task);
+            viewHolder.cover.setImageDrawable(asyncDrawable);
+            task.execute(cursor.getLong(cursor.getColumnIndex(Event.FIELD_ID)));
+        }
 	}
 
 	@Override
@@ -71,29 +75,5 @@ public class EventListAdapter extends CursorAdapter {
 		
 		bindView(v, context, cursor);
 		return v;
-	}
-	
-	private class LoadCoverTask extends AsyncTask<Long, Void, Bitmap> {
-		
-		private ImageView coverView;
-		
-		public LoadCoverTask(ImageView coverView) {
-			this.coverView = coverView;
-		}
-
-		@Override
-		protected Bitmap doInBackground(Long... params) {
-			try{
-				return SnapCache.Event.getPhoto(params[0], "150x150");
-			} catch (Exception e) {
-				return null;
-			}
-		}
-		
-		@Override
-		protected void onPostExecute(Bitmap result) {
-			this.coverView.setImageBitmap(result);
-		}
-		
 	}
 }
