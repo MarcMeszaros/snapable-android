@@ -1,16 +1,22 @@
 package ca.hashbrown.snapable.adapters;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 import ca.hashbrown.snapable.R;
+import ca.hashbrown.snapable.provider.SnapCache;
 
 import com.snapable.api.SnapClient;
 import com.snapable.api.models.Photo;
 import com.snapable.api.resources.PhotoResource;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -24,10 +30,13 @@ public class PhotoListAdapter extends CursorAdapter {
 
 	private static final String TAG = "PhotoListAdapter";
 	ArrayList<Bitmap> imagesList;
+	private Context context;
+	private final Bitmap placeholder;
 	
 	public PhotoListAdapter(Context context, Cursor c) {
 		super(context, c);
-		this.imagesList = new ArrayList<Bitmap>();
+		this.context = context;
+		this.placeholder = BitmapFactory.decodeResource(this.context.getResources(), R.drawable.photo_blank);
 	}
 	
 	static class ViewHolder {
@@ -51,19 +60,16 @@ public class PhotoListAdapter extends CursorAdapter {
 		viewHolder.authorName.setText((authorName.isEmpty()) ? "Anonymous" : authorName);
 		
 		// get the image, if there is one
-		if (this.imagesList.size()-1 >= cursor.getPosition()) {
-			Bitmap photo = (Bitmap) this.imagesList.get(cursor.getPosition());
-			if (photo != null) {
-				viewHolder.photo.setImageBitmap(photo);
-			} else {
-				viewHolder.photo.setImageResource(R.drawable.photo_blank);
-			}
-			
-		} else {
-			viewHolder.photo.setImageResource(R.drawable.photo_blank);
-			LoadPhotoTask task = new LoadPhotoTask(this, this.imagesList, cursor.getPosition());
-			task.execute(cursor.getLong(cursor.getColumnIndex(Photo.FIELD_ID)));
-		}
+		final String imageKey = cursor.getLong(cursor.getColumnIndex(Photo.FIELD_ID)) + "_480x480";
+		Bitmap bm = SnapCache.Photo.getBitmapFromCache(imageKey);
+		if (bm != null) {
+			viewHolder.photo.setImageBitmap(bm);
+		} else if (cancelPotentialWork(cursor.getLong(cursor.getColumnIndex(Photo.FIELD_ID)), viewHolder.photo)) {
+            final LoadPhotoTask task = new LoadPhotoTask(viewHolder.photo);
+            final AsyncDrawable asyncDrawable = new AsyncDrawable(this.context.getResources(), this.placeholder, task);
+            viewHolder.photo.setImageDrawable(asyncDrawable);
+            task.execute(cursor.getLong(cursor.getColumnIndex(Photo.FIELD_ID)));
+        }
 	}
 
 	@Override
@@ -84,35 +90,83 @@ public class PhotoListAdapter extends CursorAdapter {
 	
 	private class LoadPhotoTask extends AsyncTask<Long, Void, Bitmap> {
 		
-		private PhotoListAdapter adapter;
-		private ArrayList<Bitmap> imagesList;
-		private int position;
+		private final WeakReference<ImageView> photo;
+		private long data = 0;
 		
-		public LoadPhotoTask(PhotoListAdapter adapter, ArrayList<Bitmap> imagesList, int position) {
-			this.adapter = adapter;
-			this.imagesList = imagesList;
-			this.position = position;
+		public LoadPhotoTask(ImageView photo) {
+			this.photo = new WeakReference<ImageView>(photo);
 		}
 
 		@Override
 		protected Bitmap doInBackground(Long... params) {
-			try{
-				return SnapClient.getInstance().build(PhotoResource.class).getPhotoBinary(params[0], "480x480");
-			} catch (Exception e) {
-				return null;
+			this.data = params[0];
+			final String imageKey = params[0] + "_480x480";
+			Bitmap bm = SnapCache.Photo.getBitmapFromCache(imageKey);
+			if (bm != null) {
+				return bm;
+			} else{ 
+				bm = SnapClient.getInstance().build(PhotoResource.class).getPhotoBinary(params[0], "480x480");
+				SnapCache.Photo.addBitmapToCache(params[0] + "_480x480", bm);
+				return bm;
 			}
 		}
 		
 		@Override
 		protected void onPostExecute(Bitmap result) {
-			if (this.imagesList.size()-1 <= this.position) {
-				this.imagesList.ensureCapacity(this.position + 1);
-				this.imagesList.add(null);
+			if (isCancelled()) {
+				result = null;
 			}
-			this.imagesList.set(this.position, result);
-			this.adapter.notifyDataSetChanged();
+			
+			if (this.photo != null && result != null) {
+	            final ImageView imageView = this.photo.get();
+	            final LoadPhotoTask bitmapWorkerTask = getBitmapWorkerTask(imageView);
+	            if (this == bitmapWorkerTask && this.photo != null) {
+	                imageView.setImageBitmap(result);
+	            }
+	        }
 		}
 		
 	}
+	////////
+	static class AsyncDrawable extends BitmapDrawable {
+        private final WeakReference<LoadPhotoTask> bitmapWorkerTaskReference;
+
+        public AsyncDrawable(Resources res, Bitmap bitmap, LoadPhotoTask bitmapWorkerTask) {
+            super(res, bitmap);
+            bitmapWorkerTaskReference = new WeakReference<LoadPhotoTask>(bitmapWorkerTask);
+        }
+
+        public LoadPhotoTask getBitmapWorkerTask() {
+            return bitmapWorkerTaskReference.get();
+        }
+    }
+	
+	public static boolean cancelPotentialWork(long data, ImageView imageView) {
+        final LoadPhotoTask bitmapWorkerTask = getBitmapWorkerTask(imageView);
+
+        if (bitmapWorkerTask != null) {
+            final long bitmapData = bitmapWorkerTask.data;
+            if (bitmapData != data) {
+                // Cancel previous task
+                bitmapWorkerTask.cancel(true);
+            } else {
+                // The same work is already in progress
+                return false;
+            }
+        }
+        // No task associated with the ImageView, or an existing task was cancelled
+        return true;
+    }
+	
+	private static LoadPhotoTask getBitmapWorkerTask(ImageView imageView) {
+       if (imageView != null) {
+           final Drawable drawable = imageView.getDrawable();
+           if (drawable instanceof AsyncDrawable) {
+               final AsyncDrawable asyncDrawable = (AsyncDrawable) drawable;
+               return asyncDrawable.getBitmapWorkerTask();
+           }
+        }
+        return null;
+    }
 
 }

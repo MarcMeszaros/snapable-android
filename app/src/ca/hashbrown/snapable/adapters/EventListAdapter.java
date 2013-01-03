@@ -1,16 +1,21 @@
 package ca.hashbrown.snapable.adapters;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
 import ca.hashbrown.snapable.R;
+import ca.hashbrown.snapable.provider.SnapCache;
+import ca.hashbrown.snapable.provider.SnapableContract;
 
 import com.snapable.api.SnapClient;
 import com.snapable.api.models.Event;
 import com.snapable.api.resources.EventResource;
 
+import android.content.ContentUris;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.net.Uri.Builder;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -48,19 +53,9 @@ public class EventListAdapter extends CursorAdapter {
 		viewHolder.title.setText(cursor.getString(cursor.getColumnIndex(Event.FIELD_TITLE)));
 
 		// get the image, if there is one
-		if (this.imagesList.size()-1 >= cursor.getPosition()) {
-			Bitmap cover = (Bitmap) this.imagesList.get(cursor.getPosition());
-			if (cover != null) {
-				viewHolder.cover.setImageBitmap(cover);
-			} else {
-				viewHolder.cover.setImageResource(R.drawable.photo_blank);
-			}
-			
-		} else {
-			viewHolder.cover.setImageResource(R.drawable.photo_blank);
-			LoadCoverTask task = new LoadCoverTask(this, this.imagesList, cursor.getPosition());
-			task.execute(cursor.getLong(cursor.getColumnIndex(Event.FIELD_ID)));
-		}
+		viewHolder.cover.setImageResource(R.drawable.photo_blank);
+		LoadCoverTask task = new LoadCoverTask(viewHolder.cover);
+		task.execute(cursor.getLong(cursor.getColumnIndex(Event.FIELD_ID)));
 	}
 
 	@Override
@@ -80,20 +75,16 @@ public class EventListAdapter extends CursorAdapter {
 	
 	private class LoadCoverTask extends AsyncTask<Long, Void, Bitmap> {
 		
-		private EventListAdapter adapter;
-		private ArrayList<Bitmap> imagesList;
-		private int position;
+		private ImageView coverView;
 		
-		public LoadCoverTask(EventListAdapter adapter, ArrayList<Bitmap> imagesList, int position) {
-			this.adapter = adapter;
-			this.imagesList = imagesList;
-			this.position = position;
+		public LoadCoverTask(ImageView coverView) {
+			this.coverView = coverView;
 		}
 
 		@Override
 		protected Bitmap doInBackground(Long... params) {
 			try{
-				return SnapClient.getInstance().build(EventResource.class).getEventPhotoBinary(params[0], "150x150");
+				return SnapCache.Event.getPhoto(params[0], "150x150");
 			} catch (Exception e) {
 				return null;
 			}
@@ -101,12 +92,7 @@ public class EventListAdapter extends CursorAdapter {
 		
 		@Override
 		protected void onPostExecute(Bitmap result) {
-			if (this.imagesList.size()-1 <= this.position) {
-				this.imagesList.ensureCapacity(this.position + 1);
-				this.imagesList.add(null);
-			}
-			this.imagesList.set(this.position, result);
-			this.adapter.notifyDataSetChanged();
+			this.coverView.setImageBitmap(result);
 		}
 		
 	}
