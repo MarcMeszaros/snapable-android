@@ -2,6 +2,8 @@ package ca.hashbrown.snapable.provider;
 
 import java.lang.ref.WeakReference;
 
+import org.codegist.crest.CRestException;
+
 import com.snapable.api.SnapClient;
 import com.snapable.api.resources.EventResource;
 import com.snapable.api.resources.PhotoResource;
@@ -121,10 +123,15 @@ public class SnapCache {
 			Bitmap bm = SnapCache.EventWorkerTask.getBitmapFromCache(imageKey);
 			if (bm != null) {
 				return bm;
-			} else{ 
-				bm = SnapClient.getInstance().build(EventResource.class).getEventPhotoBinary(params[0], "150x150");
-				SnapCache.EventWorkerTask.addBitmapToCache(params[0] + "_150x150", bm);
-				return bm;
+			} else{
+				try {
+					bm = SnapClient.getInstance().build(EventResource.class).getEventPhotoBinary(params[0], "150x150");
+					SnapCache.EventWorkerTask.addBitmapToCache(params[0] + "_150x150", bm);
+					return bm;
+				} catch (CRestException e) {
+					Log.e(TAG, "problem getting the photo from the API", e);
+					return null;
+				}
 			}
 		}
 
@@ -135,14 +142,7 @@ public class SnapCache {
 		public static Bitmap getPhoto(long id, String size) {
 			Log.i(TAG, "inside event getPhoto");
 			final String imageKey = String.valueOf(id) + "_" + size;
-			Bitmap bitmap = getBitmapFromCache(imageKey);
-			if (bitmap != null) {
-			    return bitmap;
-			} else {
-				bitmap = SnapClient.getInstance().build(EventResource.class).getEventPhotoBinary(id, size);
-			    addBitmapToCache(imageKey, bitmap);
-				return bitmap;
-			}
+			return getBitmapFromCache(imageKey);
 		}
 		
 		public static void addBitmapToCache(String key, Bitmap bitmap) {
@@ -181,10 +181,15 @@ public class SnapCache {
 			Bitmap bm = SnapCache.PhotoWorkerTask.getBitmapFromCache(imageKey);
 			if (bm != null) {
 				return bm;
-			} else{ 
-				bm = SnapClient.getInstance().build(PhotoResource.class).getPhotoBinary(params[0], "480x480");
-				SnapCache.PhotoWorkerTask.addBitmapToCache(params[0] + "_480x480", bm);
-				return bm;
+			} else{
+				try {
+					bm = SnapClient.getInstance().build(PhotoResource.class).getPhotoBinary(params[0], "480x480");
+					SnapCache.PhotoWorkerTask.addBitmapToCache(params[0] + "_480x480", bm);
+					return bm;
+				} catch (CRestException e) {
+					Log.e(TAG, "problem getting the photo from the API", e);
+					return null;
+				}
 			}
 		}
 
