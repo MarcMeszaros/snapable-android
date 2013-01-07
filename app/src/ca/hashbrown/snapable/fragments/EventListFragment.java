@@ -1,6 +1,5 @@
 package ca.hashbrown.snapable.fragments;
 
-
 import ca.hashbrown.snapable.EventPhotoList;
 import ca.hashbrown.snapable.R;
 import ca.hashbrown.snapable.adapters.EventListAdapter;
@@ -56,17 +55,20 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
     	// If no suitable provider is found, null is returned.
     	//LocationProvider provider = null;
     	if (providerName != null) {
-    	   //provider = locationManager.getProvider(providerName);
+    	  // provider = locationManager.getProvider(providerName);
     	   locationManager.requestLocationUpdates(providerName, 1000, 1, this);
     	}
 		
 		// Prepare the loader. (Re-connect with an existing one, or start a new one.)
-		//getLoaderManager().initLoader(EVENTS_GPS, null, this);
+    	//Bundle args = new Bundle(2);
+		//args.putString("lat", "45.427324");
+		//args.putString("lng", "-75.691542");
+		//getLoaderManager().initLoader(EVENTS_GPS, args, this);
 	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		return inflater.inflate(R.layout.fragment_event_list, null);
+		return inflater.inflate(R.layout.fragment_event_list, container, false);
 	}
 	
 	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -94,6 +96,9 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 		case EVENTS:
 			eventAdapter.changeCursor(data);
 			break;
+		case EVENTS_GPS:
+			eventAdapter.changeCursor(data);
+			break;
 		
 		default:
 			eventAdapter.changeCursor(data);
@@ -108,6 +113,9 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 		// longer using it.
 		switch (loader.getId()) {
 		case EVENTS:
+			eventAdapter.changeCursor(null);
+			break;
+		case EVENTS_GPS:
 			eventAdapter.changeCursor(null);
 			break;
 

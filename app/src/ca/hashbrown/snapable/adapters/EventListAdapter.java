@@ -1,6 +1,5 @@
 package ca.hashbrown.snapable.adapters;
 
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
 import ca.hashbrown.snapable.R;
@@ -24,7 +23,6 @@ import android.widget.TextView;
 public class EventListAdapter extends CursorAdapter {
 
 	private static final String TAG = "EventListAdapter";
-	ArrayList<Bitmap> imagesList;
 	private final Bitmap placeholder;
 	
 	public EventListAdapter(Context context, Cursor c) {
@@ -69,8 +67,8 @@ public class EventListAdapter extends CursorAdapter {
 		
 		// bind the various views to the viewholder
 		final ViewHolder viewHolder = new ViewHolder();
-		viewHolder.title = (TextView) v.findViewById(R.id.EventRow_event_title);
-		viewHolder.cover = (ImageView) v.findViewById(R.id.EventRow_event_cover);
+		viewHolder.title = (TextView) v.findViewById(R.id.listview_row_event__title);
+		viewHolder.cover = (ImageView) v.findViewById(R.id.listview_row_event__cover);
 		v.setTag(viewHolder);
 		
 		bindView(v, context, cursor);

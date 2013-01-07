@@ -2,20 +2,27 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="10dp"
     android:orientation="vertical" >
 
     <ListView
         android:id="@+id/android:list"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:background="#aaaaaa"
-        android:divider="#aaaaaa"
-        android:dividerHeight="15dip"
-        android:paddingLeft="10dip"
-        android:paddingRight="10dip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:dividerHeight="10dp"
         android:scrollbars="none"
-        tools:listitem="@layout/listview_row_event" >
-    </ListView>
+        tools:listitem="@layout/listview_row_event" />
+
+    <!-- 
+    <TextView
+        android:id="@id/android:empty"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:lineSpacingMultiplier="0.92"
+        android:padding="10dp"
+        android:text="Unable to find any events..."
+        android:textSize="20sp" />
+    -->
 
 </LinearLayout>
