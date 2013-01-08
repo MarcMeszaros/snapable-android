@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
+    android:id="@+id/fragment_event_list"
+    android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="10dp"
-    android:orientation="vertical" >
+    android:layout_margin="10dp" >
 
     <ListView
         android:id="@+id/android:list"
@@ -14,7 +14,6 @@
         android:scrollbars="none"
         tools:listitem="@layout/listview_row_event" />
 
-    <!-- 
     <TextView
         android:id="@id/android:empty"
         android:layout_width="fill_parent"
@@ -23,6 +22,5 @@
         android:padding="10dp"
         android:text="Unable to find any events..."
         android:textSize="20sp" />
-    -->
 
 </LinearLayout>

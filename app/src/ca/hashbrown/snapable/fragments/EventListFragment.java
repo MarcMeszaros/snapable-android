@@ -6,6 +6,7 @@ import ca.hashbrown.snapable.adapters.EventListAdapter;
 import ca.hashbrown.snapable.cursors.EventCursor;
 import ca.hashbrown.snapable.provider.SnapableContract;
 
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -29,9 +30,11 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 	
 	private static final String TAG = "EventListFragment";
 	
-	private static final int EVENTS = 0x01;
-	private static final int EVENTS_GPS = 0x02;
-	
+	public static final class LOADERS {
+		public static final int EVENTS = 0x01;
+		public static final int EVENTS_GPS = 0x02;
+	}
+
 	EventListAdapter eventAdapter;
 	LocationManager locationManager;
 	
@@ -44,6 +47,7 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 		eventAdapter = new EventListAdapter(getActivity(), null);
 		setListAdapter(eventAdapter);
 		
+		/*
 		// Retrieve a list of location providers that have fine accuracy, no monetary cost, etc
     	Criteria criteria = new Criteria();
     	criteria.setAccuracy(Criteria.ACCURACY_FINE);
@@ -58,12 +62,13 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
     	  // provider = locationManager.getProvider(providerName);
     	   locationManager.requestLocationUpdates(providerName, 1000, 1, this);
     	}
+    	*/
 		
 		// Prepare the loader. (Re-connect with an existing one, or start a new one.)
-    	//Bundle args = new Bundle(2);
-		//args.putString("lat", "45.427324");
-		//args.putString("lng", "-75.691542");
-		//getLoaderManager().initLoader(EVENTS_GPS, args, this);
+    	Bundle args = new Bundle(2);
+		args.putString("lat", "45.427324");
+		args.putString("lng", "-75.691542");
+		getLoaderManager().initLoader(LOADERS.EVENTS_GPS, args, this);
 	}
 
 	@Override
@@ -76,16 +81,24 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 		// First, pick the base URI to use depending on whether we are
 		// currently filtering.
 		switch (id) {
-		case EVENTS:
-			return new CursorLoader(getActivity(), SnapableContract.Event.CONTENT_URI, null, null, null, null);
-		
-		case EVENTS_GPS:
-			String selection = "lat=? lng=?";
-			String[] selectionArgs = {args.getString("lat"), args.getString("lng")};
-			return new CursorLoader(getActivity(), SnapableContract.Event.CONTENT_URI, null, selection, selectionArgs, null);
-		
-		default:
-			return null;
+			case LOADERS.EVENTS: {
+				// get the query string if required
+				if (args.containsKey("q")) {
+					String selection = "q=?";
+					String[] selectionArgs = {args.getString("q")};
+					return new CursorLoader(getActivity(), SnapableContract.Event.CONTENT_URI, null, selection, selectionArgs, null);
+				} else {
+					return new CursorLoader(getActivity(), SnapableContract.Event.CONTENT_URI, null, null, null, null);
+				}
+			}
+			case LOADERS.EVENTS_GPS: {
+				String selection = "lat=? lng=?";
+				String[] selectionArgs = {args.getString("lat"), args.getString("lng")};
+				return new CursorLoader(getActivity(), SnapableContract.Event.CONTENT_URI, null, selection, selectionArgs, null);
+			}
+			default: {
+				return null;
+			}
 		}
 	}
 
@@ -93,10 +106,10 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 		// Swap the new cursor in. (The framework will take care of closing the
 		// old cursor once we return.)
 		switch (loader.getId()) {
-		case EVENTS:
+		case LOADERS.EVENTS:
 			eventAdapter.changeCursor(data);
 			break;
-		case EVENTS_GPS:
+		case LOADERS.EVENTS_GPS:
 			eventAdapter.changeCursor(data);
 			break;
 		
@@ -112,10 +125,10 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 		// above is about to be closed. We need to make sure we are no
 		// longer using it.
 		switch (loader.getId()) {
-		case EVENTS:
+		case LOADERS.EVENTS:
 			eventAdapter.changeCursor(null);
 			break;
-		case EVENTS_GPS:
+		case LOADERS.EVENTS_GPS:
 			eventAdapter.changeCursor(null);
 			break;
 
@@ -148,7 +161,7 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 		args.putString("lng", String.valueOf(location.getLongitude()));
 		
 		// Prepare the loader. (Re-connect with an existing one, or start a new one.)
-		getLoaderManager().initLoader(EVENTS_GPS, args, this);
+		getLoaderManager().initLoader(LOADERS.EVENTS_GPS, args, this);
 		locationManager.removeUpdates(this); // stop updates
 	}
 
