@@ -29,38 +29,38 @@ public class SnapContentProvider extends ContentProvider {
 	
 	// uri matching static variables
 	// NOTE: the numbers are internal to this class (the actual value doesn't really matter)
-	//private static final int ACCOUNTS = 1001;
+	//private static final int ACCOUNT = 1001;
 	//private static final int ACCOUNT_ID = 1002;
 	
-	private static final int EVENTS = 2001;
+	private static final int EVENT = 2001;
 	private static final int EVENT_ID = 2002;
 
-	private static final int GUESTS = 3001;
+	private static final int GUEST = 3001;
 	private static final int GUEST_ID = 3002;
 	
-	private static final int PHOTOS = 4001;
+	private static final int PHOTO = 4001;
 	private static final int PHOTO_ID = 4002;
 	
-	//private static final int USERS = 5001;
+	//private static final int USER = 5001;
 	//private static final int USER_ID = 5002;
 
 	// build the uri matcher from the codes above
 	private static final UriMatcher uriMatcher;
 	static {
 		uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-		//uriMatcher.addURI(AUTHORITY, SnapableContract.Account.RESOURCE_NAME, ACCOUNTS);
+		//uriMatcher.addURI(AUTHORITY, SnapableContract.Account.RESOURCE_NAME, ACCOUNT);
 		//uriMatcher.addURI(AUTHORITY, SnapableContract.Account.RESOURCE_NAME+"/#", ACCOUNT_ID);
 		
-		uriMatcher.addURI(AUTHORITY, SnapableContract.Event.RESOURCE_NAME, EVENTS);
+		uriMatcher.addURI(AUTHORITY, SnapableContract.Event.RESOURCE_NAME, EVENT);
 		uriMatcher.addURI(AUTHORITY, SnapableContract.Event.RESOURCE_NAME+"/#", EVENT_ID);
 		
-		//uriMatcher.addURI(AUTHORITY, GuestResource.RESOURCE_NAME, GUESTS);
+		//uriMatcher.addURI(AUTHORITY, GuestResource.RESOURCE_NAME, GUEST);
 		//uriMatcher.addURI(AUTHORITY, GuestResource.RESOURCE_NAME+"/#", GUEST_ID);
 
-		uriMatcher.addURI(AUTHORITY, PhotoResource.RESOURCE_NAME, PHOTOS);
+		uriMatcher.addURI(AUTHORITY, PhotoResource.RESOURCE_NAME, PHOTO);
 		uriMatcher.addURI(AUTHORITY, PhotoResource.RESOURCE_NAME+"/#", PHOTO_ID);
 		
-		//uriMatcher.addURI(AUTHORITY, UserResource.RESOURCE_NAME, USERS);
+		//uriMatcher.addURI(AUTHORITY, UserResource.RESOURCE_NAME, USER);
 		//uriMatcher.addURI(AUTHORITY, UserResource.RESOURCE_NAME+"/#", USERS_ID);
 	}
 	
@@ -83,15 +83,15 @@ public class SnapContentProvider extends ContentProvider {
 	@Override
 	public String getType(Uri uri) {
 		switch (uriMatcher.match(uri)) {
-		case EVENTS:
+		case EVENT:
 			return ContentResolver.CURSOR_DIR_BASE_TYPE+"/vnd.com.snapable.api.event";
 		case EVENT_ID:
 			return ContentResolver.CURSOR_ITEM_BASE_TYPE+"/vnd.com.snapable.api.event";
-		case GUESTS:
+		case GUEST:
 			return ContentResolver.CURSOR_DIR_BASE_TYPE+"/vnd.com.snapable.api.guest";
 		case GUEST_ID:
 			return ContentResolver.CURSOR_ITEM_BASE_TYPE+"/vnd.com.snapable.api.guest";
-		case PHOTOS:
+		case PHOTO:
 			return ContentResolver.CURSOR_DIR_BASE_TYPE+"/vnd.com.snapable.api.photo";
 		case PHOTO_ID:
 			return ContentResolver.CURSOR_ITEM_BASE_TYPE+"/vnd.com.snapable.api.photo";
@@ -121,17 +121,20 @@ public class SnapContentProvider extends ContentProvider {
 		
 		switch (uriMatcher.match(uri)) {
 			// handle the case for all events
-			case EVENTS:
+			case EVENT: {
 				// set the column names or a default
 				EventCursor eventsCursor = (projection != null) ? new EventCursor(projection) : new EventCursor();
 				
 				Pager<Event[]> events = null;
-				if (selection != null && selectionArgs != null) {
-					HashMap<String, String> hMap = getHashmap(selection, selectionArgs);
+				HashMap<String, String> hMap = getHashmap(selection, selectionArgs);
+				if (hMap != null && hMap.containsKey("lat") && hMap.containsKey("lng")) {
 					float lat =  Float.parseFloat(hMap.get("lat"));
 					float lng =  Float.parseFloat(hMap.get("lng"));
 
 					events = eventRes.getEvents(lat, lng);
+				} else if (hMap != null && hMap.containsKey("q")) {
+					String query = hMap.get("q");
+					events = eventRes.getEvents(query);
 				} else {
 					// make the api call
 					events = eventRes.getEvents();
@@ -144,8 +147,9 @@ public class SnapContentProvider extends ContentProvider {
 				// set or temporary cursor as the return cursor
 				result = eventsCursor;
 				break;
+			}
 
-			case EVENT_ID:
+			case EVENT_ID: {
 				// set the column names or a default
 				EventCursor eventCursor = (projection != null) ? new EventCursor(projection) : new EventCursor();
 				
@@ -158,8 +162,9 @@ public class SnapContentProvider extends ContentProvider {
 				// set or temporary cursor as the return cursor
 				result = eventCursor;
 				break;
+			}
 
-			case PHOTOS:
+			case PHOTO: {
 				// set tge column names or a default
 				PhotoCursor photosCursor = new PhotoCursor();
 			
@@ -174,9 +179,11 @@ public class SnapContentProvider extends ContentProvider {
 				// set or temporary cursor as the return cursor
 				result = photosCursor;
 				break;
+			}
 
-			case PHOTO_ID:
+			case PHOTO_ID: {
 				break;
+			}
 		}
 		
 		result.setNotificationUri(getContext().getContentResolver(), uri);
@@ -192,19 +199,24 @@ public class SnapContentProvider extends ContentProvider {
 	
 	// http://stackoverflow.com/questions/12949730/contentprovider-implementation-how-to-convert-selection-and-selectionargs
 	public static HashMap<String, String> getHashmap(String selection, String[] selectionArgs) {
-		HashMap<String, String> result = new HashMap<String, String>();
-
-	    Pattern pattern = Pattern.compile("[a-z]*(\\s)*=\\?", Pattern.CASE_INSENSITIVE);
-	    Matcher matcher = pattern.matcher(selection);
-
-	    int pos = 0;
-	    while (matcher.find()) {
-	        String[] selParts = matcher.group(0).split("=");
-	        result.put(selParts[0], selectionArgs[pos]);
-	        pos++;
+		try {
+			HashMap<String, String> result = new HashMap<String, String>();
+		
+		    Pattern pattern = Pattern.compile("[a-z]*(\\s)*=\\?", Pattern.CASE_INSENSITIVE);
+		    Matcher matcher = pattern.matcher(selection);
+		
+		    int pos = 0;
+		    while (matcher.find()) {
+		        String[] selParts = matcher.group(0).split("=");
+		        result.put(selParts[0], selectionArgs[pos]);
+		        pos++;
+		    }
+		
+		    return result;
+	    } catch (Exception e) {
+	    	Log.e(TAG, "error creating hashmap from selection string", e);
+	    	return null;
 	    }
-
-	    return result;
 	}
 
 }
