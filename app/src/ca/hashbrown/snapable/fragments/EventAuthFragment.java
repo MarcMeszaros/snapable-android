@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager.LayoutParams;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
@@ -45,8 +46,15 @@ public class EventAuthFragment extends DialogFragment implements OnEditorActionL
         // set the title
         getDialog().setTitle(R.string.strings__fragment_event_auth__title);
         
-        // Show soft keyboard automatically
-        pin.requestFocus();
+        if (this.event != null && this.event.getIsPublic() == true) {
+        	// hide the pin stuff because the event is public
+        	((LinearLayout)view).removeView(view.findViewById(R.id.fragment_event_auth__pin_group));
+        	// Show soft keyboard automatically
+        	name.requestFocus();
+        } else {
+        	// Show soft keyboard automatically
+        	pin.requestFocus();
+        }
         getDialog().getWindow().setSoftInputMode(LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         email.setOnEditorActionListener(this);
 
