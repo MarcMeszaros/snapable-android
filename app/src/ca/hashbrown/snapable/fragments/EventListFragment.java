@@ -6,8 +6,6 @@ import ca.hashbrown.snapable.adapters.EventListAdapter;
 import ca.hashbrown.snapable.cursors.EventCursor;
 import ca.hashbrown.snapable.provider.SnapableContract;
 
-import android.content.ContentUris;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.location.Criteria;
@@ -148,8 +146,15 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 		// store the event as data to be passed
 		Intent intent = new Intent(getActivity(), EventPhotoList.class);
 		intent.putExtra("event", eventCursor.getEvent());
-		startActivity(intent);
+
+		// prepare the event object
+		Bundle args = new Bundle(1);
+		args.putParcelable("event", eventCursor.getEvent());
 		
+		// start the dialod with the event object
+		EventAuthFragment login = new EventAuthFragment();
+		login.setArguments(args);
+		login.show(getFragmentManager(), "login");
 	}
 
 	public void onLocationChanged(Location location) {

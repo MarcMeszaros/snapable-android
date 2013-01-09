@@ -1,37 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_event_list"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content" >
+    android:layout_height="wrap_content"
+    android:orientation="vertical" >
 
-    <!--
-    <fragment
-        android:id="@+id/activity_event_list__fragment_search_bar"
-        android:name="ca.hashbrown.snapable.fragments.SearchBarFragment"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        tools:layout="@layout/fragment_search_bar" />
-    
-    <fragment
-        android:id="@+id/activity_event_list__fragment_event_list"
-        android:name="ca.hashbrown.snapable.fragments.EventListFragment"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/activity_event_list__fragment_search_bar"
-        android:layout_weight="6" />
-    -->
-    
-    <FrameLayout 
+    <FrameLayout
         android:id="@+id/activity_event_list__fragment_search_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
-    
-    <FrameLayout 
+
+    <FrameLayout
         android:id="@+id/activity_event_list__fragment_event_list"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/activity_event_list__fragment_search_bar" />
+        android:layout_height="wrap_content" />
 
-</RelativeLayout>
+</LinearLayout>

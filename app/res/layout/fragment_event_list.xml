@@ -20,7 +20,7 @@
         android:layout_height="wrap_content"
         android:lineSpacingMultiplier="0.92"
         android:padding="10dp"
-        android:text="Unable to find any events..."
+        android:text="@string/strings__fragment_event_list__empty"
         android:textSize="20sp" />
 
 </LinearLayout>
