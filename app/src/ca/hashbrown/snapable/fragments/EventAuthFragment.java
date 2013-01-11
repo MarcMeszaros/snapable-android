@@ -4,7 +4,12 @@ import com.snapable.api.models.Event;
 
 import ca.hashbrown.snapable.EventPhotoList;
 import ca.hashbrown.snapable.R;
+import ca.hashbrown.snapable.provider.SnapableContract;
+import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.util.Log;
@@ -27,6 +32,7 @@ public class EventAuthFragment extends DialogFragment implements OnEditorActionL
 	private EditText pin;
 	private EditText name;
 	private EditText email;
+	// data passed in from initializer
 	private Event event;
 	
 	public EventAuthFragment() {
@@ -73,13 +79,42 @@ public class EventAuthFragment extends DialogFragment implements OnEditorActionL
 	    		intent.putExtra("event", this.event);
 	    		
 	    		// if the event is public login
-            	if (this.event.getIsPublic() == true) {
+            	if (this.event.getIsPublic() == true && cachedPinMatchesEventPin(this.event) == false) {
+            		// save the details in the local storage
+            		ContentValues values = new ContentValues(3);
+            		values.put(SnapableContract.EventCredentials._ID, this.event.getId());
+            		values.put(SnapableContract.EventCredentials.NAME, name.getText().toString());
+            		values.put(SnapableContract.EventCredentials.EMAIL, email.getText().toString());
+
+            		// insert the event details
+            		getActivity().getContentResolver().insert(SnapableContract.EventCredentials.CONTENT_URI, values);
+
+            		// launch the event photo list
                 	this.dismiss();
             		startActivity(intent);
             		return true;
             	} 
             	// if the event is private and the pins match
-            	else if (this.event.getIsPublic() != true && this.event.getPin().contentEquals(pin.getText().toString())) {
+            	else if (this.event.getIsPublic() != true && this.event.getPin().equals(pin.getText().toString())) {
+            		// save the details in the local storage
+            		ContentValues values = new ContentValues(3);
+            		values.put(SnapableContract.EventCredentials.PIN, pin.getText().toString());
+            		values.put(SnapableContract.EventCredentials.NAME, name.getText().toString());
+            		values.put(SnapableContract.EventCredentials.EMAIL, email.getText().toString());
+
+            		// check if a cached version exists
+            		Uri requestUri = ContentUris.withAppendedId(SnapableContract.EventCredentials.CONTENT_URI, this.event.getId());
+            		Cursor query = getActivity().getContentResolver().query(requestUri, null, null, null, null);
+
+            		// insert the event details
+            		if (query.getCount() <= 0) {
+            			values.put(SnapableContract.EventCredentials._ID, this.event.getId());
+            			getActivity().getContentResolver().insert(SnapableContract.EventCredentials.CONTENT_URI, values);
+            		} else {
+            			Uri updateUri = ContentUris.withAppendedId(SnapableContract.EventCredentials.CONTENT_URI, this.event.getId());
+            			getActivity().getContentResolver().update(updateUri, values, null, null);
+            		}
+            		// launch the event photo list
             		this.dismiss();
             		startActivity(intent);
             		return true;
@@ -98,5 +133,21 @@ public class EventAuthFragment extends DialogFragment implements OnEditorActionL
         }
         return false;
     }
+	
+	private boolean cachedPinMatchesEventPin(Event event) {
+		Uri requestUri = ContentUris.withAppendedId(SnapableContract.EventCredentials.CONTENT_URI, event.getId());
+		Cursor result = getActivity().getContentResolver().query(requestUri, null, null, null, null);
+
+		// we have a result
+		if (result.getCount() > 0 && event.getIsPublic()) {
+			return true;
+		}
+		else if (result.getCount() > 0 && result.moveToFirst()) {
+			return result.getString(result.getColumnIndex(SnapableContract.EventCredentials.PIN)).equals(event.getPin());
+		}
+		
+		// there was no result
+		return false;
+	}
 
 }

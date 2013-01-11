@@ -1,17 +1,21 @@
 package ca.hashbrown.snapable.fragments;
 
+import com.snapable.api.models.Event;
+
 import ca.hashbrown.snapable.EventPhotoList;
 import ca.hashbrown.snapable.R;
 import ca.hashbrown.snapable.adapters.EventListAdapter;
 import ca.hashbrown.snapable.cursors.EventCursor;
 import ca.hashbrown.snapable.provider.SnapableContract;
 
+import android.content.ContentUris;
 import android.content.Intent;
 import android.database.Cursor;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
@@ -140,21 +144,29 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {	
 		Cursor c = eventAdapter.getCursor();
 		c.moveToPosition(position);
-		
+
+		// convert into an event cursor
 		EventCursor eventCursor = new EventCursor(c);
+		Event event = eventCursor.getEvent();
 
-		// store the event as data to be passed
-		Intent intent = new Intent(getActivity(), EventPhotoList.class);
-		intent.putExtra("event", eventCursor.getEvent());
+		// if there are stored, make sure pins match
+		if(cachedPinMatchesEventPin(event)) {
+			// store the event as data to be passed
+			Intent intent = new Intent(getActivity(), EventPhotoList.class);
+			intent.putExtra("event", event);
+			startActivity(intent);
+		} 
+		// no stored pin or pins don't match, launch dialog
+		else {
+			// prepare the event object
+			Bundle args = new Bundle(1);
+			args.putParcelable("event", event);
 
-		// prepare the event object
-		Bundle args = new Bundle(1);
-		args.putParcelable("event", eventCursor.getEvent());
-		
-		// start the dialod with the event object
-		EventAuthFragment login = new EventAuthFragment();
-		login.setArguments(args);
-		login.show(getFragmentManager(), "login");
+			// start the dialog with the event object
+			EventAuthFragment login = new EventAuthFragment();
+			login.setArguments(args);
+			login.show(getFragmentManager(), "login");
+		}
 	}
 
 	public void onLocationChanged(Location location) {
@@ -183,6 +195,22 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 	public void onStatusChanged(String provider, int status, Bundle extras) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	private boolean cachedPinMatchesEventPin(Event event) {
+		Uri requestUri = ContentUris.withAppendedId(SnapableContract.EventCredentials.CONTENT_URI, event.getId());
+		Cursor result = getActivity().getContentResolver().query(requestUri, null, null, null, null);
+		
+		// we have a result
+		if (result.getCount() > 0 && event.getIsPublic()) {
+			return true;
+		}
+		else if (result.getCount() > 0 && result.moveToFirst()) {
+			return result.getString(result.getColumnIndex(SnapableContract.EventCredentials.PIN)).equals(event.getPin());
+		}
+		
+		// there was no result
+		return false;
 	}
 
 }
