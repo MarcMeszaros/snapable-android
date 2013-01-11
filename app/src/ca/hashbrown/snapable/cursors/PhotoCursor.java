@@ -28,7 +28,7 @@ public class PhotoCursor extends MatrixCursor {
 	/**
 	 * Create a new PhotoCursor using a regular Cursor.
 	 * 
-	 * @param cursor The cursor to convert into an PhotoCursor
+	 * @param c The cursor to convert into an PhotoCursor
 	 */
 	public PhotoCursor(Cursor c) {
 		super(c.getColumnNames());
