@@ -22,7 +22,13 @@ public interface EventResource {
     	@QueryParam("lat") float lat,
     	@QueryParam("lng") float lng
     );
-    
+
+    @GET
+    @Path("/search/")
+    Pager<Event[]> getEvents(
+    	@QueryParam("q") String query
+    );
+
     @GET
     @Path("/{id}/")
     Event getEvent(

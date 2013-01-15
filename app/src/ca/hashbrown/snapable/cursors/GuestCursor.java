@@ -26,7 +26,7 @@ public class GuestCursor extends MatrixCursor {
 	/**
 	 * Create a new GuestCursor using a regular Cursor.
 	 * 
-	 * @param cursor The cursor to convert into an GuestCursor
+	 * @param c The cursor to convert into an GuestCursor
 	 */
 	public GuestCursor(Cursor c) {
 		super(c.getColumnNames());

@@ -28,7 +28,7 @@ public class EventCursor extends MatrixCursor {
 	/**
 	 * Create a new EventCursor using a regular Cursor.
 	 * 
-	 * @param cursor The cursor to convert into an EventCursor
+	 * @param c The cursor to convert into an EventCursor
 	 */
 	public EventCursor(Cursor c) {
 		super(c.getColumnNames());
