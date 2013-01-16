@@ -41,8 +41,9 @@ public class PhotoShare extends FragmentActivity implements OnClickListener {
     	// get the extra bundle data
     	Bundle bundle = getIntent().getExtras();
     	event = bundle.getParcelable("event");
-		Uri imageUri = bundle.getParcelable("imageUri");
-		imageBitmap = BitmapFactory.decodeFile(imageUri.getPath());
+		imageBitmap = bundle.getParcelable("imageBitmap");
+    	//Uri imageUri = bundle.getParcelable("imageUri");
+		//imageBitmap = BitmapFactory.decodeFile(imageUri.getPath());
 		
 		// set the scaled image in the image view
     	ImageView photo = (ImageView) findViewById(R.id.fragment_photo_share__image);
@@ -55,8 +56,8 @@ public class PhotoShare extends FragmentActivity implements OnClickListener {
 		case R.id.fragment_photo_share__button_done:
 			// get the image data ready for uploading via the API
 			EditText caption = (EditText) findViewById(R.id.fragment_photo_share__caption);
-	        PhotoUloadTask uploadTask = new PhotoUloadTask(event, caption.getText().toString(), imageBitmap);
-	        uploadTask.execute();	
+	        PhotoUploadTask uploadTask = new PhotoUploadTask(event, caption.getText().toString(), imageBitmap);
+	        //uploadTask.execute();	
 			break;
 
 		default:
@@ -65,13 +66,13 @@ public class PhotoShare extends FragmentActivity implements OnClickListener {
 		
 	}
 	
-	private class PhotoUloadTask extends AsyncTask<Void, Void, Void> {
+	private class PhotoUploadTask extends AsyncTask<Void, Void, Void> {
 
 		private Event event;
 		private String caption;
 		private Bitmap photo;
 		
-		public PhotoUloadTask(Event event, String caption, Bitmap photo) {
+		public PhotoUploadTask(Event event, String caption, Bitmap photo) {
 			this.event = event;
 			this.caption = caption;
 			this.photo = photo;
