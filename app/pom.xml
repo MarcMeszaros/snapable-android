@@ -131,21 +131,6 @@
                             <zipalignOutputApk>${project.build.directory}/Snapable-${project.version}-final.apk</zipalignOutputApk>
                             <zipalignVerbose>true</zipalignVerbose>
                         </configuration>
-
-                        <executions>
-                            <execution>
-                                <id>manifest-update</id>
-                                <goals>
-                                    <goal>manifest-update</goal>
-                                </goals>
-                                <configuration>
-                                    <manifest>
-                                        <versionName>${project.version}</versionName>
-                                        <versionCodeAutoIncrement>true</versionCodeAutoIncrement>
-                                    </manifest>
-                                </configuration>
-                            </execution>
-                        </executions>
                     </plugin>
 
                     <plugin>

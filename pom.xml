@@ -10,6 +10,16 @@
 	<packaging>pom</packaging>
 	<name>Snapable</name>
 
+	<!-- minimum Maven version (based on plugins) -->
+	<prerequisites>
+		<maven>3.0.3</maven>
+	</prerequisites>
+
+	<!-- define some project-wide properties -->
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
 	<repositories>
 		<repository>
 			<id>snapable.thirtparty</id>
@@ -39,7 +49,7 @@
 			<dependency>
 				<groupId>org.codehaus.jackson</groupId>
 				<artifactId>jackson-mapper-asl</artifactId>
-				<version>1.9.10</version>
+				<version>1.9.11</version>
 			</dependency>
 
 			<dependency>
@@ -95,11 +105,14 @@
 						<bootclasspath>${sun.boot.class.path}</bootclasspath>
 						<additionalparam>
 							-quiet
-							-federate JDK http://download.oracle.com/javase/6/docs/api/index.html?
+							-federate JDK
+							http://download.oracle.com/javase/6/docs/api/index.html?
 							-federationxml JDK
 							http://doclava.googlecode.com/svn/static/api/openjdk-6.xml
-							-hdf project.name "${project.name}"
-							-d ${project.build.directory}/apidocs
+							-hdf
+							project.name "${project.name}"
+							-d
+							${project.build.directory}/apidocs
 						</additionalparam>
 						<useStandardDocletOptions>false</useStandardDocletOptions>
 						<!-- | Apple's JVM sometimes requires more memory -->
@@ -115,7 +128,7 @@
 		<!-- this is the actual application -->
 		<module>app</module>
 		<!-- this is the unit test application -->
-		<!-- <module>test</module> -->
+		<module>test</module>
 	</modules>
 
 </project>
