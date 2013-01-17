@@ -4,7 +4,11 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FileOutputStream;
 import java.io.InputStream;
+
+import ca.hashbrown.snapable.utils.SnapBitmapFactory;
+import ca.hashbrown.snapable.utils.SnapStorage;
 
 import com.snapable.api.SnapClient;
 import com.snapable.api.models.Event;
@@ -12,10 +16,13 @@ import com.snapable.api.resources.PhotoResource;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
@@ -41,22 +48,25 @@ public class PhotoShare extends FragmentActivity implements OnClickListener {
     	// get the extra bundle data
     	Bundle bundle = getIntent().getExtras();
     	event = bundle.getParcelable("event");
-		Uri imageUri = bundle.getParcelable("imageUri");
-		imageBitmap = BitmapFactory.decodeFile(imageUri.getPath());
-		
-		// set the scaled image in the image view
-    	ImageView photo = (ImageView) findViewById(R.id.fragment_photo_share__image);
+		imageBitmap = SnapBitmapFactory.decodeFileRotate(bundle.getString("imagePath"));
+
+		// create a scaled bitmap
+		ImageView photo = (ImageView) findViewById(R.id.fragment_photo_share__image);
     	Bitmap bmScaled = Bitmap.createScaledBitmap(imageBitmap, 100, 100, false);
+
+    	// set the scaled image in the image view
     	photo.setImageBitmap(bmScaled);
     }
 
 	public void onClick(View v) {
 		switch (v.getId()) {
 		case R.id.fragment_photo_share__button_done:
-			// get the image data ready for uploading via the API
+			// get the image caption
 			EditText caption = (EditText) findViewById(R.id.fragment_photo_share__caption);
-	        PhotoUloadTask uploadTask = new PhotoUloadTask(event, caption.getText().toString(), imageBitmap);
-	        uploadTask.execute();	
+
+			// get the image data ready for uploading via the API
+	        PhotoUploadTask uploadTask = new PhotoUploadTask(event, caption.getText().toString(), imageBitmap);
+	        //uploadTask.execute();	
 			break;
 
 		default:
@@ -65,13 +75,13 @@ public class PhotoShare extends FragmentActivity implements OnClickListener {
 		
 	}
 	
-	private class PhotoUloadTask extends AsyncTask<Void, Void, Void> {
+	private class PhotoUploadTask extends AsyncTask<Void, Void, Void> {
 
 		private Event event;
 		private String caption;
 		private Bitmap photo;
 		
-		public PhotoUloadTask(Event event, String caption, Bitmap photo) {
+		public PhotoUploadTask(Event event, String caption, Bitmap photo) {
 			this.event = event;
 			this.caption = caption;
 			this.photo = photo;
