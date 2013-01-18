@@ -70,17 +70,6 @@ public class CameraActivity extends Activity implements OnClickListener, Picture
 			bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
 			MediaScannerConnection.scanFile(this, new String[]{filename.getAbsolutePath()}, null, null); // tell the system to scan the image
 
-			// tweak the image data
-			ExifInterface exif = new ExifInterface(filename.getAbsolutePath());
-			int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
-			CameraInfo info = new CameraInfo();
-			Camera.getCameraInfo(CameraInfo.CAMERA_FACING_BACK, info);
-
-			//if (orientation != orientationToExifValue(info)) {
-				exif.setAttribute(ExifInterface.TAG_ORIENTATION, String.valueOf(ExifInterface.ORIENTATION_ROTATE_90));
-				exif.saveAttributes();
-			//}
-
 			// pass all the data to the photo upload activity
 			Intent upload = new Intent(this, PhotoShare.class);
 			upload.putExtra("event", event);
@@ -103,22 +92,6 @@ public class CameraActivity extends Activity implements OnClickListener, Picture
 
 		default:
 			break;
-		}
-	}
-	
-	private static int orientationToExifValue(CameraInfo info) {
-		switch (info.orientation) {
-			case 0:
-				return ExifInterface.ORIENTATION_NORMAL;
-			case 90:
-				return ExifInterface.ORIENTATION_ROTATE_90;
-			case 180:
-				return ExifInterface.ORIENTATION_ROTATE_180;
-			case 270:
-				return ExifInterface.ORIENTATION_ROTATE_270;
-	
-			default:
-				return ExifInterface.ORIENTATION_UNDEFINED;
 		}
 	}
 

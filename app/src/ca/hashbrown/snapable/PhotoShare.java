@@ -48,7 +48,7 @@ public class PhotoShare extends FragmentActivity implements OnClickListener {
     	// get the extra bundle data
     	Bundle bundle = getIntent().getExtras();
     	event = bundle.getParcelable("event");
-		imageBitmap = SnapBitmapFactory.decodeFileRotate(bundle.getString("imagePath"));
+		imageBitmap = SnapBitmapFactory.decodeFile(bundle.getString("imagePath"));
 
 		// create a scaled bitmap
 		ImageView photo = (ImageView) findViewById(R.id.fragment_photo_share__image);

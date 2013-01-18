@@ -3,12 +3,14 @@ package ca.hashbrown.snapable.utils;
 import java.io.IOException;
 import java.util.List;
 
+import android.app.Activity;
 import android.content.Context;
 import android.hardware.Camera;
 import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.Parameters;
 import android.hardware.Camera.PictureCallback;
 import android.util.Log;
+import android.view.Surface;
 import android.view.SurfaceHolder;
 
 public class SnapSurfaceView extends android.view.SurfaceView implements SurfaceHolder.Callback {
@@ -16,6 +18,7 @@ public class SnapSurfaceView extends android.view.SurfaceView implements Surface
 	private static final String TAG = "SnapSurfaceView";
 
 	private Camera camera;
+	private Parameters cameraParams;
 
 	public SnapSurfaceView(Context context) {
 		super(context);
@@ -29,29 +32,40 @@ public class SnapSurfaceView extends android.view.SurfaceView implements Surface
 		holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 	}
 
-	public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-		camera.setDisplayOrientation(90);
-
+	public void surfaceChanged(SurfaceHolder holder, int format, int width,	int height) {
+		Log.d(TAG, "surfaceChanged");
 		// get camera info
 		CameraInfo info = new CameraInfo();
 		Camera.getCameraInfo(CameraInfo.CAMERA_FACING_BACK, info);
-				
-		// IMPORTANT: We must call startPreview() on the camera before we take
-		// any pictures
+		Log.d(TAG, "camera orientation: " + info.orientation);
+		Log.d(TAG, "camera orientation fixed: " + ((getRotation(true) + info.orientation) % 360));
+
+		// set rotation as necessary
+		cameraParams.setRotation((getRotation(true) + info.orientation) % 360);
+		camera.setParameters(cameraParams);
+
+		camera.setDisplayOrientation((info.orientation - getRotation(false) + 360) % 360);
+
+		// IMPORTANT: We must call startPreview() on the camera before we take any pictures
 		camera.startPreview();
 	}
 
 	public void surfaceCreated(SurfaceHolder holder) {
+		Log.d(TAG, "surfaceCreated");
 		try {
+			// get camera info
+			CameraInfo info = new CameraInfo();
+			Camera.getCameraInfo(CameraInfo.CAMERA_FACING_BACK, info);
+
 			// Open the Camera in preview mode
 			camera = Camera.open();
-			
+
 			// set some camera parameters
-			Parameters params = camera.getParameters();
-			List<Camera.Size> sizes = params.getSupportedPictureSizes();
-			params.setJpegQuality(100);
-			params.setPictureSize(sizes.get(0).width, sizes.get(0).height);
-			camera.setParameters(params);
+			cameraParams = camera.getParameters();
+			List<Camera.Size> sizes = cameraParams.getSupportedPictureSizes();
+			cameraParams.setJpegQuality(100);
+			cameraParams.setPictureSize(sizes.get(0).width, sizes.get(0).height);
+			camera.setParameters(cameraParams);
 
 			// set the surface preview
 			camera.setPreviewDisplay(holder);
@@ -61,6 +75,7 @@ public class SnapSurfaceView extends android.view.SurfaceView implements Surface
 	}
 
 	public void surfaceDestroyed(SurfaceHolder holder) {
+		Log.d(TAG, "surfaceDestroyed");
 		// Surface will be destroyed when replaced with a new screen
 		// Always make sure to release the Camera instance
 		camera.stopPreview();
@@ -70,6 +85,35 @@ public class SnapSurfaceView extends android.view.SurfaceView implements Surface
 
 	public void takePicture(PictureCallback pictureCallback) {
 		camera.takePicture(null, null, pictureCallback);
+	}
+
+	/**
+	 * 
+	 * @param reversed true = clockwise vs false = counterclockwise
+	 * @return
+	 */
+	private int getRotation(boolean reversed) {
+		Activity activity = (Activity) getContext();
+		int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
+
+		int degrees = 0;
+		switch (rotation) {
+		case Surface.ROTATION_0:
+			degrees = 0;
+			break;
+		case Surface.ROTATION_90:
+			degrees = (reversed) ? 270 : 90;
+			break;
+		case Surface.ROTATION_180:
+			degrees = 180;
+			break;
+		case Surface.ROTATION_270:
+			degrees = (reversed) ? 90 : 270;
+			break;
+		}
+
+		Log.d(TAG, "getRotation: " + degrees);
+		return degrees;
 	}
 
 }
