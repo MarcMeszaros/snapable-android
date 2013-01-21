@@ -48,6 +48,16 @@ public class PhotoListFragment extends ListFragment implements LoaderCallbacks<C
 		return inflater.inflate(R.layout.fragment_photo_list, null);
 	}
 	
+	@Override
+	public void onResume() {
+		super.onResume();
+
+		// if the loader is already started, reload it
+		if(getLoaderManager().getLoader(PHOTOS).isStarted()) {
+			getLoaderManager().getLoader(PHOTOS).forceLoad();
+		}
+	}
+
 	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 		// This is called when a new Loader needs to be created.
 		// First, pick the base URI to use depending on whether we are
