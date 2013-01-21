@@ -48,7 +48,7 @@ public class PhotoShare extends FragmentActivity implements OnClickListener {
     	// get the extra bundle data
     	Bundle bundle = getIntent().getExtras();
     	event = bundle.getParcelable("event");
-		imageBitmap = SnapBitmapFactory.decodeFile(bundle.getString("imagePath"));
+		imageBitmap = BitmapFactory.decodeFile(bundle.getString("imagePath"));
 
 		// create a scaled bitmap
 		ImageView photo = (ImageView) findViewById(R.id.fragment_photo_share__image);
@@ -66,7 +66,7 @@ public class PhotoShare extends FragmentActivity implements OnClickListener {
 
 			// get the image data ready for uploading via the API
 	        PhotoUploadTask uploadTask = new PhotoUploadTask(event, caption.getText().toString(), imageBitmap);
-	        //uploadTask.execute();	
+	        uploadTask.execute();	
 			break;
 
 		default:
@@ -96,10 +96,6 @@ public class PhotoShare extends FragmentActivity implements OnClickListener {
 		
 		@Override
 		protected Void doInBackground(Void... params) {
-			//pb.setVisibility(View.VISIBLE);
-			
-			this.photo = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher);
-			
 			// turn the bitmap into an input stream
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();  
 	        photo.compress(Bitmap.CompressFormat.JPEG, 50, baos);
@@ -121,6 +117,9 @@ public class PhotoShare extends FragmentActivity implements OnClickListener {
 			ProgressBar pb = (ProgressBar) findViewById(R.id.fragment_photo_share__progressBar);
 			pb.setVisibility(View.INVISIBLE);
 			Log.d(TAG, "upload complete");
+
+			// we finished uploading the photo, close the activity
+			finish();
 		}
 
 	}
