@@ -14,6 +14,7 @@ import ca.hashbrown.snapable.utils.SnapSurfaceView;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.hardware.Camera;
@@ -22,6 +23,7 @@ import android.hardware.Camera.PictureCallback;
 import android.media.ExifInterface;
 import android.media.MediaScannerConnection;
 import android.os.Bundle;
+import android.provider.MediaStore.Images.ImageColumns;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -54,6 +56,7 @@ public class CameraActivity extends Activity implements OnClickListener, Picture
 		// grab out shutter button so we can reference it later
 		shutterButton = (Button) findViewById(R.id.activity_camera__shutter_button);
 		shutterButton.setOnClickListener(this);
+		findViewById(R.id.activity_camera__image_picker).setOnClickListener(this);
 	}
 
 	public void onPictureTaken(byte[] data, Camera camera) {
@@ -100,9 +103,34 @@ public class CameraActivity extends Activity implements OnClickListener, Picture
 			cameraSurfaceView.takePicture(this);
 			break;
 
-		default:
+		case R.id.activity_camera__image_picker:
+			Intent intent = new Intent(Intent.ACTION_PICK);
+			intent.setType("image/jpeg");
+			
+			startActivityForResult(intent, 0); // TODO the code shouldn't be hardcoded
 			break;
 		}
+	}
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+
+		if (requestCode == 0) { // TODO code shouldn't be hardcoded
+			  if (data != null) {
+				  Cursor cursor = getContentResolver().query(data.getData(), null, null, null, null);
+				  cursor.moveToFirst();  //if not doing this, 01-22 19:17:04.564: ERROR/AndroidRuntime(26264): Caused by: android.database.CursorIndexOutOfBoundsException: Index -1 requested, with a size of 1
+				  int idx = cursor.getColumnIndex(ImageColumns.DATA);
+				  String fileSrc = cursor.getString(idx);
+				  
+				  // pass all the data to the photo upload activity
+				  Intent upload = new Intent(this, PhotoShare.class);
+				  upload.putExtra("event", event);
+				  upload.putExtra("imagePath", fileSrc);
+				  startActivity(upload);
+			  }
+		}
+
 	}
 
 }

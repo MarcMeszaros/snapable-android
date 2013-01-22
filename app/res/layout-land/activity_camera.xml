@@ -42,6 +42,14 @@
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
                 android:text="Take Picture" />
+            
+            <Button 
+                android:id="@+id/activity_camera__image_picker"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_below="@id/activity_camera__shutter_button"
+                android:text="Pick from Gallery" />
         </RelativeLayout>
     </LinearLayout>
 
