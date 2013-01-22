@@ -6,14 +6,16 @@ import java.util.List;
 import android.app.Activity;
 import android.content.Context;
 import android.hardware.Camera;
+import android.hardware.Camera.AutoFocusCallback;
 import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.Parameters;
 import android.hardware.Camera.PictureCallback;
+import android.hardware.Camera.Size;
 import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 
-public class SnapSurfaceView extends android.view.SurfaceView implements SurfaceHolder.Callback {
+public class SnapSurfaceView extends android.view.SurfaceView implements SurfaceHolder.Callback, AutoFocusCallback {
 
 	private static final String TAG = "SnapSurfaceView";
 
@@ -48,6 +50,9 @@ public class SnapSurfaceView extends android.view.SurfaceView implements Surface
 
 		// IMPORTANT: We must call startPreview() on the camera before we take any pictures
 		camera.startPreview();
+
+		// setup he auto focus
+		camera.autoFocus(this);
 	}
 
 	public void surfaceCreated(SurfaceHolder holder) {
@@ -62,10 +67,18 @@ public class SnapSurfaceView extends android.view.SurfaceView implements Surface
 
 			// set some camera parameters
 			cameraParams = camera.getParameters();
-			List<Camera.Size> sizes = cameraParams.getSupportedPictureSizes();
+			List<Camera.Size> cameraSizes = cameraParams.getSupportedPictureSizes();
+			List<Camera.Size> cameraPreviewSizes = cameraParams.getSupportedPreviewSizes();
 			cameraParams.setJpegQuality(100);
-			cameraParams.setPictureSize(sizes.get(0).width, sizes.get(0).height);
+			cameraParams.setPictureSize(cameraSizes.get(0).width, cameraSizes.get(0).height);
+			cameraParams.setPreviewSize(cameraPreviewSizes.get(0).width, cameraPreviewSizes.get(0).height);
 			camera.setParameters(cameraParams);
+			for (Size size : cameraSizes) {	
+				Log.d(TAG, "camera size: " + size.width + "x" + size.height);
+			}
+			for (Size size : cameraPreviewSizes) {	
+				Log.d(TAG, "camera preview size: " + size.width + "x" + size.height);
+			}
 
 			// set the surface preview
 			camera.setPreviewDisplay(holder);
@@ -114,6 +127,12 @@ public class SnapSurfaceView extends android.view.SurfaceView implements Surface
 
 		Log.d(TAG, "getRotation: " + degrees);
 		return degrees;
+	}
+
+	@Override
+	public void onAutoFocus(boolean success, Camera camera) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

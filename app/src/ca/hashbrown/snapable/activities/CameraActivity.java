@@ -65,6 +65,18 @@ public class CameraActivity extends Activity implements OnClickListener, Picture
 		try {
 			// save the image
 			bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+			// tweak the bitmap so it's square before saving
+			if (bitmap.getWidth() > bitmap.getHeight()) {
+				int x = (bitmap.getWidth() - bitmap.getHeight()) / 2;
+				int y = 0;
+				bitmap = Bitmap.createBitmap(bitmap, x, y, bitmap.getHeight(), bitmap.getHeight());
+			} else {
+				int x = 0;
+				int y = (bitmap.getHeight() - bitmap.getWidth()) / 2;
+				bitmap = Bitmap.createBitmap(bitmap, x, y, bitmap.getWidth(), bitmap.getWidth());
+			}
+
+			// save the file to storage
 			File filename = SnapStorage.getOutputMediaFile(SnapStorage.MEDIA_TYPE_IMAGE);
 			FileOutputStream out = new FileOutputStream(filename);
 			bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
@@ -78,8 +90,6 @@ public class CameraActivity extends Activity implements OnClickListener, Picture
 			
 		} catch (FileNotFoundException e) {
 			Log.e(TAG, "file not found", e);
-		} catch (IOException e) {
-			Log.e(TAG, "IO Exception", e);
 		}
 	}
 
