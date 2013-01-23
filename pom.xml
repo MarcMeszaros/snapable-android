@@ -37,7 +37,7 @@
 			<dependency>
 				<groupId>android</groupId>
 				<artifactId>android</artifactId>
-				<version>2.3.3_r2</version>
+				<version>4.0.3_r3</version>
 			</dependency>
 
 			<dependency>
@@ -53,9 +53,10 @@
 			</dependency>
 
 			<dependency>
-				<groupId>android.support</groupId>
-				<artifactId>compatibility-v4</artifactId>
-				<version>11</version>
+				<groupId>com.actionbarsherlock</groupId>
+				<artifactId>actionbarsherlock</artifactId>
+				<version>4.2.0</version>
+				<type>apklib</type>
 			</dependency>
 
 		</dependencies>
@@ -72,8 +73,8 @@
 					<extensions>true</extensions>
 					<configuration>
 						<sdk>
-							<!-- platform/api version (api v10 = Android 2.3.3) -->
-							<platform>10</platform>
+							<!-- platform/api version (api v15 = Android 4.0.3) -->
+							<platform>15</platform>
 						</sdk>
 					</configuration>
 				</plugin>

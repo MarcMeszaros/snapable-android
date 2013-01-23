@@ -4,6 +4,7 @@ import ca.hashbrown.snapable.fragments.EventListFragment;
 import ca.hashbrown.snapable.fragments.SearchBarFragment;
 import ca.hashbrown.snapable.fragments.SearchBarFragment.OnQueryTextListener;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -28,8 +29,10 @@ public class EventList extends FragmentActivity implements OnQueryTextListener {
     	EventListFragment eventListFragment = new EventListFragment();
 
     	// add the fragments
-    	FragmentTransaction transaction = getFragmentManager().beginTransaction();
-    	transaction.add(R.id.activity_event_list__fragment_search_bar, searchFragment, "SEARCH_FRAGMENT");
+    	FragmentTransaction transaction = getCompatFragmentManager().beginTransaction();
+    	if (Build.VERSION.SDK_INT > Build.VERSION_CODES.GINGERBREAD_MR1) {
+    		transaction.add(R.id.activity_event_list__fragment_search_bar, searchFragment, "SEARCH_FRAGMENT");
+        }
     	transaction.add(R.id.activity_event_list__fragment_event_list, eventListFragment, "EVENT_LIST_FRAGMENT");
     	transaction.commit();
 	}
@@ -41,7 +44,8 @@ public class EventList extends FragmentActivity implements OnQueryTextListener {
 
 	@Override
 	protected void onStart() {
-		EventListFragment frag = (EventListFragment) getFragmentManager().findFragmentByTag("EVENT_LIST_FRAGMENT");
+		super.onStart();
+		EventListFragment frag = (EventListFragment) getCompatFragmentManager().findFragmentByTag("EVENT_LIST_FRAGMENT");
 
 		// if the event list is there, we can create the listenet that will modify it
 		if (frag != null) {
@@ -55,21 +59,20 @@ public class EventList extends FragmentActivity implements OnQueryTextListener {
 	    			args.putString("q", query);
 	    			
 	    			// get the fragment, and init the new search loader (using the search param)
-	    			EventListFragment frag = (EventListFragment) getFragmentManager().findFragmentByTag("EVENT_LIST_FRAGMENT");
+	    			EventListFragment frag = (EventListFragment) getCompatFragmentManager().findFragmentByTag("EVENT_LIST_FRAGMENT");
 	    			frag.getLoaderManager().initLoader(EventListFragment.LOADERS.EVENTS, args, frag);
 	    			return true;
 	    		}
 			};
 		}
-		super.onStart();
 	}
 	
 	/**
 	 * 
 	 * @return
 	 */
-	private FragmentManager getFragmentManager() {
-		return getSupportFragmentManager();
+	private FragmentManager getCompatFragmentManager() {
+			return getSupportFragmentManager();
 	}
 	
 }
