@@ -10,8 +10,8 @@
         android:id="@+id/fragment_photo_share__image"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
         android:padding="5dp"
         android:src="@drawable/photo_blank" />
 
@@ -30,7 +30,7 @@
 
     <EditText
         android:id="@+id/fragment_photo_share__caption"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/fragment_photo_share__image"
         android:layout_centerHorizontal="true"
