@@ -1,4 +1,4 @@
-package ca.hashbrown.snapable;
+package ca.hashbrown.snapable.activities;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -7,6 +7,7 @@ import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 
+import ca.hashbrown.snapable.R;
 import ca.hashbrown.snapable.utils.SnapBitmapFactory;
 import ca.hashbrown.snapable.utils.SnapStorage;
 
@@ -32,9 +33,9 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 
-public class PhotoShare extends SherlockFragmentActivity implements OnClickListener {
+public class PhotoUpload extends SherlockFragmentActivity implements OnClickListener {
 
-	private static final String TAG = "PhotoShare";
+	private static final String TAG = "PhotoUpload";
 	
 	private Event event;
 	private Bitmap imageBitmap;
@@ -42,9 +43,9 @@ public class PhotoShare extends SherlockFragmentActivity implements OnClickListe
 	@Override
     public void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
-    	setContentView(R.layout.activity_photo_share);
+    	setContentView(R.layout.activity_photo_upload);
     	
-    	findViewById(R.id.fragment_photo_share__button_done).setOnClickListener(this);
+    	findViewById(R.id.fragment_photo_upload__button_done).setOnClickListener(this);
     	
     	// get the extra bundle data
     	Bundle bundle = getIntent().getExtras();
@@ -52,8 +53,8 @@ public class PhotoShare extends SherlockFragmentActivity implements OnClickListe
 		imageBitmap = BitmapFactory.decodeFile(bundle.getString("imagePath"));
 
 		// create a scaled bitmap
-		ImageView photo = (ImageView) findViewById(R.id.fragment_photo_share__image);
-    	Bitmap bmScaled = Bitmap.createScaledBitmap(imageBitmap, 100, 100, false);
+		ImageView photo = (ImageView) findViewById(R.id.fragment_photo_upload__image);
+    	Bitmap bmScaled = Bitmap.createScaledBitmap(imageBitmap, 150, 150, false);
 
     	// set the scaled image in the image view
     	photo.setImageBitmap(bmScaled);
@@ -61,9 +62,9 @@ public class PhotoShare extends SherlockFragmentActivity implements OnClickListe
 
 	public void onClick(View v) {
 		switch (v.getId()) {
-		case R.id.fragment_photo_share__button_done:
+		case R.id.fragment_photo_upload__button_done:
 			// get the image caption
-			EditText caption = (EditText) findViewById(R.id.fragment_photo_share__caption);
+			EditText caption = (EditText) findViewById(R.id.fragment_photo_upload__caption);
 
 			// get the image data ready for uploading via the API
 	        PhotoUploadTask uploadTask = new PhotoUploadTask(event, caption.getText().toString(), imageBitmap);
@@ -91,7 +92,7 @@ public class PhotoShare extends SherlockFragmentActivity implements OnClickListe
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
-			ProgressBar pb = (ProgressBar) findViewById(R.id.fragment_photo_share__progressBar);
+			ProgressBar pb = (ProgressBar) findViewById(R.id.fragment_photo_upload__progressBar);
 			pb.setVisibility(View.VISIBLE);
 		}
 		
@@ -115,7 +116,7 @@ public class PhotoShare extends SherlockFragmentActivity implements OnClickListe
 		@Override
 		protected void onPostExecute(Void result) {
 			super.onPostExecute(result);
-			ProgressBar pb = (ProgressBar) findViewById(R.id.fragment_photo_share__progressBar);
+			ProgressBar pb = (ProgressBar) findViewById(R.id.fragment_photo_upload__progressBar);
 			pb.setVisibility(View.INVISIBLE);
 			Log.d(TAG, "upload complete");
 

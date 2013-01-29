@@ -7,8 +7,8 @@ import java.io.IOException;
 
 import com.snapable.api.models.Event;
 
-import ca.hashbrown.snapable.PhotoShare;
 import ca.hashbrown.snapable.R;
+import ca.hashbrown.snapable.activities.PhotoUpload;
 import ca.hashbrown.snapable.utils.SnapStorage;
 import ca.hashbrown.snapable.utils.SnapSurfaceView;
 
@@ -86,7 +86,7 @@ public class CameraActivity extends Activity implements OnClickListener, Picture
 			MediaScannerConnection.scanFile(this, new String[]{filename.getAbsolutePath()}, null, null); // tell the system to scan the image
 
 			// pass all the data to the photo upload activity
-			Intent upload = new Intent(this, PhotoShare.class);
+			Intent upload = new Intent(this, PhotoUpload.class);
 			upload.putExtra("event", event);
 			upload.putExtra("imagePath", filename.getAbsolutePath());
 			startActivity(upload);
@@ -124,7 +124,7 @@ public class CameraActivity extends Activity implements OnClickListener, Picture
 				  String fileSrc = cursor.getString(idx);
 				  
 				  // pass all the data to the photo upload activity
-				  Intent upload = new Intent(this, PhotoShare.class);
+				  Intent upload = new Intent(this, PhotoUpload.class);
 				  upload.putExtra("event", event);
 				  upload.putExtra("imagePath", fileSrc);
 				  startActivity(upload);
