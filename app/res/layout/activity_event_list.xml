@@ -7,16 +7,11 @@
     android:background="#e3e8eb"
     android:orientation="vertical" >
 
-    <!--
-    <FrameLayout
-        android:id="@+id/activity_event_list__fragment_search_bar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-	-->
-
-    <FrameLayout
+    <fragment
         android:id="@+id/activity_event_list__fragment_event_list"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:name="ca.hashbrown.snapable.fragments.EventListFragment"
+        tools:layout="@layout/fragment_event_list" />
 
 </LinearLayout>
