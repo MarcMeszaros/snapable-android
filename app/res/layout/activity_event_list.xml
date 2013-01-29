@@ -7,10 +7,12 @@
     android:background="#e3e8eb"
     android:orientation="vertical" >
 
+    <!--
     <FrameLayout
         android:id="@+id/activity_event_list__fragment_search_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
+	-->
 
     <FrameLayout
         android:id="@+id/activity_event_list__fragment_event_list"
