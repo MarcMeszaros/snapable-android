@@ -10,6 +10,8 @@ import java.io.InputStream;
 import ca.hashbrown.snapable.utils.SnapBitmapFactory;
 import ca.hashbrown.snapable.utils.SnapStorage;
 
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+
 import com.snapable.api.SnapClient;
 import com.snapable.api.models.Event;
 import com.snapable.api.resources.PhotoResource;
@@ -23,7 +25,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -31,7 +32,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 
-public class PhotoShare extends FragmentActivity implements OnClickListener {
+public class PhotoShare extends SherlockFragmentActivity implements OnClickListener {
 
 	private static final String TAG = "PhotoShare";
 	
