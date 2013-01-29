@@ -2,8 +2,8 @@ package ca.hashbrown.snapable.fragments;
 
 import com.snapable.api.models.Event;
 
-import ca.hashbrown.snapable.EventPhotoList;
 import ca.hashbrown.snapable.R;
+import ca.hashbrown.snapable.activities.EventPhotoList;
 import ca.hashbrown.snapable.provider.SnapableContract;
 import android.content.ContentUris;
 import android.content.ContentValues;

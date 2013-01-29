@@ -31,7 +31,7 @@
             </intent-filter>
         </activity>
         
-        <activity android:name=".EventPhotoList" />
+        <activity android:name=".activities.EventPhotoList" />
         <activity android:name=".activities.PhotoUpload" />
 
         <provider

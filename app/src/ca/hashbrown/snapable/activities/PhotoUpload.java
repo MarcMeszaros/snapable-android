@@ -58,6 +58,9 @@ public class PhotoUpload extends SherlockFragmentActivity implements OnClickList
 
     	// set the scaled image in the image view
     	photo.setImageBitmap(bmScaled);
+    	
+    	// set the action bar title
+    	getSupportActionBar().setTitle(event.getTitle());
     }
 
 	public void onClick(View v) {

@@ -1,9 +1,11 @@
-package ca.hashbrown.snapable;
+package ca.hashbrown.snapable.activities;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import ca.hashbrown.snapable.R;
+import ca.hashbrown.snapable.EventList;
 import ca.hashbrown.snapable.activities.CameraActivity;
 import ca.hashbrown.snapable.fragments.PhotoListFragment;
 
@@ -54,6 +56,7 @@ public class EventPhotoList extends SherlockFragmentActivity implements OnClickL
 
 		// make the action bar button home button go back
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+		getSupportActionBar().setTitle(event.getTitle());
 	}
 
 	public void onClick(View v) {
@@ -74,6 +77,11 @@ public class EventPhotoList extends SherlockFragmentActivity implements OnClickL
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case android.R.id.home:
+			// This is called when the Home (Up) button is pressed in the Action Bar.
+			// http://developer.android.com/training/implementing-navigation/ancestral.html
+            Intent parentActivityIntent = new Intent(this, EventList.class);
+            parentActivityIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(parentActivityIntent);
 			finish();
 			return true;
 
