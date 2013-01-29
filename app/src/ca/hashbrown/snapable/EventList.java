@@ -1,19 +1,21 @@
 package ca.hashbrown.snapable;
 
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+
 import ca.hashbrown.snapable.fragments.EventListFragment;
 import ca.hashbrown.snapable.fragments.SearchBarFragment;
 import ca.hashbrown.snapable.fragments.SearchBarFragment.OnQueryTextListener;
 
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
+
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.SearchViewCompat;
 import android.support.v4.widget.SearchViewCompat.OnQueryTextListenerCompat;
 import android.util.Log;
 
-public class EventList extends FragmentActivity implements OnQueryTextListener {
+public class EventList extends SherlockFragmentActivity implements OnQueryTextListener {
 
 	private static final String TAG = "EventList";
 

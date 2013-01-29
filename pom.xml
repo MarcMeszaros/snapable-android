@@ -53,10 +53,9 @@
 			</dependency>
 
 			<dependency>
-				<groupId>com.actionbarsherlock</groupId>
-				<artifactId>actionbarsherlock</artifactId>
-				<version>4.2.0</version>
-				<type>apklib</type>
+				<groupId>android.support</groupId>
+				<artifactId>compatibility-v4</artifactId>
+				<version>11</version>
 			</dependency>
 
 		</dependencies>
