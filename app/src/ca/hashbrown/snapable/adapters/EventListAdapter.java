@@ -13,6 +13,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.text.format.DateFormat;
+import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,6 +34,7 @@ public class EventListAdapter extends CursorAdapter {
 	
 	static class ViewHolder {
         protected TextView title;
+        protected TextView date;
         protected ImageView cover;
     }
 	
@@ -46,6 +49,8 @@ public class EventListAdapter extends CursorAdapter {
 
 		// set the title
 		viewHolder.title.setText(cursor.getString(cursor.getColumnIndex(Event.FIELD_TITLE)));
+		long start = cursor.getLong(cursor.getColumnIndex(Event.FIELD_START));
+		viewHolder.date.setText(DateFormat.format("EEE MMMM d, h:mm a", start));
 
 		// get the image, if there is one
 		final String imageKey = cursor.getLong(cursor.getColumnIndex(Event.FIELD_ID)) + "_480x480";
@@ -68,6 +73,7 @@ public class EventListAdapter extends CursorAdapter {
 		// bind the various views to the viewholder
 		final ViewHolder viewHolder = new ViewHolder();
 		viewHolder.title = (TextView) v.findViewById(R.id.listview_row_event__title);
+		viewHolder.date = (TextView) v.findViewById(R.id.listview_row_event__date);
 		viewHolder.cover = (ImageView) v.findViewById(R.id.listview_row_event__cover);
 		v.setTag(viewHolder);
 		

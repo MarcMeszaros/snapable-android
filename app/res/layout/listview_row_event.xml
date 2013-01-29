@@ -27,4 +27,14 @@
         android:padding="5dp"
         android:textStyle="bold" />
 
+    <TextView
+        android:id="@+id/listview_row_event__date"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_toRightOf="@id/listview_row_event__cover"
+        android:layout_below="@id/listview_row_event__title"
+        android:padding="5dp"
+        android:textStyle="bold" />
+
 </RelativeLayout>
