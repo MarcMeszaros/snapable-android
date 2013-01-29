@@ -29,13 +29,10 @@ public class EventList extends SherlockFragmentActivity implements OnQueryTextLi
 	@Override
     public boolean onCreateOptionsMenu(Menu menu) {
         //Create the search view
-        SearchView searchView = new SearchView(getSupportActionBar().getThemedContext());
-        searchView.setQueryHint("Event URL or Title");
-        searchView.setOnQueryTextListener(this);
-
-        menu.add("Search")
-            .setActionView(searchView)
-            .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
+		getSupportMenuInflater().inflate(R.menu.fragment_event_list, menu);
+		SearchView searchView = (SearchView) menu.findItem(R.id.menu__fragment_event_list__search).getActionView();
+		searchView.setQueryHint("Event Title or URL");
+		searchView.setOnQueryTextListener(this);
 
         return true;
     }
@@ -48,7 +45,7 @@ public class EventList extends SherlockFragmentActivity implements OnQueryTextLi
 		args.putString("q", query);
 		
 		// get the fragment, and init the new search loader (using the search param)
-		EventListFragment frag = (EventListFragment) getSupportFragmentManager().findFragmentByTag("EVENT_LIST_FRAGMENT");
+		EventListFragment frag = (EventListFragment) getSupportFragmentManager().findFragmentById(R.id.activity_event_list__fragment_event_list);
 		frag.getLoaderManager().initLoader(EventListFragment.LOADERS.EVENTS, args, frag);
 		return true;
 	}
