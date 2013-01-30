@@ -71,7 +71,7 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
     		locationManager.requestLocationUpdates(providerName, 1000, 1, this);
     	}
 
-    	// add a message to kill the location updater if it takes more than 10 sec.
+    	// add a message to kill the location updater if it takes more than 30 sec.
     	class GpsTimeout implements Runnable {
     		
     		private LocationManager locationManager;
@@ -88,7 +88,7 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 				stopLoadingSpinner(true);
 			}
 		}
-    	msgHandler.postDelayed(new GpsTimeout(locationManager, this), 10000);
+    	msgHandler.postDelayed(new GpsTimeout(locationManager, this), 30000);
 	}
 
 	@Override
@@ -199,6 +199,7 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 		// Prepare the loader. (Re-connect with an existing one, or start a new one.)
 		getLoaderManager().restartLoader(LOADERS.EVENTS_GPS, args, this);
 		locationManager.removeUpdates(this); // stop updates
+		msgHandler.removeCallbacksAndMessages(null); // remove all messages in the handler
 		stopLoadingSpinner(true);
 	}
 
