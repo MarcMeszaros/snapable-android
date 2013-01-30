@@ -29,6 +29,7 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -96,7 +97,9 @@ public class PhotoUpload extends SherlockFragmentActivity implements OnClickList
 		protected void onPreExecute() {
 			super.onPreExecute();
 			ProgressBar pb = (ProgressBar) findViewById(R.id.fragment_photo_upload__progressBar);
+			Button butt = (Button) findViewById(R.id.fragment_photo_upload__button_done);
 			pb.setVisibility(View.VISIBLE);
+			butt.setVisibility(View.INVISIBLE);
 		}
 		
 		@Override
