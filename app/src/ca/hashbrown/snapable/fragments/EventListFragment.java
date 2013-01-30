@@ -1,5 +1,7 @@
 package ca.hashbrown.snapable.fragments;
 
+import javax.security.auth.PrivateCredentialPermission;
+
 import com.snapable.api.models.Event;
 
 import ca.hashbrown.snapable.R;
@@ -9,6 +11,7 @@ import ca.hashbrown.snapable.cursors.EventCursor;
 import ca.hashbrown.snapable.provider.SnapableContract;
 
 import android.content.ContentUris;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.location.Criteria;
@@ -17,6 +20,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.ListFragment;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
@@ -39,17 +43,19 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 
 	EventListAdapter eventAdapter;
 	LocationManager locationManager;
+	Handler msgHandler;
 	
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 
+		// initialize/setup some basic stuff
+		msgHandler = new Handler();
 		getListView().setOnItemClickListener(this);
-		
+
 		eventAdapter = new EventListAdapter(getActivity(), null);
 		setListAdapter(eventAdapter);
 		
-		/*
 		// Retrieve a list of location providers that have fine accuracy, no monetary cost, etc
     	Criteria criteria = new Criteria();
     	criteria.setAccuracy(Criteria.ACCURACY_FINE);
@@ -59,18 +65,27 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
     	String providerName = locationManager.getBestProvider(criteria, true);
 
     	// If no suitable provider is found, null is returned.
-    	//LocationProvider provider = null;
     	if (providerName != null) {
-    	  // provider = locationManager.getProvider(providerName);
-    	   locationManager.requestLocationUpdates(providerName, 1000, 1, this);
+    		locationManager.requestLocationUpdates(providerName, 1000, 1, this);
     	}
-    	*/
-		
-		// Prepare the loader. (Re-connect with an existing one, or start a new one.)
-    	Bundle args = new Bundle(2);
-		args.putString("lat", "45.427324");
-		args.putString("lng", "-75.691542");
-		getLoaderManager().initLoader(LOADERS.EVENTS_GPS, args, this);
+
+    	// add a message to kill the location updater if it takes more than 10 sec.
+    	class GpsTimeout implements Runnable {
+    		
+    		private LocationManager locationManager;
+			private LocationListener locationListener;
+
+    		public GpsTimeout(LocationManager locationManager, LocationListener locationListener) {
+    			this.locationManager = locationManager;
+    			this.locationListener = locationListener;
+    		}
+    		
+    		public void run() {
+    			Log.d(TAG, "kill the location updates");
+				locationManager.removeUpdates(locationListener);
+			}
+		}
+    	msgHandler.postDelayed(new GpsTimeout(locationManager, this), 10000);
 	}
 
 	@Override
@@ -178,7 +193,7 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 		args.putString("lng", String.valueOf(location.getLongitude()));
 		
 		// Prepare the loader. (Re-connect with an existing one, or start a new one.)
-		getLoaderManager().initLoader(LOADERS.EVENTS_GPS, args, this);
+		getLoaderManager().restartLoader(LOADERS.EVENTS_GPS, args, this);
 		locationManager.removeUpdates(this); // stop updates
 	}
 
