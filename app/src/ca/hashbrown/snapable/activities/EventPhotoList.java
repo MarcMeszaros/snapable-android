@@ -5,8 +5,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import ca.hashbrown.snapable.R;
-import ca.hashbrown.snapable.EventList;
 import ca.hashbrown.snapable.activities.CameraActivity;
+import ca.hashbrown.snapable.activities.EventList;
 import ca.hashbrown.snapable.fragments.PhotoListFragment;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;

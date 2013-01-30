@@ -1,4 +1,4 @@
-package ca.hashbrown.snapable;
+package ca.hashbrown.snapable.activities;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
@@ -46,7 +46,7 @@ public class EventList extends SherlockFragmentActivity implements OnQueryTextLi
 		
 		// get the fragment, and init the new search loader (using the search param)
 		EventListFragment frag = (EventListFragment) getSupportFragmentManager().findFragmentById(R.id.activity_event_list__fragment_event_list);
-		frag.getLoaderManager().initLoader(EventListFragment.LOADERS.EVENTS, args, frag);
+		frag.getLoaderManager().restartLoader(EventListFragment.LOADERS.EVENTS, args, frag);
 		return true;
 	}
 

@@ -23,7 +23,7 @@
             android:name=".activities.CameraActivity"
             android:theme="@style/Theme.Styled.NoActionBar" />
         
-        <activity android:name=".EventList" >
+        <activity android:name=".activities.EventList" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
