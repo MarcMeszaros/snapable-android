@@ -12,6 +12,6 @@
     <string name="strings__fragment_event_auth__name">Name (Optional)</string>
     <string name="strings__fragment_event_auth__email">Email</string>
     
-    <string name="strings__fragment_event_list__empty">Unable to find any events…</string>
+    <string name="strings__fragment_event_list__empty">Unable to find any events nearby. Try searching for the event.</string>
     
 </resources>

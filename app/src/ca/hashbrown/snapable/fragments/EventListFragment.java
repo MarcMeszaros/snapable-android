@@ -1,7 +1,5 @@
 package ca.hashbrown.snapable.fragments;
 
-import javax.security.auth.PrivateCredentialPermission;
-
 import com.snapable.api.models.Event;
 
 import ca.hashbrown.snapable.R;
@@ -29,8 +27,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 public class EventListFragment extends ListFragment implements LoaderCallbacks<Cursor>, OnItemClickListener, LocationListener {
 	
@@ -83,6 +85,7 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
     		public void run() {
     			Log.d(TAG, "kill the location updates");
 				locationManager.removeUpdates(locationListener);
+				stopLoadingSpinner(true);
 			}
 		}
     	msgHandler.postDelayed(new GpsTimeout(locationManager, this), 10000);
@@ -134,6 +137,7 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 			eventAdapter.changeCursor(data);
 			break;
 		}
+		stopLoadingSpinner(true);
 		
 	}
 
@@ -195,6 +199,7 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 		// Prepare the loader. (Re-connect with an existing one, or start a new one.)
 		getLoaderManager().restartLoader(LOADERS.EVENTS_GPS, args, this);
 		locationManager.removeUpdates(this); // stop updates
+		stopLoadingSpinner(true);
 	}
 
 	public void onProviderDisabled(String provider) {
@@ -226,6 +231,38 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 		
 		// there was no result
 		return false;
+	}
+	
+	public void stopLoadingSpinner(boolean animate) {
+		// get handles on things
+		ProgressBar pb = (ProgressBar) getView().findViewById(R.id.fragment_event_list__progressBar);
+		LinearLayout listContainer = (LinearLayout) getView().findViewById(R.id.fragment_event_list__list_container);
+
+		// fade in the list/fade out the spinner
+		if (animate) {
+			pb.startAnimation(AnimationUtils.loadAnimation(getActivity(), android.R.anim.fade_out));
+			listContainer.startAnimation(AnimationUtils.loadAnimation(getActivity(), android.R.anim.fade_in));
+		}
+		
+		// set the visibilities
+		pb.setVisibility(View.GONE);
+		listContainer.setVisibility(View.VISIBLE);
+	}
+	
+	public void startLoadingSpinner(boolean animate) {	
+		// get handles on things
+		ProgressBar pb = (ProgressBar) getView().findViewById(R.id.fragment_event_list__progressBar);
+		LinearLayout listContainer = (LinearLayout) getView().findViewById(R.id.fragment_event_list__list_container);
+
+		// fade in the list/fade out the spinner
+		if (animate) {
+			pb.startAnimation(AnimationUtils.loadAnimation(getActivity(), android.R.anim.fade_in));
+			listContainer.startAnimation(AnimationUtils.loadAnimation(getActivity(), android.R.anim.fade_out));
+		}
+		
+		// set the visibilities
+		pb.setVisibility(View.VISIBLE);
+		listContainer.setVisibility(View.GONE);
 	}
 
 }

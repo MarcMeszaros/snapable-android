@@ -4,24 +4,40 @@
     android:id="@+id/fragment_event_list"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="10dp" >
+    android:layout_margin="10dp"
+    android:orientation="vertical" >
 
-    <ListView
-        android:id="@+id/android:list"
+    <ProgressBar
+        android:id="@+id/fragment_event_list__progressBar"
+        style="?android:attr/progressBarStyleLarge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:divider="@android:color/transparent"
-        android:dividerHeight="12dp"
-        android:scrollbars="none"
-        tools:listitem="@layout/listview_row_event" />
+        android:layout_gravity="center" />
 
-    <TextView
-        android:id="@id/android:empty"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:lineSpacingMultiplier="0.92"
-        android:padding="10dp"
-        android:text="@string/strings__fragment_event_list__empty"
-        android:textSize="20sp" />
+    <LinearLayout
+        android:id="@+id/fragment_event_list__list_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone" >
+
+        <ListView
+            android:id="@+id/android:list"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:divider="@android:color/transparent"
+            android:dividerHeight="12dp"
+            android:scrollbars="none"
+            tools:listitem="@layout/listview_row_event" />
+
+        <TextView
+            android:id="@id/android:empty"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:lineSpacingMultiplier="0.92"
+            android:padding="10dp"
+            android:text="@string/strings__fragment_event_list__empty"
+            android:textSize="20sp" />
+    </LinearLayout>
 
 </LinearLayout>
