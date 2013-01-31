@@ -57,38 +57,42 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 
 		eventAdapter = new EventListAdapter(getActivity(), null);
 		setListAdapter(eventAdapter);
-		
-		// Retrieve a list of location providers that have fine accuracy, no monetary cost, etc
-    	Criteria criteria = new Criteria();
-    	criteria.setAccuracy(Criteria.ACCURACY_FINE);
-    	criteria.setCostAllowed(false);
-    	
-    	locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-    	String providerName = locationManager.getBestProvider(criteria, true);
 
-    	// If no suitable provider is found, null is returned.
-    	if (providerName != null) {
-    		locationManager.requestLocationUpdates(providerName, 1000, 1, this);
-    	}
-
-    	// add a message to kill the location updater if it takes more than 30 sec.
-    	class GpsTimeout implements Runnable {
-    		
-    		private LocationManager locationManager;
-			private LocationListener locationListener;
-
-    		public GpsTimeout(LocationManager locationManager, LocationListener locationListener) {
-    			this.locationManager = locationManager;
-    			this.locationListener = locationListener;
-    		}
-    		
-    		public void run() {
-    			Log.d(TAG, "kill the location updates");
-				locationManager.removeUpdates(locationListener);
-				stopLoadingSpinner(true);
+		// if we don't have any results try and load some
+		if (eventAdapter.getCount() <= 0) {
+			startLoadingSpinner(false);
+			// Retrieve a list of location providers that have fine accuracy, no monetary cost, etc
+	    	Criteria criteria = new Criteria();
+	    	criteria.setAccuracy(Criteria.ACCURACY_COARSE);
+	    	criteria.setCostAllowed(false);
+	    	
+	    	locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+	    	String providerName = locationManager.getBestProvider(criteria, true);
+	
+	    	// If no suitable provider is found, null is returned.
+	    	if (providerName != null) {
+	    		locationManager.requestLocationUpdates(providerName, 1000, 1, this);
+	    	}
+	
+	    	// add a message to kill the location updater if it takes more than 30 sec.
+	    	class GpsTimeout implements Runnable {
+	    		
+	    		private LocationManager locationManager;
+				private LocationListener locationListener;
+	
+	    		public GpsTimeout(LocationManager locationManager, LocationListener locationListener) {
+	    			this.locationManager = locationManager;
+	    			this.locationListener = locationListener;
+	    		}
+	    		
+	    		public void run() {
+	    			Log.d(TAG, "kill the location updates");
+					locationManager.removeUpdates(locationListener);
+					stopLoadingSpinner(true);
+				}
 			}
+	    	msgHandler.postDelayed(new GpsTimeout(locationManager, this), 30000);
 		}
-    	msgHandler.postDelayed(new GpsTimeout(locationManager, this), 30000);
 	}
 
 	@Override
@@ -157,6 +161,9 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 			eventAdapter.changeCursor(null);
 			break;
 		}
+
+		// stop the loading spinner
+		stopLoadingSpinner(true);
 	}
 
 	// click
@@ -189,7 +196,6 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 	}
 
 	public void onLocationChanged(Location location) {
-		// TODO Auto-generated method stub
 		Log.d(TAG, location.getLatitude() + " | " + location.getLongitude());
 		
 		Bundle args = new Bundle(2);
@@ -197,10 +203,9 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 		args.putString("lng", String.valueOf(location.getLongitude()));
 		
 		// Prepare the loader. (Re-connect with an existing one, or start a new one.)
-		getLoaderManager().restartLoader(LOADERS.EVENTS_GPS, args, this);
 		locationManager.removeUpdates(this); // stop updates
+		getLoaderManager().restartLoader(LOADERS.EVENTS_GPS, args, this);
 		msgHandler.removeCallbacksAndMessages(null); // remove all messages in the handler
-		stopLoadingSpinner(true);
 	}
 
 	public void onProviderDisabled(String provider) {
