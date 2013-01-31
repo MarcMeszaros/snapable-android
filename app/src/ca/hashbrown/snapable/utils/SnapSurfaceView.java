@@ -1,6 +1,8 @@
 package ca.hashbrown.snapable.utils;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import android.app.Activity;
@@ -93,9 +95,13 @@ public class SnapSurfaceView extends android.view.SurfaceView implements Surface
 			cameraParams = camera.getParameters();
 			List<Camera.Size> cameraSizes = cameraParams.getSupportedPictureSizes();
 			List<Camera.Size> cameraPreviewSizes = cameraParams.getSupportedPreviewSizes();
+			// sort the lists
+			Collections.sort(cameraSizes, new CameraSizeComparator());
+			Collections.sort(cameraPreviewSizes, new CameraSizeComparator());
+
 			cameraParams.setJpegQuality(100);
-			cameraParams.setPictureSize(cameraSizes.get(0).width, cameraSizes.get(0).height);
-			cameraParams.setPreviewSize(cameraPreviewSizes.get(0).width, cameraPreviewSizes.get(0).height);
+			cameraParams.setPictureSize(cameraSizes.get(cameraSizes.size()-1).width, cameraSizes.get(cameraSizes.size()-1).height);
+			cameraParams.setPreviewSize(cameraPreviewSizes.get(cameraPreviewSizes.size()-1).width, cameraPreviewSizes.get(cameraPreviewSizes.size()-1).height);
 			camera.setParameters(cameraParams);
 			for (Size size : cameraSizes) {	
 				Log.d(TAG, "camera size: " + size.width + "x" + size.height);
@@ -156,7 +162,18 @@ public class SnapSurfaceView extends android.view.SurfaceView implements Surface
 	@Override
 	public void onAutoFocus(boolean success, Camera camera) {
 		// TODO Auto-generated method stub
-		
+	}
+
+	/**
+	 * Helper class to compare Camera.Size values
+	 */
+	private class CameraSizeComparator implements Comparator<Camera.Size> {
+
+		@Override
+		public int compare(final Size a, final Size b) {
+			return a.width * a.height - b.width * b.height;
+		}
+
 	}
 
 }
