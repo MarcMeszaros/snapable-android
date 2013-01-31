@@ -19,6 +19,7 @@ public class SnapSurfaceView extends android.view.SurfaceView implements Surface
 
 	private static final String TAG = "SnapSurfaceView";
 
+	private int cameraId;
 	private Camera camera;
 	private Parameters cameraParams;
 
@@ -38,15 +39,30 @@ public class SnapSurfaceView extends android.view.SurfaceView implements Surface
 		Log.d(TAG, "surfaceChanged");
 		// get camera info
 		CameraInfo info = new CameraInfo();
-		Camera.getCameraInfo(CameraInfo.CAMERA_FACING_BACK, info);
+		Camera.getCameraInfo(cameraId, info);
 		Log.d(TAG, "camera orientation: " + info.orientation);
 		Log.d(TAG, "camera orientation fixed: " + ((getRotation(true) + info.orientation) % 360));
 
-		// set rotation as necessary
-		cameraParams.setRotation((getRotation(true) + info.orientation) % 360);
-		camera.setParameters(cameraParams);
+		// set rotation as necessary for back facing
+		// http://developer.android.com/reference/android/hardware/Camera.html#setDisplayOrientation(int)
+		// http://developer.android.com/reference/android/hardware/Camera.Parameters.html#setRotation(int)
+		int orientation;
+		int rotation;
+		if (info.facing == CameraInfo.CAMERA_FACING_BACK) {
+			rotation = (info.orientation + getRotation(true)) % 360;
+			orientation = (info.orientation - getRotation(false) + 360) % 360;
+		}
+		// assume front facing
+		else {
+			rotation = (info.orientation - getRotation(true) + 360) % 360;
+			orientation = (info.orientation + getRotation(false)) % 360;
+			orientation = (360 - orientation) % 360;
+		}
 
-		camera.setDisplayOrientation((info.orientation - getRotation(false) + 360) % 360);
+		// set the camera params
+		cameraParams.setRotation(rotation);
+		camera.setParameters(cameraParams);
+		camera.setDisplayOrientation(orientation);
 
 		// IMPORTANT: We must call startPreview() on the camera before we take any pictures
 		camera.startPreview();
@@ -58,12 +74,20 @@ public class SnapSurfaceView extends android.view.SurfaceView implements Surface
 	public void surfaceCreated(SurfaceHolder holder) {
 		Log.d(TAG, "surfaceCreated");
 		try {
-			// get camera info
-			CameraInfo info = new CameraInfo();
-			Camera.getCameraInfo(CameraInfo.CAMERA_FACING_BACK, info);
-
 			// Open the Camera in preview mode
 			camera = Camera.open();
+
+			// if there is no back facing camera, use the first camera available
+			if (camera == null && Camera.getNumberOfCameras() >= 1) {
+				cameraId = 0;
+				camera = Camera.open(cameraId);
+			} else {
+				cameraId = CameraInfo.CAMERA_FACING_BACK;
+			}
+
+			// get camera info
+			CameraInfo info = new CameraInfo();
+			Camera.getCameraInfo(cameraId, info);
 
 			// set some camera parameters
 			cameraParams = camera.getParameters();
