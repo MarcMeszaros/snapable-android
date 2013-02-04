@@ -36,21 +36,20 @@
             android:background="#000000" >
 
             <Button
+                android:id="@+id/activity_camera__image_picker"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
+                android:background="@drawable/button__image_picker" />
+
+            <Button
                 android:id="@+id/activity_camera__shutter_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
                 android:background="@drawable/button__camera" />
-
-            <Button
-                android:id="@+id/activity_camera__image_picker"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_below="@id/activity_camera__shutter_button"
-                android:background="@drawable/button__image_picker" />
-
         </RelativeLayout>
     </LinearLayout>
 

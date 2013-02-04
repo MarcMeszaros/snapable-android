@@ -47,7 +47,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
-                android:layout_toRightOf="@id/activity_camera__shutter_button"
+                android:layout_alignParentRight="true"
                 android:background="@drawable/button__image_picker" />
         </RelativeLayout>
     </LinearLayout>
