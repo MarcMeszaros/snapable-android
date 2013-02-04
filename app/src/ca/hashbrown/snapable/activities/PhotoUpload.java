@@ -8,15 +8,19 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 
 import ca.hashbrown.snapable.R;
+import ca.hashbrown.snapable.provider.SnapableContract;
 import ca.hashbrown.snapable.utils.SnapBitmapFactory;
 import ca.hashbrown.snapable.utils.SnapStorage;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 
+import com.snapable.api.SnapApi;
 import com.snapable.api.SnapClient;
 import com.snapable.api.models.Event;
 import com.snapable.api.resources.PhotoResource;
 
+import android.content.ContentUris;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
@@ -108,11 +112,23 @@ public class PhotoUpload extends SherlockFragmentActivity implements OnClickList
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();  
 	        photo.compress(Bitmap.CompressFormat.JPEG, 50, baos);
 	        ByteArrayInputStream inStream = new ByteArrayInputStream(baos.toByteArray());
-			
+	        
+	        // get local cached event info
+	        Uri queryUri = ContentUris.withAppendedId(SnapableContract.EventCredentials.CONTENT_URI, event.getId());
+	        Cursor c = getContentResolver().query(queryUri, null, null, null, null);
+	        
 	        // upload via the API
 	        try {
-				PhotoResource photoRes = SnapClient.getInstance().build(PhotoResource.class);
-				photoRes.postPhoto(inStream, event.getResourceUri(), "/private_v1/type/6/", caption);
+	        	PhotoResource photoRes = SnapClient.getInstance().build(PhotoResource.class);
+	        	
+	        	// if we have a guest id, upload the photo with the id
+	        	if (c.moveToFirst()) {
+	        		long guest_id = c.getLong(c.getColumnIndex(SnapableContract.EventCredentials.GUEST_ID));
+	        		long type_id = c.getLong(c.getColumnIndex(SnapableContract.EventCredentials.TYPE_ID));
+	        		photoRes.postPhoto(inStream, event.getResourceUri(), "/"+SnapApi.api_version +"/guest/"+guest_id+"/", "/"+SnapApi.api_version +"/type/"+type_id+"/", caption);
+	        	} else {
+	        		photoRes.postPhoto(inStream, event.getResourceUri(), "/"+SnapApi.api_version +"/type/6/", caption);
+				}
 	        } catch (org.codegist.crest.CRestException e) {
 	        	Log.e(TAG, "problem with the response?", e);
 	        }

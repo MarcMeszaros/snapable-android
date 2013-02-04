@@ -46,7 +46,16 @@ public interface PhotoResource {
     Photo postPhoto(
     	@MultiPartParam(value="image", contentType="image/jpeg", fileName="image.jpg") InputStream photo,
     	@MultiPartParam(value="event") String event,
-    	//@MultiPartParam(value="guest") String guest,
+    	@MultiPartParam(value="type", defaultValue="/private_v1/type/6/") String type,
+    	@MultiPartParam(value="caption", defaultValue="") String caption
+    );
+    
+    @POST
+    @Path("/")
+    Photo postPhoto(
+    	@MultiPartParam(value="image", contentType="image/jpeg", fileName="image.jpg") InputStream photo,
+    	@MultiPartParam(value="event") String event,
+    	@MultiPartParam(value="guest") String guest,
     	@MultiPartParam(value="type", defaultValue="/private_v1/type/6/") String type,
     	@MultiPartParam(value="caption", defaultValue="") String caption
     );

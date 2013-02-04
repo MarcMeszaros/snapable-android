@@ -142,14 +142,14 @@ public class SnapContentProvider extends ContentProvider {
 
 		switch (uriMatcher.match(uri)) {
 			case EVENT_CREDENTIALS: {
+				result = ContentUris.withAppendedId(SnapableContract.EventCredentials.CONTENT_URI, db.insert(DBHelper.EVENT_CREDENTIALS.TABLE_NAME, null, values));
+				
 				// TODO remove this dirty hack
 				// update/create a guest via API if there is an email
 				if (!values.getAsString(SnapableContract.EventCredentials.EMAIL).isEmpty()) {
 					UpdateInsertGuest task = new UpdateInsertGuest(values);
 					task.execute();
 				}
-				
-				result = ContentUris.withAppendedId(SnapableContract.EventCredentials.CONTENT_URI, db.insert(DBHelper.EVENT_CREDENTIALS.TABLE_NAME, null, values));
 				break;
 			}
 
@@ -377,9 +377,22 @@ public class SnapContentProvider extends ContentProvider {
 			// if we have a guest update the result
 			if (guests.getMeta().getTotalCount() == 1) {
 				guestResource.putGuest(guests.getObjects()[0].getId(), guest_name);
+				
+				// update the local db with the guest id
+				Uri request_uri = ContentUris.withAppendedId(SnapableContract.EventCredentials.CONTENT_URI, values.getAsLong(SnapableContract.EventCredentials._ID));
+				ContentValues vals = new ContentValues();
+				vals.put(SnapableContract.EventCredentials.GUEST_ID, guests.getObjects()[0].getId());
+				vals.put(SnapableContract.EventCredentials.TYPE_ID, guests.getObjects()[0].getTypeId());
+				getContext().getContentResolver().update(request_uri, vals, null, null);
 			} else {
-				// create the guest
+				// create the guest and update
 				Guest guest = guestResource.postGuest(guest_event, guest_type, guest_email, guest_name);
+				
+				// update the local db with the guest id
+				Uri request_uri = ContentUris.withAppendedId(SnapableContract.EventCredentials.CONTENT_URI, values.getAsLong(SnapableContract.EventCredentials._ID));
+				ContentValues vals = new ContentValues();
+				vals.put(SnapableContract.EventCredentials.GUEST_ID, guest.getId());
+				getContext().getContentResolver().update(request_uri, vals, null, null);
 			}
 			
 			return null;
