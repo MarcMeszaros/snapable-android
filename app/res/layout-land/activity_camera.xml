@@ -10,6 +10,7 @@
         android:layout_height="match_parent" />
 
     <LinearLayout
+        android:id="@+id/activity_camera__overlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@android:color/transparent"
@@ -17,6 +18,7 @@
         android:orientation="horizontal" >
 
         <RelativeLayout
+            android:id="@+id/activity_camera__first_blackbar"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="0.25"
@@ -24,12 +26,14 @@
         </RelativeLayout>
 
         <RelativeLayout
+            android:id="@+id/activity_camera__transparent_bar"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="0.5"
             android:background="@android:color/transparent" />
 
         <RelativeLayout
+            android:id="@+id/activity_camera__second_blackbar"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="0.25"
