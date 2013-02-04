@@ -85,6 +85,7 @@ public class EventAuthFragment extends DialogFragment implements OnEditorActionL
             		values.put(SnapableContract.EventCredentials._ID, this.event.getId());
             		values.put(SnapableContract.EventCredentials.NAME, name.getText().toString());
             		values.put(SnapableContract.EventCredentials.EMAIL, email.getText().toString());
+            		values.put(SnapableContract.EventCredentials.TYPE_ID, 6);
 
             		// insert the event details
             		getActivity().getContentResolver().insert(SnapableContract.EventCredentials.CONTENT_URI, values);
@@ -101,6 +102,7 @@ public class EventAuthFragment extends DialogFragment implements OnEditorActionL
             		values.put(SnapableContract.EventCredentials.PIN, pin.getText().toString());
             		values.put(SnapableContract.EventCredentials.NAME, name.getText().toString());
             		values.put(SnapableContract.EventCredentials.EMAIL, email.getText().toString());
+            		values.put(SnapableContract.EventCredentials.TYPE_ID, 5);
 
             		// check if a cached version exists
             		Uri requestUri = ContentUris.withAppendedId(SnapableContract.EventCredentials.CONTENT_URI, this.event.getId());

@@ -20,7 +20,8 @@ public interface GuestResource {
     @GET
     @Path("/")
     Pager<Guest[]> getGuests(
-    	@QueryParam("email") String email
+    	@QueryParam("email") String email,
+    	@QueryParam("event") long event_id
     );
     
     @GET

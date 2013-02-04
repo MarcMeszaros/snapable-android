@@ -155,5 +155,11 @@ public final class SnapableContract {
 		 * <p>TYPE: TEXT</p>
 		 */
 		public static final String PIN = "pin";
+		
+		/**
+		 * The the guest type.
+		 * <p>TYPE: INTEGER</p>
+		 */
+		public static final String TYPE_ID = "type_id";
 	}
 }

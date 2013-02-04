@@ -6,6 +6,7 @@ import java.util.regex.Pattern;
 
 import ca.hashbrown.snapable.cursors.*;
 
+import com.snapable.api.SnapApi;
 import com.snapable.api.SnapClient;
 import com.snapable.api.models.*;
 import com.snapable.api.resources.*;
@@ -21,6 +22,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.provider.BaseColumns;
 import android.util.Log;
 
@@ -140,6 +142,13 @@ public class SnapContentProvider extends ContentProvider {
 
 		switch (uriMatcher.match(uri)) {
 			case EVENT_CREDENTIALS: {
+				// TODO remove this dirty hack
+				// update/create a guest via API if there is an email
+				if (!values.getAsString(SnapableContract.EventCredentials.EMAIL).isEmpty()) {
+					UpdateInsertGuest task = new UpdateInsertGuest(values);
+					task.execute();
+				}
+				
 				result = ContentUris.withAppendedId(SnapableContract.EventCredentials.CONTENT_URI, db.insert(DBHelper.EVENT_CREDENTIALS.TABLE_NAME, null, values));
 				break;
 			}
@@ -322,7 +331,8 @@ public class SnapContentProvider extends ContentProvider {
 				+ DBHelper.EVENT_CREDENTIALS.FIELD_GUEST_ID + " INTEGER,"
 				+ DBHelper.EVENT_CREDENTIALS.FIELD_EMAIL + " TEXT,"
 				+ DBHelper.EVENT_CREDENTIALS.FIELD_NAME + " TEXT,"
-				+ DBHelper.EVENT_CREDENTIALS.FIELD_PIN + " TEXT"
+				+ DBHelper.EVENT_CREDENTIALS.FIELD_PIN + " TEXT,"
+				+ DBHelper.EVENT_CREDENTIALS.FIELD_TYPE_ID + " INTEGER"
 			+ ");");	
 		}
 
@@ -338,8 +348,43 @@ public class SnapContentProvider extends ContentProvider {
 			public static final String FIELD_EMAIL = "email";
 			public static final String FIELD_NAME = "name";
 			public static final String FIELD_PIN = "pin";
+			public static final String FIELD_TYPE_ID = "type_id";
 		}
 
+	}
+	
+	////// UGLY HACK
+	private class UpdateInsertGuest extends AsyncTask<Void, Void, Void> {
+
+		private ContentValues values;
+		
+		public UpdateInsertGuest(ContentValues values) {
+			this.values = values;
+		}
+		
+		@Override
+		protected Void doInBackground(Void... params) {
+			// some values
+			String guest_email = values.getAsString(SnapableContract.EventCredentials.EMAIL);
+			String guest_event = "/" + SnapApi.api_version + "/event/" + values.getAsLong(SnapableContract.EventCredentials._ID) + "/";
+			String guest_name = values.getAsString(SnapableContract.EventCredentials.NAME);
+			String guest_type = "/" + SnapApi.api_version + "/type/" + values.getAsInteger(SnapableContract.EventCredentials.TYPE_ID) + "/";
+
+			// setup the API client
+			GuestResource guestResource = SnapClient.getInstance().build(GuestResource.class);
+			Pager<Guest[]> guests = guestResource.getGuests(guest_email, values.getAsLong(SnapableContract.EventCredentials._ID));
+			
+			// if we have a guest update the result
+			if (guests.getMeta().getTotalCount() == 1) {
+				guestResource.putGuest(guests.getObjects()[0].getId(), guest_name);
+			} else {
+				// create the guest
+				Guest guest = guestResource.postGuest(guest_event, guest_type, guest_email, guest_name);
+			}
+			
+			return null;
+		}
+		
 	}
 
 }
