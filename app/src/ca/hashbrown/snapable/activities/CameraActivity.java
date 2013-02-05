@@ -61,6 +61,7 @@ public class CameraActivity extends Activity implements OnClickListener, Picture
 		shutterButton = (Button) findViewById(R.id.activity_camera__shutter_button);
 		shutterButton.setOnClickListener(this);
 		findViewById(R.id.activity_camera__image_picker).setOnClickListener(this);
+		findViewById(R.id.activity_camera__flash_mode).setOnClickListener(this);
 
 		// get the display size
 		Display display = getWindowManager().getDefaultDisplay();
@@ -142,6 +143,10 @@ public class CameraActivity extends Activity implements OnClickListener, Picture
 			
 			startActivityForResult(intent, 0); // TODO the code shouldn't be hardcoded
 			break;
+		
+		case R.id.activity_camera__flash_mode:
+			toggleFlashMode();
+			break;
 		}
 	}
 	
@@ -164,6 +169,46 @@ public class CameraActivity extends Activity implements OnClickListener, Picture
 			  }
 		}
 
+	}
+
+	/**
+	 * 
+	 * @param mode
+	 */
+	private void setFlashMode(String newMode) {
+		// get current flash mode
+		String mode = cameraSurfaceView.getFlashMode();
+		Button flashButton = (Button) findViewById(R.id.activity_camera__flash_mode);
+		
+		// if the flash mode isn't null, set it, otherwise hide the button
+		if (mode != null) {
+			cameraSurfaceView.setFlashMode(newMode);
+			if (newMode.equals(Camera.Parameters.FLASH_MODE_AUTO)) {
+				flashButton.setBackgroundResource(R.drawable.button__flash_mode__auto);
+			} else if (newMode.equals(Camera.Parameters.FLASH_MODE_ON)) {
+				flashButton.setBackgroundResource(R.drawable.button__flash_mode__on);
+			} else {
+				flashButton.setBackgroundResource(R.drawable.button__flash_mode__off);
+			}
+		} else {
+			findViewById(R.id.activity_camera__flash_mode).setVisibility(View.GONE);
+		}
+	}
+	
+	private void toggleFlashMode() {
+		// get current flash mode
+		String mode = cameraSurfaceView.getFlashMode();
+
+		if (mode != null) {
+			if (mode.equals(Camera.Parameters.FLASH_MODE_AUTO)) {
+				setFlashMode(Camera.Parameters.FLASH_MODE_ON);
+			} else if (mode.equals(Camera.Parameters.FLASH_MODE_ON)) {
+				setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+			} else {
+				setFlashMode(Camera.Parameters.FLASH_MODE_AUTO);
+			}
+		}
+		
 	}
 
 }

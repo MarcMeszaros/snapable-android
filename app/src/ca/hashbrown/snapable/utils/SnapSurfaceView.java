@@ -164,6 +164,17 @@ public class SnapSurfaceView extends android.view.SurfaceView implements Surface
 		// TODO Auto-generated method stub
 	}
 
+	public String getFlashMode() {
+		return cameraParams.getFlashMode();
+	}
+	
+	public void setFlashMode(String mode) {
+		if (cameraParams.getFlashMode() != null) {
+			cameraParams.setFlashMode(mode);
+			camera.setParameters(cameraParams);
+		}
+	}
+
 	/**
 	 * Helper class to compare Camera.Size values
 	 */

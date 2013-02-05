@@ -24,6 +24,14 @@
             android:layout_height="match_parent"
             android:layout_weight="0.25"
             android:background="#000000" >
+
+            <Button
+                android:id="@+id/activity_camera__flash_mode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:background="@drawable/button__flash_mode__auto" />
         </RelativeLayout>
 
         <RelativeLayout
