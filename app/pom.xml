@@ -92,12 +92,12 @@
 						<artifactId>android-maven-plugin</artifactId>
 						<inherited>true</inherited>
 						<configuration>
-							<sign>
-								<debug>false</debug>
-							</sign>
 							<proguard>
 								<skip>true</skip>
 							</proguard>
+							<sign>
+								<debug>false</debug>
+							</sign>
 							<zipalign>
 								<skip>false</skip>
 							</zipalign>
@@ -138,6 +138,7 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-jarsigner-plugin</artifactId>
+						<version>1.2</version>
 						<executions>
 							<execution>
 								<id>signing</id>
@@ -147,6 +148,11 @@
 								<phase>package</phase>
 								<inherited>true</inherited>
 								<configuration>
+								    <!-- Required arguments because Java 7 changes default signing algorithm (breaks on Android) -->
+								    <arguments>
+								        <argument>-digestalg</argument><argument>SHA1</argument>
+								        <argument>-sigalg</argument><argument>MD5withRSA</argument>
+								    </arguments>
 									<keystore>${sign.keystore}</keystore>
 									<alias>${sign.alias}</alias>
 									<storepass>${sign.storepass}</storepass>
