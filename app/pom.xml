@@ -99,12 +99,21 @@
 								<skip>true</skip>
 							</proguard>
 							<zipalign>
-							    <skip>false</skip>
+								<skip>false</skip>
 							</zipalign>
 							<zipalignInputApk>${project.build.directory}/Snapable-${project.version}.apk</zipalignInputApk>
 							<zipalignOutputApk>${project.build.directory}/Snapable-${project.version}-final.apk</zipalignOutputApk>
 							<zipalignVerbose>true</zipalignVerbose>
 						</configuration>
+						<executions>
+							<execution>
+								<id>alignApk</id>
+								<phase>install</phase>
+								<goals>
+									<goal>zipalign</goal>
+								</goals>
+							</execution>
+						</executions>
 					</plugin>
 
 					<plugin>

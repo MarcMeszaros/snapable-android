@@ -26,5 +26,5 @@ Below are some basic Maven commands to do some common tasks. (Assumes you are in
     # debug build, no unit tests (faster)
     mvn -pl app clean compile package android:deploy
 
-    # release build, no unit tests
-    mvn -pl app -P release clean install android:zipalign -Djarsigner.keystore='<absolute path to keystore>' -Djarsigner.alias=<alias> -Djarsigner.storepass='<store_password>' -Djarsigner.keypass='<alias_password>'
+    # release build, no unit tests (keystore and release.properties file must exist)
+    mvn -pl app -P release clean install
