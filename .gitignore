@@ -19,8 +19,9 @@ test/proguard.cfg
 .metadata
 .checkstyle
 
-# ignore keystores
+# ignore keystores related files
 *.keystore
+*.properties
 
 # ignore temp files from various editors
 .DS_Store
