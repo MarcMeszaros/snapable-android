@@ -47,7 +47,6 @@ public class EventList extends SherlockFragmentActivity implements OnQueryTextLi
 		// get the fragment, and init the new search loader (using the search param)
 		EventListFragment frag = (EventListFragment) getSupportFragmentManager().findFragmentById(R.id.activity_event_list__fragment_event_list);
 		frag.getLoaderManager().restartLoader(EventListFragment.LOADERS.EVENTS, args, frag);
-		frag.startLoadingSpinner(false);
 		return true;
 	}
 

@@ -40,12 +40,12 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 	
 	public static final class LOADERS {
 		public static final int EVENTS = 0x01;
-		public static final int EVENTS_GPS = 0x02;
 	}
 
-	EventListAdapter eventAdapter;
-	LocationManager locationManager;
-	Handler msgHandler;
+	private EventListAdapter eventAdapter;
+	private LocationManager locationManager;
+	private Handler msgHandler;
+	private boolean mLoading = false;
 	
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
@@ -58,41 +58,8 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 		eventAdapter = new EventListAdapter(getActivity(), null);
 		setListAdapter(eventAdapter);
 
-		// if we don't have any results try and load some
-		if (eventAdapter.getCount() <= 0) {
-			startLoadingSpinner(false);
-			// Retrieve a list of location providers that have fine accuracy, no monetary cost, etc
-	    	Criteria criteria = new Criteria();
-	    	criteria.setAccuracy(Criteria.ACCURACY_COARSE);
-	    	criteria.setCostAllowed(false);
-	    	
-	    	locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-	    	String providerName = locationManager.getBestProvider(criteria, true);
-	
-	    	// If no suitable provider is found, null is returned.
-	    	if (providerName != null) {
-	    		locationManager.requestLocationUpdates(providerName, 1000, 1, this);
-	    	}
-	
-	    	// add a message to kill the location updater if it takes more than 30 sec.
-	    	class GpsTimeout implements Runnable {
-	    		
-	    		private LocationManager locationManager;
-				private LocationListener locationListener;
-	
-	    		public GpsTimeout(LocationManager locationManager, LocationListener locationListener) {
-	    			this.locationManager = locationManager;
-	    			this.locationListener = locationListener;
-	    		}
-	    		
-	    		public void run() {
-	    			Log.d(TAG, "kill the location updates");
-					locationManager.removeUpdates(locationListener);
-					stopLoadingSpinner(true);
-				}
-			}
-	    	msgHandler.postDelayed(new GpsTimeout(locationManager, this), 30000);
-		}
+		// initialize the loader
+		getLoaderManager().initLoader(LOADERS.EVENTS, null, this);
 	}
 
 	@Override
@@ -107,18 +74,22 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 		switch (id) {
 			case LOADERS.EVENTS: {
 				// get the query string if required
-				if (args.containsKey("q")) {
+				if (args != null && args.containsKey("q")) {
+					Log.d(TAG, "CursorLoader: q");
 					String selection = "q=?";
 					String[] selectionArgs = {args.getString("q")};
 					return new CursorLoader(getActivity(), SnapableContract.Event.CONTENT_URI, null, selection, selectionArgs, null);
+				} else if (args != null && args.containsKey("lat") && args.containsKey("lng")) {
+					Log.d(TAG, "CursorLoader: lat|lng");
+					String selection = "lat=? lng=?";
+					String[] selectionArgs = {args.getString("lat"), args.getString("lng")};
+					return new CursorLoader(getActivity(), SnapableContract.Event.CONTENT_URI, null, selection, selectionArgs, null);
 				} else {
-					return new CursorLoader(getActivity(), SnapableContract.Event.CONTENT_URI, null, null, null, null);
+					Log.d(TAG, "CursorLoader: getLatLng()");
+					startLoadingSpinner(false);
+					getLatLng();
+					return new Loader<Cursor>(getActivity());
 				}
-			}
-			case LOADERS.EVENTS_GPS: {
-				String selection = "lat=? lng=?";
-				String[] selectionArgs = {args.getString("lat"), args.getString("lng")};
-				return new CursorLoader(getActivity(), SnapableContract.Event.CONTENT_URI, null, selection, selectionArgs, null);
 			}
 			default: {
 				return null;
@@ -132,17 +103,13 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 		switch (loader.getId()) {
 		case LOADERS.EVENTS:
 			eventAdapter.changeCursor(data);
-			break;
-		case LOADERS.EVENTS_GPS:
-			eventAdapter.changeCursor(data);
+			stopLoadingSpinner(true);
 			break;
 		
 		default:
 			eventAdapter.changeCursor(data);
 			break;
 		}
-		stopLoadingSpinner(true);
-		
 	}
 
 	public void onLoaderReset(Loader<Cursor> loader) {
@@ -153,17 +120,11 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 		case LOADERS.EVENTS:
 			eventAdapter.changeCursor(null);
 			break;
-		case LOADERS.EVENTS_GPS:
-			eventAdapter.changeCursor(null);
-			break;
 
 		default:
 			eventAdapter.changeCursor(null);
 			break;
 		}
-
-		// stop the loading spinner
-		stopLoadingSpinner(true);
 	}
 
 	// click
@@ -204,7 +165,7 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 		
 		// Prepare the loader. (Re-connect with an existing one, or start a new one.)
 		locationManager.removeUpdates(this); // stop updates
-		getLoaderManager().restartLoader(LOADERS.EVENTS_GPS, args, this);
+		getLoaderManager().restartLoader(LOADERS.EVENTS, args, this);
 		msgHandler.removeCallbacksAndMessages(null); // remove all messages in the handler
 	}
 
@@ -245,7 +206,7 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 		LinearLayout listContainer = (LinearLayout) getView().findViewById(R.id.fragment_event_list__list_container);
 
 		// fade in the list/fade out the spinner
-		if (animate) {
+		if (animate && mLoading == true) {
 			pb.startAnimation(AnimationUtils.loadAnimation(getActivity(), android.R.anim.fade_out));
 			listContainer.startAnimation(AnimationUtils.loadAnimation(getActivity(), android.R.anim.fade_in));
 		}
@@ -253,6 +214,7 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 		// set the visibilities
 		pb.setVisibility(View.GONE);
 		listContainer.setVisibility(View.VISIBLE);
+		mLoading = false;
 	}
 	
 	public void startLoadingSpinner(boolean animate) {	
@@ -261,7 +223,7 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 		LinearLayout listContainer = (LinearLayout) getView().findViewById(R.id.fragment_event_list__list_container);
 
 		// fade in the list/fade out the spinner
-		if (animate) {
+		if (animate && mLoading == false) {
 			pb.startAnimation(AnimationUtils.loadAnimation(getActivity(), android.R.anim.fade_in));
 			listContainer.startAnimation(AnimationUtils.loadAnimation(getActivity(), android.R.anim.fade_out));
 		}
@@ -269,6 +231,42 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 		// set the visibilities
 		pb.setVisibility(View.VISIBLE);
 		listContainer.setVisibility(View.GONE);
+		mLoading = true;
+	}
+	
+	private void getLatLng() {
+		Log.d(TAG, "getLatLng()");
+		// Retrieve a list of location providers that have fine accuracy, no monetary cost, etc
+    	Criteria criteria = new Criteria();
+    	criteria.setAccuracy(Criteria.ACCURACY_COARSE);
+    	criteria.setCostAllowed(false);
+    	
+    	locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+    	String providerName = locationManager.getBestProvider(criteria, true);
+
+    	// If no suitable provider is found, null is returned.
+    	if (providerName != null) {
+    		locationManager.requestLocationUpdates(providerName, 1000, 1, this);
+    	}
+
+    	// add a message to kill the location updater if it takes more than 30 sec.
+    	class GpsTimeout implements Runnable {
+    		
+    		private LocationManager locationManager;
+			private LocationListener locationListener;
+
+    		public GpsTimeout(LocationManager locationManager, LocationListener locationListener) {
+    			this.locationManager = locationManager;
+    			this.locationListener = locationListener;
+    		}
+    		
+    		public void run() {
+    			Log.d(TAG, "kill the location updates");
+				locationManager.removeUpdates(locationListener);
+				stopLoadingSpinner(true);
+			}
+		}
+    	msgHandler.postDelayed(new GpsTimeout(locationManager, this), 30000);
 	}
 
 }
