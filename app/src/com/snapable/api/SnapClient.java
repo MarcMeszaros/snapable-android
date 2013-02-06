@@ -12,6 +12,8 @@ import android.graphics.Bitmap;
 public class SnapClient {
 	
 	private static volatile SnapClient instance = null;
+	private static final String live_api_key = "***REMOVED***";
+	private static final String live_api_secret = "***REMOVED***";
 	
 	// private class variable
 	private CRest crest;
@@ -21,17 +23,20 @@ public class SnapClient {
 	 */
 	private SnapClient() {
 		CRestBuilder builder = new CRestBuilder(); // get a CRestBuilder
-		Authorization auth = new SnapAuthorization(); // get our custom auth class
-		builder.property(Authorization.class.getName(), auth); // set the auth class to the builder
-		builder.bindDeserializer(SnapDeserializer.class, "image/jpeg"); // tell CRest to use our custom image deserializer
-		builder.bindSerializer(SnapBitmapSerializer.class, Bitmap.class); // tell CRest how to serialize Bitmap
 
-		// set the endpoint based on build flag
+		// set client values based on build mode
 		if (BuildConfig.DEBUG) {
 			builder.endpoint("http://devapi.snapable.com");
 		} else {
 			builder.endpoint("https://api.snapable.com");
+			SnapApi.setApiKeySecret(live_api_key, live_api_secret);
 		}
+
+		// set some CRestBuilder params
+		Authorization auth = new SnapAuthorization(); // get our custom auth class
+		builder.property(Authorization.class.getName(), auth); // set the auth class to the builder
+		builder.bindDeserializer(SnapDeserializer.class, "image/jpeg"); // tell CRest to use our custom image deserializer
+		builder.bindSerializer(SnapBitmapSerializer.class, Bitmap.class); // tell CRest how to serialize Bitmap
 
         this.crest = builder.build(); // return the CRest object
 	}
