@@ -10,7 +10,6 @@ import android.graphics.Bitmap;
 import com.snapable.api.SnapApi;
 import com.snapable.api.models.*;
 
-@EndPoint(SnapApi.api_host)
 @Path("/"+SnapApi.api_version+"/"+PhotoResource.RESOURCE_NAME+"/")
 @Consumes("application/json")
 public interface PhotoResource {

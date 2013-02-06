@@ -18,7 +18,6 @@ import javax.crypto.spec.SecretKeySpec;
 public class SnapApi {
 
 	// API information
-	public static final String api_host = "http://devapi.snapable.com"; // no trailing /
 	public static final String api_version = "private_v1";
 	private static final String api_key = "abc123"; // default: abc123
 	private static final String api_secret = "123"; // default: 123

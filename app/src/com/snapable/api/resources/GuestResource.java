@@ -6,7 +6,6 @@ import com.snapable.api.JsonEntityWriter;
 import com.snapable.api.SnapApi;
 import com.snapable.api.models.*;
 
-@EndPoint(SnapApi.api_host)
 @Path("/"+SnapApi.api_version+"/"+GuestResource.RESOURCE_NAME+"/")
 @Consumes("application/json")
 public interface GuestResource {

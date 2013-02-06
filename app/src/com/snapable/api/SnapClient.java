@@ -5,6 +5,8 @@ import org.codegist.crest.CRestBuilder;
 import org.codegist.crest.CRestException;
 import org.codegist.crest.security.Authorization;
 
+import ca.hashbrown.snapable.BuildConfig;
+
 import android.graphics.Bitmap;
 
 public class SnapClient {
@@ -23,6 +25,13 @@ public class SnapClient {
 		builder.property(Authorization.class.getName(), auth); // set the auth class to the builder
 		builder.bindDeserializer(SnapDeserializer.class, "image/jpeg"); // tell CRest to use our custom image deserializer
 		builder.bindSerializer(SnapBitmapSerializer.class, Bitmap.class); // tell CRest how to serialize Bitmap
+
+		// set the endpoint based on build flag
+		if (BuildConfig.DEBUG) {
+			builder.endpoint("http://devapi.snapable.com");
+		} else {
+			builder.endpoint("https://api.snapable.com");
+		}
 
         this.crest = builder.build(); // return the CRest object
 	}
