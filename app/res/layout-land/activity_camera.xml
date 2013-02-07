@@ -27,6 +27,7 @@
 
             <ImageButton
                 android:id="@+id/activity_camera__flash_mode"
+                style="@style/Widget.ImageButton.RoundedCorners"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
@@ -51,11 +52,13 @@
 
             <ImageButton
                 android:id="@+id/activity_camera__image_picker"
+                style="@style/Widget.ImageButton.RoundedCorners"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentTop="true"
                 android:layout_margin="5dp"
+                android:padding="5dp"
                 android:src="@drawable/button__image_picker" />
 
             <Button
