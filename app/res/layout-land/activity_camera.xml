@@ -23,7 +23,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="0.25"
-            android:background="#000000" >
+            android:background="#222222" >
 
             <ImageButton
                 android:id="@+id/activity_camera__flash_mode"
@@ -48,7 +48,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="0.25"
-            android:background="#000000" >
+            android:background="#222222" >
 
             <ImageButton
                 android:id="@+id/activity_camera__image_picker"

@@ -72,7 +72,12 @@ public class CameraActivity extends Activity implements OnClickListener, Picture
 		// get the display size
 		Display display = getWindowManager().getDefaultDisplay();
 		Point size = new Point();
-		display.getSize(size);
+		try {
+	        display.getSize(size); // newer devices
+	    } catch (java.lang.NoSuchMethodError e) { // Older device
+	        size.x = display.getWidth();
+	        size.y = display.getHeight();
+	    }
 
 		// if width < height
 		Log.d(TAG, "x,y: " + size.x + "," + size.y);

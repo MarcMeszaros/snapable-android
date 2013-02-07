@@ -20,6 +20,7 @@ import com.snapable.api.SnapClient;
 import com.snapable.api.models.Event;
 import com.snapable.api.resources.PhotoResource;
 
+import android.app.Activity;
 import android.content.ContentUris;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -88,7 +89,7 @@ public class PhotoUpload extends SherlockFragmentActivity implements OnClickList
 			EditText caption = (EditText) findViewById(R.id.fragment_photo_upload__caption);
 
 			// get the image data ready for uploading via the API
-	        PhotoUploadTask uploadTask = new PhotoUploadTask(event, caption.getText().toString(), imageBitmap);
+	        PhotoUploadTask uploadTask = new PhotoUploadTask(this, event, caption.getText().toString(), imageBitmap);
 	        uploadTask.execute();	
 			break;
 
@@ -100,11 +101,13 @@ public class PhotoUpload extends SherlockFragmentActivity implements OnClickList
 	
 	private class PhotoUploadTask extends AsyncTask<Void, Void, Void> {
 
+		private Activity activity;
 		private Event event;
 		private String caption;
 		private Bitmap photo;
 		
-		public PhotoUploadTask(Event event, String caption, Bitmap photo) {
+		public PhotoUploadTask(Activity activity, Event event, String caption, Bitmap photo) {
+			this.activity = activity;
 			this.event = event;
 			this.caption = caption;
 			this.photo = photo;
@@ -128,7 +131,7 @@ public class PhotoUpload extends SherlockFragmentActivity implements OnClickList
 	        
 	        // get local cached event info
 	        Uri queryUri = ContentUris.withAppendedId(SnapableContract.EventCredentials.CONTENT_URI, event.getId());
-	        Cursor c = getContentResolver().query(queryUri, null, null, null, null);
+	        Cursor c = activity.getContentResolver().query(queryUri, null, null, null, null);
 	        
 	        // upload via the API
 	        try {
@@ -138,10 +141,14 @@ public class PhotoUpload extends SherlockFragmentActivity implements OnClickList
 	        	if (c.moveToFirst()) {
 	        		long guest_id = c.getLong(c.getColumnIndex(SnapableContract.EventCredentials.GUEST_ID));
 	        		long type_id = c.getLong(c.getColumnIndex(SnapableContract.EventCredentials.TYPE_ID));
-	        		photoRes.postPhoto(inStream, event.getResourceUri(), "/"+SnapApi.api_version +"/guest/"+guest_id+"/", "/"+SnapApi.api_version +"/type/"+type_id+"/", caption);
-	        	} else {
-	        		photoRes.postPhoto(inStream, event.getResourceUri(), "/"+SnapApi.api_version +"/type/6/", caption);
-				}
+
+	        		// update the data
+	        		if(guest_id > 0) {
+		        		photoRes.postPhoto(inStream, event.getResourceUri(), "/"+SnapApi.api_version +"/guest/"+guest_id+"/", "/"+SnapApi.api_version +"/type/"+type_id+"/", caption);
+		        	} else {
+		        		photoRes.postPhoto(inStream, event.getResourceUri(), "/"+SnapApi.api_version +"/type/6/", caption);
+					}
+	        	}
 	        } catch (org.codegist.crest.CRestException e) {
 	        	Log.e(TAG, "problem with the response?", e);
 	        }
@@ -156,7 +163,7 @@ public class PhotoUpload extends SherlockFragmentActivity implements OnClickList
 			Log.d(TAG, "upload complete");
 
 			// we finished uploading the photo, close the activity
-			finish();
+			activity.finish();
 		}
 
 	}
