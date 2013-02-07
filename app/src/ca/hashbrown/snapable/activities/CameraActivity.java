@@ -34,6 +34,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
@@ -244,20 +245,20 @@ public class CameraActivity extends Activity implements OnClickListener, Picture
 	 * @param newMode the camera mode the backgroud need to be set too
 	 */
 	private void setFlashModeButton(String newMode) {
-		Button flashButton = (Button) findViewById(R.id.activity_camera__flash_mode);
+		ImageButton flashButton = (ImageButton) findViewById(R.id.activity_camera__flash_mode);
 		
 		// if the flash mode isn't null, set it, otherwise hide the button
 		if (newMode != null) {
 			cameraSurfaceView.setFlashMode(newMode);
 			if (newMode.equals(Camera.Parameters.FLASH_MODE_AUTO)) {
-				flashButton.setBackgroundResource(R.drawable.button__flash_mode__auto);
+				flashButton.setImageResource(R.drawable.button__flash_mode__auto);
 			} else if (newMode.equals(Camera.Parameters.FLASH_MODE_ON)) {
-				flashButton.setBackgroundResource(R.drawable.button__flash_mode__on);
+				flashButton.setImageResource(R.drawable.button__flash_mode__on);
 			} else {
-				flashButton.setBackgroundResource(R.drawable.button__flash_mode__off);
+				flashButton.setImageResource(R.drawable.button__flash_mode__off);
 			}
 		} else {
-			findViewById(R.id.activity_camera__flash_mode).setVisibility(View.GONE);
+			flashButton.setVisibility(View.GONE);
 		}
 	}
 
