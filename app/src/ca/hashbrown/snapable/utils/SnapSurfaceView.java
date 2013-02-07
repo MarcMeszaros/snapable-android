@@ -24,6 +24,15 @@ public class SnapSurfaceView extends android.view.SurfaceView implements Surface
 	private int cameraId;
 	private Camera camera;
 	private Parameters cameraParams;
+	private OnCameraReadyListener cameraReadyListener;
+
+	/**
+	 * An interface for various events that are fired when the surfaceview/camera are in different
+	 * states. 
+	 */
+	public interface OnCameraReadyListener {
+		public void onCameraReady(Camera.Parameters params);
+	}
 
 	public SnapSurfaceView(Context context) {
 		super(context);
@@ -110,6 +119,11 @@ public class SnapSurfaceView extends android.view.SurfaceView implements Surface
 				Log.d(TAG, "camera preview size: " + size.width + "x" + size.height);
 			}
 
+			// tell the camera listener the camera is ready (if the listener is set)
+			if(cameraReadyListener != null) {
+				cameraReadyListener.onCameraReady(cameraParams);
+			}
+
 			// set the surface preview
 			camera.setPreviewDisplay(holder);
 		} catch (IOException e) {
@@ -128,6 +142,15 @@ public class SnapSurfaceView extends android.view.SurfaceView implements Surface
 
 	public void takePicture(PictureCallback pictureCallback) {
 		camera.takePicture(null, null, pictureCallback);
+	}
+
+	/**
+	 * Set the listner to callback when the camera is ready.
+	 * 
+	 * @param listener the listener to callback when the camera is ready
+	 */
+	public void setOnCameraReadyListener(OnCameraReadyListener listener){
+		cameraReadyListener = listener;
 	}
 
 	/**
@@ -165,7 +188,11 @@ public class SnapSurfaceView extends android.view.SurfaceView implements Surface
 	}
 
 	public String getFlashMode() {
-		return cameraParams.getFlashMode();
+		if(cameraParams != null) {
+			return cameraParams.getFlashMode();
+		} else {
+			return null;
+		}
 	}
 	
 	public void setFlashMode(String mode) {

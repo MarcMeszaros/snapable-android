@@ -12,6 +12,7 @@ import ca.hashbrown.snapable.R;
 import ca.hashbrown.snapable.activities.PhotoUpload;
 import ca.hashbrown.snapable.utils.SnapStorage;
 import ca.hashbrown.snapable.utils.SnapSurfaceView;
+import ca.hashbrown.snapable.utils.SnapSurfaceView.OnCameraReadyListener;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -21,6 +22,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.hardware.Camera;
 import android.hardware.Camera.CameraInfo;
+import android.hardware.Camera.Parameters;
 import android.hardware.Camera.PictureCallback;
 import android.media.ExifInterface;
 import android.media.MediaScannerConnection;
@@ -35,7 +37,7 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
-public class CameraActivity extends Activity implements OnClickListener, PictureCallback {
+public class CameraActivity extends Activity implements OnClickListener, PictureCallback, OnCameraReadyListener {
 
 	private static final String TAG = "CameraActivity";
 
@@ -43,6 +45,7 @@ public class CameraActivity extends Activity implements OnClickListener, Picture
 	private SnapSurfaceView cameraSurfaceView;
 	private Button shutterButton;
 	private Bitmap bitmap;
+	private String lastFlashMode;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +59,7 @@ public class CameraActivity extends Activity implements OnClickListener, Picture
 		// set up our preview surface
 		FrameLayout preview = (FrameLayout) findViewById(R.id.activity_camera__preview);
 		cameraSurfaceView = new SnapSurfaceView(this);
+		cameraSurfaceView.setOnCameraReadyListener(this);
 		preview.addView(cameraSurfaceView);
 
 		// grab shutter button so we can reference it later
@@ -104,6 +108,24 @@ public class CameraActivity extends Activity implements OnClickListener, Picture
 	protected void onStop() {
 		super.onStop();
 		EasyTracker.getInstance().activityStop(this);
+	}
+
+	/**
+	 * Save the "lastFlashMode" so it persists when the user returns from the upload activity.
+	 */
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		outState.putString("lastFlashMode", lastFlashMode);
+		super.onSaveInstanceState(outState);
+	}
+
+	/**
+	 * When restoring the activity state, check if there is a "lastFlashMode" set in the bundle.
+	 */
+	@Override
+	protected void onRestoreInstanceState(Bundle savedInstanceState) {
+		lastFlashMode = savedInstanceState.getString("lastFlashMode");
+		super.onRestoreInstanceState(savedInstanceState);
 	}
 
 	public void onPictureTaken(byte[] data, Camera camera) {
@@ -185,16 +207,47 @@ public class CameraActivity extends Activity implements OnClickListener, Picture
 	}
 
 	/**
+	 * Set the new flash mode for the camera and updates the UI accordinggly.
 	 * 
-	 * @param mode
+	 * @param newMode the new flash mode for the camera
 	 */
 	private void setFlashMode(String newMode) {
 		// get current flash mode
 		String mode = cameraSurfaceView.getFlashMode();
+		cameraSurfaceView.setFlashMode(newMode);
+		setFlashModeButton(newMode);
+		lastFlashMode = newMode;
+	}
+
+	/**
+	 * Toggle the flash mode (if possible);
+	 */
+	private void toggleFlashMode() {
+		// get current flash mode
+		String mode = cameraSurfaceView.getFlashMode();
+
+		if (mode != null) {
+			Log.d(TAG, "toggle flash(current): " + mode);
+			if (mode.equals(Camera.Parameters.FLASH_MODE_AUTO)) {
+				setFlashMode(Camera.Parameters.FLASH_MODE_ON);
+			} else if (mode.equals(Camera.Parameters.FLASH_MODE_ON)) {
+				setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+			} else {
+				setFlashMode(Camera.Parameters.FLASH_MODE_AUTO);
+			}
+		}
+	}
+
+	/**
+	 * Set the flash mode button background.
+	 * 
+	 * @param newMode the camera mode the backgroud need to be set too
+	 */
+	private void setFlashModeButton(String newMode) {
 		Button flashButton = (Button) findViewById(R.id.activity_camera__flash_mode);
 		
 		// if the flash mode isn't null, set it, otherwise hide the button
-		if (mode != null) {
+		if (newMode != null) {
 			cameraSurfaceView.setFlashMode(newMode);
 			if (newMode.equals(Camera.Parameters.FLASH_MODE_AUTO)) {
 				flashButton.setBackgroundResource(R.drawable.button__flash_mode__auto);
@@ -207,21 +260,17 @@ public class CameraActivity extends Activity implements OnClickListener, Picture
 			findViewById(R.id.activity_camera__flash_mode).setVisibility(View.GONE);
 		}
 	}
-	
-	private void toggleFlashMode() {
-		// get current flash mode
-		String mode = cameraSurfaceView.getFlashMode();
 
-		if (mode != null) {
-			if (mode.equals(Camera.Parameters.FLASH_MODE_AUTO)) {
-				setFlashMode(Camera.Parameters.FLASH_MODE_ON);
-			} else if (mode.equals(Camera.Parameters.FLASH_MODE_ON)) {
-				setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
-			} else {
-				setFlashMode(Camera.Parameters.FLASH_MODE_AUTO);
-			}
+	/**
+	 * This is called when the camera is ready. Any last minute configurations should be made here.
+	 */
+	@Override
+	public void onCameraReady(Parameters params) {
+		if (lastFlashMode == null) {
+			setFlashMode(params.getFlashMode());
+		} else {
+			setFlashMode(lastFlashMode);
 		}
-		
 	}
 
 }

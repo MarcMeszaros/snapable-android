@@ -21,12 +21,14 @@ public class Snapable extends Application {
 		// if we are in release mode
 		if(!BuildConfig.DEBUG) {
 			Log.i(TAG, "Starting in release mode.");
-			// TODO set release stuff
+			
+			// set google analytics to be in release mode
+			// TODO implement release mode
 		} else {
 			Log.i(TAG, "Starting in debug mode.");
 
 			// set google analytics to be in debug mode
-			GoogleAnalytics.getInstance(this).setDebug(true);
+			GoogleAnalytics.getInstance(this).setAppOptOut(true);
 		}
 	}
 
