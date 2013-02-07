@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import com.google.analytics.tracking.android.EasyTracker;
 import com.snapable.api.models.Event;
 
 import ca.hashbrown.snapable.R;
@@ -91,6 +92,18 @@ public class CameraActivity extends Activity implements OnClickListener, Picture
 		((LinearLayout.LayoutParams)second.getLayoutParams()).weight = blackBarWeight;
 		((LinearLayout.LayoutParams)transparent.getLayoutParams()).weight = transparentWeight;
 		overlay.requestLayout();
+	}
+
+	@Override
+	protected void onStart() {
+		super.onStart();
+		EasyTracker.getInstance().activityStart(this);
+	}
+
+	@Override
+	protected void onStop() {
+		super.onStop();
+		EasyTracker.getInstance().activityStop(this);
 	}
 
 	public void onPictureTaken(byte[] data, Camera camera) {

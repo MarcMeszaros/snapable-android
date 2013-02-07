@@ -1,5 +1,7 @@
 package ca.hashbrown.snapable;
 
+import com.google.analytics.tracking.android.GoogleAnalytics;
+
 import android.app.Application;
 import android.util.Log;
 
@@ -22,7 +24,9 @@ public class Snapable extends Application {
 			// TODO set release stuff
 		} else {
 			Log.i(TAG, "Starting in debug mode.");
-			// TODO set debug stuff
+
+			// set google analytics to be in debug mode
+			GoogleAnalytics.getInstance(this).setDebug(true);
 		}
 	}
 
