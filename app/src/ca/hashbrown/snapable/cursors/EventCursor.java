@@ -6,12 +6,12 @@ import com.snapable.api.models.Event;
 
 import android.database.Cursor;
 import android.database.MatrixCursor;
-import android.util.Log;
 
 public class EventCursor extends MatrixCursor {
 	
-	private static final String TAG = "EventCursor";
-	
+	/**
+	 * Create a new EventCursor.
+	 */
 	public EventCursor() {
 		super(Event.COLUMN_NAMES);
 	}
@@ -19,13 +19,17 @@ public class EventCursor extends MatrixCursor {
 	/**
 	 * Create a new EventCursor.
 	 * 
-	 * @param columnNames The list of colums for the cursor.
-	 * @deprecated
+	 * @param columnNames The list of columns for the cursor.
 	 */
 	public EventCursor(String[] columnNames) {
 		super(Event.COLUMN_NAMES);
 	}
-	
+
+	/**
+	 * Create a new EventCursor using a regular Cursor.
+	 * 
+	 * @param c The cursor to convert into an EventCursor
+	 */
 	public EventCursor(Cursor c) {
 		super(c.getColumnNames());
 		int position = c.getPosition();
@@ -37,7 +41,6 @@ public class EventCursor extends MatrixCursor {
 	
 			// add the values for the row
 			for (String column : c.getColumnNames()) {
-				Log.i(TAG, column);
 				if (column.equals(Event.FIELD_ID)) { row.add(c.getLong(c.getColumnIndex(Event.FIELD_ID))); }
 				if (column.equals(Event.FIELD_COVER)) { row.add(c.getLong(c.getColumnIndex(Event.FIELD_COVER))); }
 				if (column.equals(Event.FIELD_ENABLED)) { row.add(c.getInt(c.getColumnIndex(Event.FIELD_ENABLED))); }
@@ -55,7 +58,12 @@ public class EventCursor extends MatrixCursor {
 		// move to the position the original cursor was at
 		this.moveToPosition(position);
 	}
-	
+
+	/**
+	 * Add an Event object to the Cursor.
+	 * 
+	 * @param event The event to add to the cursor.
+	 */
 	public void add(Event event) {
 		// create a new row
 		MatrixCursor.RowBuilder row = this.newRow();
@@ -77,6 +85,11 @@ public class EventCursor extends MatrixCursor {
 
 	}
 
+	/**
+	 * Get an event object at the position the cursor is currently pointing.
+	 * 
+	 * @return an Event object at the current cursor position
+	 */
 	public Event getEvent() {
 		checkPosition();
 		Event event = new Event();

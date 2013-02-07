@@ -25,6 +25,9 @@ public class PhotoListFragment extends ListFragment implements LoaderCallbacks<C
 	PhotoListAdapter photoAdapter;
 	Event event;
 	
+	public PhotoListFragment() {
+	}
+	
 	public PhotoListFragment(Event event) {
 		this.event = event;
 	}
@@ -42,18 +45,32 @@ public class PhotoListFragment extends ListFragment implements LoaderCallbacks<C
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		return inflater.inflate(R.layout.fragment_event_list, null);
+		return inflater.inflate(R.layout.fragment_photo_list, null);
 	}
 	
+	@Override
+	public void onResume() {
+		super.onResume();
+
+		// if the loader is already started, reload it
+		if(getLoaderManager().getLoader(PHOTOS).isStarted()) {
+			getLoaderManager().getLoader(PHOTOS).forceLoad();
+		}
+	}
+
 	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 		// This is called when a new Loader needs to be created.
 		// First, pick the base URI to use depending on whether we are
 		// currently filtering.
 		switch (id) {
 		case PHOTOS:
-			String selection = "event=?";
-			String[] selectionArgs = {String.valueOf(event.getId())};
-			return new CursorLoader(getActivity(), SnapableContract.Photo.CONTENT_URI, null, selection, selectionArgs, null);
+			if (this.event != null) {
+				String selection = "event=?";
+				String[] selectionArgs = {String.valueOf(event.getId())};
+				return new CursorLoader(getActivity(), SnapableContract.Photo.CONTENT_URI, null, selection, selectionArgs, null);
+			} else {
+				return null;
+			}
 		
 		default:
 			return null;
@@ -86,6 +103,11 @@ public class PhotoListFragment extends ListFragment implements LoaderCallbacks<C
 		default:
 			break;
 		}
+	}
+	
+	public void setEvent(Event event) {
+		this.event = event;
+		this.getLoaderManager().initLoader(PHOTOS, null, this);
 	}
 
 }

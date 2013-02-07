@@ -18,10 +18,9 @@ import javax.crypto.spec.SecretKeySpec;
 public class SnapApi {
 
 	// API information
-	public static final String api_host = "http://devapi.snapable.com"; // no trailing /
 	public static final String api_version = "private_v1";
-	private static final String api_key = "abc123"; // default: abc123
-	private static final String api_secret = "123"; // default: 123
+	private static String api_key = "abc123"; // default: abc123
+	private static String api_secret = "123"; // default: 123
 
 	// information used to generate signature
 	private static final String HMAC_SHA1_ALGORITHM = "HmacSHA1";
@@ -111,6 +110,17 @@ public class SnapApi {
 		resp.put("signature", enc.toString());
 
 		return resp;
+	}
+
+	/**
+	 * Helper method to set the API key and secret.
+	 * 
+	 * @param key the API key
+	 * @param secret the API secret
+	 */
+	public static void setApiKeySecret(String key, String secret) {
+		SnapApi.api_key = key;
+		SnapApi.api_secret = secret;
 	}
 
 }

@@ -3,16 +3,18 @@ package ca.hashbrown.snapable.adapters;
 import java.util.ArrayList;
 
 import ca.hashbrown.snapable.R;
+import ca.hashbrown.snapable.provider.SnapCache;
+import ca.hashbrown.snapable.provider.SnapCache.AsyncDrawable;
+import ca.hashbrown.snapable.provider.SnapCache.EventWorkerTask;
 
-import com.snapable.api.SnapClient;
 import com.snapable.api.models.Event;
-import com.snapable.api.resources.EventResource;
 
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.os.AsyncTask;
-import android.util.Log;
+import android.graphics.BitmapFactory;
+import android.text.format.DateFormat;
+import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,15 +25,16 @@ import android.widget.TextView;
 public class EventListAdapter extends CursorAdapter {
 
 	private static final String TAG = "EventListAdapter";
-	ArrayList<Bitmap> imagesList;
+	private final Bitmap placeholder;
 	
 	public EventListAdapter(Context context, Cursor c) {
 		super(context, c);
-		this.imagesList = new ArrayList<Bitmap>();
+		this.placeholder = BitmapFactory.decodeResource(context.getResources(), R.drawable.photo_blank);
 	}
 	
 	static class ViewHolder {
         protected TextView title;
+        protected TextView date;
         protected ImageView cover;
     }
 	
@@ -46,21 +49,20 @@ public class EventListAdapter extends CursorAdapter {
 
 		// set the title
 		viewHolder.title.setText(cursor.getString(cursor.getColumnIndex(Event.FIELD_TITLE)));
+		long start = cursor.getLong(cursor.getColumnIndex(Event.FIELD_START));
+		viewHolder.date.setText(DateFormat.format("EEE MMMM d, h:mm a", start));
 
 		// get the image, if there is one
-		if (this.imagesList.size()-1 >= cursor.getPosition()) {
-			Bitmap cover = (Bitmap) this.imagesList.get(cursor.getPosition());
-			if (cover != null) {
-				viewHolder.cover.setImageBitmap(cover);
-			} else {
-				viewHolder.cover.setImageResource(R.drawable.photo_blank);
-			}
-			
-		} else {
-			viewHolder.cover.setImageResource(R.drawable.photo_blank);
-			LoadCoverTask task = new LoadCoverTask(this, this.imagesList, cursor.getPosition());
-			task.execute(cursor.getLong(cursor.getColumnIndex(Event.FIELD_ID)));
-		}
+		final String imageKey = cursor.getLong(cursor.getColumnIndex(Event.FIELD_ID)) + "_480x480";
+		Bitmap bm = SnapCache.PhotoWorkerTask.getBitmapFromCache(imageKey);
+		if (bm != null) {
+			viewHolder.cover.setImageBitmap(bm);
+		} else if (SnapCache.EventWorkerTask.cancelPotentialWork(cursor.getLong(cursor.getColumnIndex(Event.FIELD_ID)), viewHolder.cover)) {
+            final EventWorkerTask task = new EventWorkerTask(viewHolder.cover);
+            final AsyncDrawable asyncDrawable = new AsyncDrawable(context.getResources(), this.placeholder, task);
+            viewHolder.cover.setImageDrawable(asyncDrawable);
+            task.execute(cursor.getLong(cursor.getColumnIndex(Event.FIELD_ID)));
+        }
 	}
 
 	@Override
@@ -70,44 +72,12 @@ public class EventListAdapter extends CursorAdapter {
 		
 		// bind the various views to the viewholder
 		final ViewHolder viewHolder = new ViewHolder();
-		viewHolder.title = (TextView) v.findViewById(R.id.EventRow_event_title);
-		viewHolder.cover = (ImageView) v.findViewById(R.id.EventRow_event_cover);
+		viewHolder.title = (TextView) v.findViewById(R.id.listview_row_event__title);
+		viewHolder.date = (TextView) v.findViewById(R.id.listview_row_event__date);
+		viewHolder.cover = (ImageView) v.findViewById(R.id.listview_row_event__cover);
 		v.setTag(viewHolder);
 		
 		bindView(v, context, cursor);
 		return v;
-	}
-	
-	private class LoadCoverTask extends AsyncTask<Long, Void, Bitmap> {
-		
-		private EventListAdapter adapter;
-		private ArrayList<Bitmap> imagesList;
-		private int position;
-		
-		public LoadCoverTask(EventListAdapter adapter, ArrayList<Bitmap> imagesList, int position) {
-			this.adapter = adapter;
-			this.imagesList = imagesList;
-			this.position = position;
-		}
-
-		@Override
-		protected Bitmap doInBackground(Long... params) {
-			try{
-				return SnapClient.getInstance().build(EventResource.class).getEventPhotoBinary(params[0], "150x150");
-			} catch (Exception e) {
-				return null;
-			}
-		}
-		
-		@Override
-		protected void onPostExecute(Bitmap result) {
-			if (this.imagesList.size()-1 <= this.position) {
-				this.imagesList.ensureCapacity(this.position + 1);
-				this.imagesList.add(null);
-			}
-			this.imagesList.set(this.position, result);
-			this.adapter.notifyDataSetChanged();
-		}
-		
 	}
 }

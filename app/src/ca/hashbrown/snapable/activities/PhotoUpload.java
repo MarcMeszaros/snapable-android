@@ -1,0 +1,170 @@
+package ca.hashbrown.snapable.activities;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileDescriptor;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+
+import ca.hashbrown.snapable.R;
+import ca.hashbrown.snapable.provider.SnapableContract;
+import ca.hashbrown.snapable.utils.SnapBitmapFactory;
+import ca.hashbrown.snapable.utils.SnapStorage;
+
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.google.analytics.tracking.android.EasyTracker;
+
+import com.snapable.api.SnapApi;
+import com.snapable.api.SnapClient;
+import com.snapable.api.models.Event;
+import com.snapable.api.resources.PhotoResource;
+
+import android.app.Activity;
+import android.content.ContentUris;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.graphics.drawable.BitmapDrawable;
+import android.media.MediaScannerConnection;
+import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.provider.MediaStore;
+import android.util.Log;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
+
+public class PhotoUpload extends SherlockFragmentActivity implements OnClickListener {
+
+	private static final String TAG = "PhotoUpload";
+	
+	private Event event;
+	private Bitmap imageBitmap;
+
+	@Override
+    public void onCreate(Bundle savedInstanceState) {
+    	super.onCreate(savedInstanceState);
+    	setContentView(R.layout.activity_photo_upload);
+    	
+    	findViewById(R.id.fragment_photo_upload__button_done).setOnClickListener(this);
+    	
+    	// get the extra bundle data
+    	Bundle bundle = getIntent().getExtras();
+    	event = bundle.getParcelable("event");
+		imageBitmap = BitmapFactory.decodeFile(bundle.getString("imagePath"));
+
+		// create a scaled bitmap
+		ImageView photo = (ImageView) findViewById(R.id.fragment_photo_upload__image);
+    	Bitmap bmScaled = Bitmap.createScaledBitmap(imageBitmap, 150, 150, false);
+
+    	// set the scaled image in the image view
+    	photo.setImageBitmap(bmScaled);
+    	
+    	// set the action bar title
+    	getSupportActionBar().setTitle(event.getTitle());
+    }
+
+	@Override
+	protected void onStart() {
+		super.onStart();
+		EasyTracker.getInstance().activityStart(this);
+	}
+
+	@Override
+	protected void onStop() {
+		super.onStop();
+		EasyTracker.getInstance().activityStop(this);
+	}
+
+	public void onClick(View v) {
+		switch (v.getId()) {
+		case R.id.fragment_photo_upload__button_done:
+			// get the image caption
+			EditText caption = (EditText) findViewById(R.id.fragment_photo_upload__caption);
+
+			// get the image data ready for uploading via the API
+	        PhotoUploadTask uploadTask = new PhotoUploadTask(this, event, caption.getText().toString(), imageBitmap);
+	        uploadTask.execute();	
+			break;
+
+		default:
+			break;
+		}
+		
+	}
+	
+	private class PhotoUploadTask extends AsyncTask<Void, Void, Void> {
+
+		private Activity activity;
+		private Event event;
+		private String caption;
+		private Bitmap photo;
+		
+		public PhotoUploadTask(Activity activity, Event event, String caption, Bitmap photo) {
+			this.activity = activity;
+			this.event = event;
+			this.caption = caption;
+			this.photo = photo;
+		}
+		
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			ProgressBar pb = (ProgressBar) findViewById(R.id.fragment_photo_upload__progressBar);
+			Button butt = (Button) findViewById(R.id.fragment_photo_upload__button_done);
+			pb.setVisibility(View.VISIBLE);
+			butt.setVisibility(View.INVISIBLE);
+		}
+		
+		@Override
+		protected Void doInBackground(Void... params) {
+			// turn the bitmap into an input stream
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();  
+	        photo.compress(Bitmap.CompressFormat.JPEG, 50, baos);
+	        ByteArrayInputStream inStream = new ByteArrayInputStream(baos.toByteArray());
+	        
+	        // get local cached event info
+	        Uri queryUri = ContentUris.withAppendedId(SnapableContract.EventCredentials.CONTENT_URI, event.getId());
+	        Cursor c = activity.getContentResolver().query(queryUri, null, null, null, null);
+	        
+	        // upload via the API
+	        try {
+	        	PhotoResource photoRes = SnapClient.getInstance().build(PhotoResource.class);
+	        	
+	        	// if we have a guest id, upload the photo with the id
+	        	if (c.moveToFirst()) {
+	        		long guest_id = c.getLong(c.getColumnIndex(SnapableContract.EventCredentials.GUEST_ID));
+	        		long type_id = c.getLong(c.getColumnIndex(SnapableContract.EventCredentials.TYPE_ID));
+
+	        		// update the data
+	        		if(guest_id > 0) {
+		        		photoRes.postPhoto(inStream, event.getResourceUri(), "/"+SnapApi.api_version +"/guest/"+guest_id+"/", "/"+SnapApi.api_version +"/type/"+type_id+"/", caption);
+		        	} else {
+		        		photoRes.postPhoto(inStream, event.getResourceUri(), "/"+SnapApi.api_version +"/type/6/", caption);
+					}
+	        	}
+	        } catch (org.codegist.crest.CRestException e) {
+	        	Log.e(TAG, "problem with the response?", e);
+	        }
+			return null;
+		}
+		
+		@Override
+		protected void onPostExecute(Void result) {
+			super.onPostExecute(result);
+			ProgressBar pb = (ProgressBar) findViewById(R.id.fragment_photo_upload__progressBar);
+			pb.setVisibility(View.INVISIBLE);
+			Log.d(TAG, "upload complete");
+
+			// we finished uploading the photo, close the activity
+			activity.finish();
+		}
+
+	}
+}

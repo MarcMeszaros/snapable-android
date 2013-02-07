@@ -3,6 +3,8 @@ package com.snapable.api.models;
 import org.codegist.common.lang.ToStringBuilder;
 import org.codehaus.jackson.annotate.JsonProperty;
 
+import android.provider.BaseColumns;
+
 public class Guest {
 	@JsonProperty("email")
 	private String email;
@@ -15,13 +17,31 @@ public class Guest {
 	@JsonProperty("type")
 	private String typeUri;
 	
+	// fields
+    public static final String FIELD_ID = BaseColumns._ID;
+    public static final String FIELD_EMAIL = "email";
+    public static final String FIELD_EVENT_URI = "eventUri";
+    public static final String FIELD_NAME = "name";
+    public static final String FIELD_RESOURCE_URI = "resourceUri";
+    public static final String FIELD_TYPE_URI = "typeUri";
+    
+    // required for a Cursor implementation
+    public static final String[] COLUMN_NAMES = {
+    	FIELD_ID,
+    	FIELD_EMAIL,
+    	FIELD_EVENT_URI,
+    	FIELD_NAME,
+    	FIELD_RESOURCE_URI,
+    	FIELD_TYPE_URI
+    };
+	
     public String toString() {
         return new ToStringBuilder(this)
-            .append("email", this.email)
-            .append("eventUri", this.eventUri)
-        	.append("name", this.name)
-        	.append("resourceUri", this.resourceUri)
-        	.append("typeUri", this.typeUri)
+            .append(FIELD_EMAIL, this.email)
+            .append(FIELD_EVENT_URI, this.eventUri)
+        	.append(FIELD_NAME, this.name)
+        	.append(FIELD_RESOURCE_URI, this.resourceUri)
+        	.append(FIELD_TYPE_URI, this.typeUri)
             .toString();
     }
 

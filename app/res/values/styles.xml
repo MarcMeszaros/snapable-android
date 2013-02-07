@@ -1,5 +1,17 @@
-<resources>
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <style name="AppTheme" parent="android:Theme.Light" />
+    <style name="Theme.Styled" parent="Theme.Sherlock.Light.DarkActionBar">
+        
+    </style>
+    
+    <style name="Theme.Styled.NoActionBar" parent="Theme.Sherlock.NoActionBar">
+        
+    </style>
 
+
+    <!-- Custom stuff -->
+    <style name="Widget.ImageButton.RoundedCorners" parent="@android:style/Widget.ImageButton">
+        <item name="android:background">@drawable/widget_imagebutton_background</item>
+    </style>
 </resources>

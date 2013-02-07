@@ -7,11 +7,11 @@ public class Meta {
 	@JsonProperty("limit")
     private long limit;
 	@JsonProperty("next")
-    private long next;
+    private String next;
 	@JsonProperty("offset")
     private long offset;
 	@JsonProperty("previous")
-    private long previous;
+    private String previous;
 	@JsonProperty("total_count")
     private long totalCount;
     
@@ -33,11 +33,11 @@ public class Meta {
         this.limit = limit;
     }
     
-    public long getNext() {
+    public String getNext() {
         return this.next;
     }
 
-    public void setNext(long next) {
+    public void setNext(String next) {
         this.next = next;
     }
     
@@ -49,11 +49,11 @@ public class Meta {
         this.offset = offset;
     }
     
-    public long getPrevious() {
+    public String getPrevious() {
         return this.previous;
     }
 
-    public void setPrevious(long previous) {
+    public void setPrevious(String previous) {
         this.previous = previous;
     }
     

@@ -5,7 +5,6 @@ import org.codegist.crest.annotate.*;
 import com.snapable.api.SnapApi;
 import com.snapable.api.models.*;
 
-@EndPoint(SnapApi.api_host)
 @Path("/"+SnapApi.api_version+"/"+EventResource.RESOURCE_NAME+"/")
 @Consumes("application/json")
 public interface EventResource {
@@ -16,6 +15,19 @@ public interface EventResource {
     @Path("/")
     Pager<Event[]> getEvents();
     
+    @GET
+    @Path("/")
+    Pager<Event[]> getEvents(
+    	@QueryParam("lat") float lat,
+    	@QueryParam("lng") float lng
+    );
+
+    @GET
+    @Path("/search/")
+    Pager<Event[]> getEvents(
+    	@QueryParam("q") String query
+    );
+
     @GET
     @Path("/{id}/")
     Event getEvent(

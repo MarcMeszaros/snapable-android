@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                      http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <!-- get the reference to the parent POM -->
+    <parent>
+        <groupId>ca.hashbrown.snapable</groupId>
+        <artifactId>parent</artifactId>
+        <version>1.0</version>
+    </parent>
+
+    <!-- define the applications -->
+    <artifactId>test</artifactId>
+    <packaging>apk</packaging>
+    <name>Snapable - test</name>
+
+    <!-- include required dependencies declared available in the parent POM -->
+    <dependencies>
+        <!-- the Android SDK library -->
+        <dependency>
+            <groupId>android</groupId>
+            <artifactId>android</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- the target apk, which we will test -->
+        <dependency>
+            <groupId>ca.hashbrown.snapable</groupId>
+            <artifactId>app</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+            <type>apk</type>
+        </dependency>
+        
+        <!-- required: compile time dependency, so that we can read from the R.java and other -->
+        <dependency>
+            <groupId>ca.hashbrown.snapable</groupId>
+            <artifactId>app</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+            <type>jar</type>
+        </dependency>
+        
+        <!-- Testing -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.8.1</version>
+		</dependency>
+
+    </dependencies>
+
+    <!-- override some defaults with module specific parameters -->
+    <build>
+        <finalName>${project.version}</finalName>
+        <sourceDirectory>src</sourceDirectory>
+
+        <plugins>
+
+            <!-- android maven plugin -->
+            <plugin>
+                <groupId>com.jayway.maven.plugins.android.generation2</groupId>
+                <artifactId>android-maven-plugin</artifactId>
+            </plugin>
+
+        </plugins>
+
+    </build>    
+
+</project>
