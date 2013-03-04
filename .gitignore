@@ -1,16 +1,20 @@
 ## ignore automatically generated files
 target/
 out/
+
 app/bin/
 app/gen/
 app/build/
 app/out/
 app/target/
+
 test/bin/
 test/gen/
 test/build/
 test/out/
 test/target/
+
+*gen-external-apklibs/
 
 ## ignore certain files
 test/proguard.cfg
