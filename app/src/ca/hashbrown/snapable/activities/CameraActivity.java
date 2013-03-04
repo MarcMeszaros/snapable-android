@@ -41,8 +41,7 @@ public class CameraActivity extends Activity implements OnClickListener, Picture
 	private Event event;
 	private SnapSurfaceView cameraSurfaceView;
 	private Button shutterButton;
-	private Bitmap bitmap;
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -101,7 +100,7 @@ public class CameraActivity extends Activity implements OnClickListener, Picture
 
 		try {
 			// save the image
-			bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+			Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
 			// tweak the bitmap so it's square before saving
 			if (bitmap.getWidth() > bitmap.getHeight()) {
 				int x = (bitmap.getWidth() - bitmap.getHeight()) / 2;
@@ -117,6 +116,8 @@ public class CameraActivity extends Activity implements OnClickListener, Picture
 			File filename = SnapStorage.getOutputMediaFile(SnapStorage.MEDIA_TYPE_IMAGE);
 			FileOutputStream out = new FileOutputStream(filename);
 			bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+			bitmap.recycle(); // make extra sure it will be garbage collected
+			bitmap = null; // make extra sure there are no pointers
 			MediaScannerConnection.scanFile(this, new String[]{filename.getAbsolutePath()}, null, null); // tell the system to scan the image
 
 			// pass all the data to the photo upload activity

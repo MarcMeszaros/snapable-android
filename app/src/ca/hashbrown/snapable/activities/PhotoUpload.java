@@ -43,7 +43,8 @@ public class PhotoUpload extends SherlockFragmentActivity implements OnClickList
 	private static final String TAG = "PhotoUpload";
 	
 	private Event event;
-	private Bitmap imageBitmap;
+	//private Bitmap imageBitmap;
+	private String imagePath;
 
 	@Override
     public void onCreate(Bundle savedInstanceState) {
@@ -55,11 +56,13 @@ public class PhotoUpload extends SherlockFragmentActivity implements OnClickList
     	// get the extra bundle data
     	Bundle bundle = getIntent().getExtras();
     	event = bundle.getParcelable("event");
-		imageBitmap = BitmapFactory.decodeFile(bundle.getString("imagePath"));
+		//imageBitmap = BitmapFactory.decodeFile(bundle.getString("imagePath"));
+    	imagePath = bundle.getString("imagePath");
 
 		// create a scaled bitmap
 		ImageView photo = (ImageView) findViewById(R.id.fragment_photo_upload__image);
-    	Bitmap bmScaled = Bitmap.createScaledBitmap(imageBitmap, 150, 150, false);
+    	//Bitmap bmScaled = Bitmap.createScaledBitmap(imageBitmap, 150, 150, false);
+    	Bitmap bmScaled = PhotoUpload.decodeSampledBitmapFromPath(bundle.getString("imagePath"), 150, 150);
 
     	// set the scaled image in the image view
     	photo.setImageBitmap(bmScaled);
@@ -75,7 +78,7 @@ public class PhotoUpload extends SherlockFragmentActivity implements OnClickList
 			EditText caption = (EditText) findViewById(R.id.fragment_photo_upload__caption);
 
 			// get the image data ready for uploading via the API
-	        PhotoUploadTask uploadTask = new PhotoUploadTask(event, caption.getText().toString(), imageBitmap);
+	        PhotoUploadTask uploadTask = new PhotoUploadTask(event, caption.getText().toString(), imagePath);
 	        uploadTask.execute();	
 			break;
 
@@ -85,16 +88,52 @@ public class PhotoUpload extends SherlockFragmentActivity implements OnClickList
 		
 	}
 	
+	public static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
+	    // Raw height and width of image
+	    final int height = options.outHeight;
+	    final int width = options.outWidth;
+	    int inSampleSize = 1;
+	
+	    if (height > reqHeight || width > reqWidth) {
+	
+	        // Calculate ratios of height and width to requested height and width
+	        final int heightRatio = Math.round((float) height / (float) reqHeight);
+	        final int widthRatio = Math.round((float) width / (float) reqWidth);
+	
+	        // Choose the smallest ratio as inSampleSize value, this will guarantee
+	        // a final image with both dimensions larger than or equal to the
+	        // requested height and width.
+	        inSampleSize = heightRatio < widthRatio ? heightRatio : widthRatio;
+	    }
+	
+	    return inSampleSize;
+	}
+	
+	public static Bitmap decodeSampledBitmapFromPath(String path, int reqWidth, int reqHeight) {
+
+	    // First decode with inJustDecodeBounds=true to check dimensions
+	    final BitmapFactory.Options options = new BitmapFactory.Options();
+	    options.inJustDecodeBounds = true;
+	    BitmapFactory.decodeFile(path, options);
+
+	    // Calculate inSampleSize
+	    options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+
+	    // Decode bitmap with inSampleSize set
+	    options.inJustDecodeBounds = false;
+	    return BitmapFactory.decodeFile(path, options);
+	}
+	
 	private class PhotoUploadTask extends AsyncTask<Void, Void, Void> {
 
 		private Event event;
 		private String caption;
-		private Bitmap photo;
+		private String photoPath;
 		
-		public PhotoUploadTask(Event event, String caption, Bitmap photo) {
+		public PhotoUploadTask(Event event, String caption, String photoPath) {
 			this.event = event;
 			this.caption = caption;
-			this.photo = photo;
+			this.photoPath = photoPath;
 		}
 		
 		@Override
@@ -108,6 +147,8 @@ public class PhotoUpload extends SherlockFragmentActivity implements OnClickList
 		
 		@Override
 		protected Void doInBackground(Void... params) {
+			Bitmap photo = BitmapFactory.decodeFile(photoPath);
+			
 			// turn the bitmap into an input stream
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();  
 	        photo.compress(Bitmap.CompressFormat.JPEG, 50, baos);
@@ -125,12 +166,20 @@ public class PhotoUpload extends SherlockFragmentActivity implements OnClickList
 	        	if (c.moveToFirst()) {
 	        		long guest_id = c.getLong(c.getColumnIndex(SnapableContract.EventCredentials.GUEST_ID));
 	        		long type_id = c.getLong(c.getColumnIndex(SnapableContract.EventCredentials.TYPE_ID));
-	        		photoRes.postPhoto(inStream, event.getResourceUri(), "/"+SnapApi.api_version +"/guest/"+guest_id+"/", "/"+SnapApi.api_version +"/type/"+type_id+"/", caption);
+	        		if(guest_id > 0 && type_id > 0) {
+	        			photoRes.postPhoto(inStream, event.getResourceUri(), "/"+SnapApi.api_version +"/guest/"+guest_id+"/", "/"+SnapApi.api_version +"/type/"+type_id+"/", caption);
+	        		} else {
+	        			photoRes.postPhoto(inStream, event.getResourceUri(), "/"+SnapApi.api_version +"/type/6/", caption);
+	        		}
 	        	} else {
 	        		photoRes.postPhoto(inStream, event.getResourceUri(), "/"+SnapApi.api_version +"/type/6/", caption);
 				}
 	        } catch (org.codegist.crest.CRestException e) {
 	        	Log.e(TAG, "problem with the response?", e);
+	        } finally {
+	        	// make sure memory is released
+	        	photo.recycle();
+	        	photo = null;
 	        }
 			return null;
 		}
