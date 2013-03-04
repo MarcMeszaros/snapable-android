@@ -188,14 +188,19 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 	private boolean cachedPinMatchesEventPin(Event event) {
 		Uri requestUri = ContentUris.withAppendedId(SnapableContract.EventCredentials.CONTENT_URI, event.getId());
 		Cursor result = getActivity().getContentResolver().query(requestUri, null, null, null, null);
-		
-		// we have a result
-		if (result.getCount() > 0 && event.getIsPublic()) {
-			return true;
-		}
-		else if (result.getCount() > 0 && result.moveToFirst()) {
-			return result.getString(result.getColumnIndex(SnapableContract.EventCredentials.PIN)).equals(event.getPin());
-		}
+
+        try {
+            // we have a result
+            if (result.getCount() > 0 && event.getIsPublic()) {
+                return true;
+            }
+            else if (result.getCount() > 0 && result.moveToFirst()) {
+                return result.getString(result.getColumnIndex(SnapableContract.EventCredentials.PIN)).equals(event.getPin());
+            }
+        } catch (NullPointerException e) {
+            Log.e(TAG, "Null pointer while trying to access cached event PIN", e);
+            return false;
+        }
 		
 		// there was no result
 		return false;

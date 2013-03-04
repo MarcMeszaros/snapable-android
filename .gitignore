@@ -1,29 +1,44 @@
-# ignore automatically generated files
+## ignore automatically generated files
 target/
+out/
+
 app/bin/
 app/gen/
 app/build/
+app/out/
 app/target/
+
 test/bin/
 test/gen/
 test/build/
+test/out/
 test/target/
 
-# ignore certain files
+*gen-external-apklibs/
+
+## ignore certain files
 test/proguard.cfg
 
-# ignore IDE project files
+## ignore IDE project files
+# Eclipse
 .project
 .settings/
 .classpath
 .metadata
 .checkstyle
+# IntelliJ
+.idea
+*.iml
 
-# ignore keystores related files
+## ignore thirdparty stuff
+# crashlytics
+*.crashlytics_data
+
+## ignore keystores related files
 *.keystore
 *.properties
 
-# ignore temp files from various editors
+## ignore temp files from various editors
 .DS_Store
 *~
 *.swp
