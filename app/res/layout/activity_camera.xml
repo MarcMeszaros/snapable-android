@@ -22,15 +22,17 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="0.25"
-            android:background="#000000" >
+            android:background="#222222" >
 
-            <Button
+            <ImageButton
                 android:id="@+id/activity_camera__flash_mode"
+                style="@style/Widget.ImageButton.RoundedCorners"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
                 android:layout_alignParentRight="true"
-                android:background="@drawable/button__flash_mode__auto" />
+                android:layout_alignParentTop="true"
+                android:layout_margin="5dp"
+                android:src="@drawable/button__flash_mode__auto" />
         </RelativeLayout>
 
         <RelativeLayout
@@ -45,7 +47,7 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="0.25"
-            android:background="#000000" >
+            android:background="#222222" >
 
             <Button
                 android:id="@+id/activity_camera__shutter_button"
@@ -55,13 +57,16 @@
                 android:layout_centerHorizontal="true"
                 android:background="@drawable/button__camera" />
 
-            <Button
+            <ImageButton
                 android:id="@+id/activity_camera__image_picker"
+                style="@style/Widget.ImageButton.RoundedCorners"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:layout_alignParentRight="true"
-                android:background="@drawable/button__image_picker" />
+                android:layout_margin="5dp"
+                android:padding="5dp"
+                android:src="@drawable/button__image_picker" />
         </RelativeLayout>
     </LinearLayout>
 

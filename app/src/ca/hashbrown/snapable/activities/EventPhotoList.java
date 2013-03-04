@@ -11,6 +11,7 @@ import ca.hashbrown.snapable.fragments.PhotoListFragment;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.MenuItem;
+import com.google.analytics.tracking.android.EasyTracker;
 
 import com.snapable.api.SnapClient;
 import com.snapable.api.models.Event;
@@ -57,6 +58,18 @@ public class EventPhotoList extends SherlockFragmentActivity implements OnClickL
 		// make the action bar button home button go back
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		getSupportActionBar().setTitle(event.getTitle());
+	}
+
+	@Override
+	protected void onStart() {
+		super.onStart();
+		EasyTracker.getInstance().activityStart(this);
+	}
+
+	@Override
+	protected void onStop() {
+		super.onStop();
+		EasyTracker.getInstance().activityStop(this);
 	}
 
 	public void onClick(View v) {

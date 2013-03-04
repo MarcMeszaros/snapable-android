@@ -13,5 +13,8 @@
     <string name="strings__fragment_event_auth__email">Email</string>
     
     <string name="strings__fragment_event_list__empty">Unable to find any events nearby. Try searching for the event.</string>
+
+    <string name="fragment_photo_upload__caption_hint">Caption (Optional)</string>
+    <string name="fragment_photo_upload__button_done">Upload</string>
     
 </resources>

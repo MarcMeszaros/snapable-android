@@ -76,6 +76,7 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 				// get the query string if required
 				if (args != null && args.containsKey("q")) {
 					Log.d(TAG, "CursorLoader: q");
+					startLoadingSpinner(false);
 					String selection = "q=?";
 					String[] selectionArgs = {args.getString("q")};
 					return new CursorLoader(getActivity(), SnapableContract.Event.CONTENT_URI, null, selection, selectionArgs, null);
