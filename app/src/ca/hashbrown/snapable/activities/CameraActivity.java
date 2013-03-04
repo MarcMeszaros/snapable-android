@@ -38,7 +38,7 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
-spublic class CameraActivity extends Activity implements OnClickListener, PictureCallback, OnCameraReadyListener {
+public class CameraActivity extends Activity implements OnClickListener, PictureCallback, OnCameraReadyListener {
 
 	private static final String TAG = "CameraActivity";
 
