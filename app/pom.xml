@@ -15,6 +15,7 @@
 	<artifactId>app</artifactId>
 	<packaging>apk</packaging>
 	<name>Snapable - app</name>
+    <version>1.0.1</version>
 
 	<!-- include required dependencies declared in the parent POM -->
 	<dependencies>
