@@ -26,6 +26,10 @@ test/proguard.cfg
 .idea
 *.iml
 
+## ignore thirdparty stuff
+# crashlytics
+*.crashlytics_data
+
 ## ignore keystores related files
 *.keystore
 *.properties
