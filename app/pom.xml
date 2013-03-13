@@ -43,7 +43,7 @@
 
 		<dependency>
 			<groupId>com.actionbarsherlock</groupId>
-			<artifactId>library</artifactId>
+			<artifactId>actionbarsherlock</artifactId>
 			<type>apklib</type>
 			<version>4.2.0</version>
 			<exclusions>
@@ -54,16 +54,22 @@
 			</exclusions>
 		</dependency>
 
-		<!-- Hack for Eclipse -->
+		<!-- Hack for Eclipse/IntelliJ -->
 		<dependency>
 			<groupId>com.actionbarsherlock</groupId>
-			<artifactId>library</artifactId>
+			<artifactId>actionbarsherlock</artifactId>
 			<type>jar</type>
 			<version>4.2.0</version>
 			<scope>provided</scope>
 		</dependency>
 
-		<!-- Google Analytics Android Library (from http://nexus.snapable.com) -->
+        <dependency>
+            <groupId>com.crashlytics.android</groupId>
+            <artifactId>crashlytics</artifactId>
+            <version>0.9.4</version>
+        </dependency>
+
+        <!-- Google Analytics Android Library (from http://nexus.snapable.com) -->
 		<dependency>
 			<groupId>com.google.android</groupId>
 			<artifactId>analytics</artifactId>

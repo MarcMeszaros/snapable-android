@@ -21,7 +21,7 @@
 	</properties>
 
 	<repositories>
-		<repository>
+        <repository>
 			<id>snapable.thirtparty</id>
 			<url>http://nexus.snapable.com/content/repositories/thirdparty</url>
 		</repository>
@@ -29,7 +29,12 @@
 			<id>snapable.thirtparty-snapshots</id>
 			<url>http://nexus.snapable.com/content/repositories/thirdparty-snapshots</url>
 		</repository>
-	</repositories>
+        <repository>
+            <id>crashlytics-repo</id>
+            <url>http://download.crashlytics.com/maven</url>
+        </repository>
+
+    </repositories>
 
 	<dependencyManagement>
 		<dependencies>
