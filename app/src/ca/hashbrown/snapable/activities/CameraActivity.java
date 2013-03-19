@@ -47,7 +47,6 @@ public class CameraActivity extends Activity implements OnClickListener, Picture
 	private Event event;
 	private SnapSurfaceView cameraSurfaceView;
 	private Button shutterButton;
-	private Bitmap bitmap;
 	private String lastFlashMode;
 	
 	@Override
@@ -147,22 +146,30 @@ public class CameraActivity extends Activity implements OnClickListener, Picture
 
 		try {
 			// save the image
-			bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+			Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+			Bitmap cropBitmap = null;
 			// tweak the bitmap so it's square before saving
 			if (bitmap.getWidth() > bitmap.getHeight()) {
 				int x = (bitmap.getWidth() - bitmap.getHeight()) / 2;
 				int y = 0;
-				bitmap = Bitmap.createBitmap(bitmap, x, y, bitmap.getHeight(), bitmap.getHeight());
+				cropBitmap = Bitmap.createBitmap(bitmap, x, y, bitmap.getHeight(), bitmap.getHeight());
 			} else {
 				int x = 0;
 				int y = (bitmap.getHeight() - bitmap.getWidth()) / 2;
-				bitmap = Bitmap.createBitmap(bitmap, x, y, bitmap.getWidth(), bitmap.getWidth());
+				cropBitmap = Bitmap.createBitmap(bitmap, x, y, bitmap.getWidth(), bitmap.getWidth());
 			}
+            // release memory
+            bitmap.recycle();
+            bitmap = null;
 
 			// save the file to storage
 			File filename = SnapStorage.getOutputMediaFile(SnapStorage.MEDIA_TYPE_IMAGE);
 			FileOutputStream out = new FileOutputStream(filename);
-			bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+			cropBitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+            // release memory
+            cropBitmap.recycle();
+            cropBitmap = null;
+            // alert the media scanner of new file
 			MediaScannerConnection.scanFile(this, new String[]{filename.getAbsolutePath()}, null, null); // tell the system to scan the image
 
 			// pass all the data to the photo upload activity
