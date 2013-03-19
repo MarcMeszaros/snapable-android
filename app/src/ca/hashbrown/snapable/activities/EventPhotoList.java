@@ -4,6 +4,7 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import ca.hashbrown.snapable.BuildConfig;
 import ca.hashbrown.snapable.R;
 import ca.hashbrown.snapable.activities.CameraActivity;
 import ca.hashbrown.snapable.activities.EventList;
@@ -11,6 +12,7 @@ import ca.hashbrown.snapable.fragments.PhotoListFragment;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.MenuItem;
+import com.crashlytics.android.Crashlytics;
 import com.google.analytics.tracking.android.EasyTracker;
 
 import com.snapable.api.SnapClient;
@@ -41,8 +43,11 @@ public class EventPhotoList extends SherlockFragmentActivity implements OnClickL
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_photo_list);
+		if (!BuildConfig.DEBUG) {
+            Crashlytics.start(this);
+        }
 
-		// add click listener
+        // add click listener
 		findViewById(R.id.activity_photo_list__photo_button).setOnClickListener(this);
 
 		// get the extra bundle data for the fragment

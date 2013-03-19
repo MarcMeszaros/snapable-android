@@ -1,5 +1,6 @@
 package ca.hashbrown.snapable.activities;
 
+import ca.hashbrown.snapable.BuildConfig;
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
@@ -7,6 +8,8 @@ import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.widget.SearchView;
 import com.actionbarsherlock.widget.SearchView.OnQueryTextListener;
 import com.google.analytics.tracking.android.EasyTracker;
+
+import com.crashlytics.android.Crashlytics;
 
 import ca.hashbrown.snapable.R;
 import ca.hashbrown.snapable.fragments.EventListFragment;
@@ -25,6 +28,9 @@ public class EventList extends SherlockFragmentActivity implements OnQueryTextLi
     public void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
     	setContentView(R.layout.activity_event_list);
+        if (!BuildConfig.DEBUG) {
+            Crashlytics.start(this);
+        }
 	}
 
 	@Override

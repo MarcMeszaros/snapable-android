@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="ca.hashbrown.snapable"
-    android:versionCode="3"
-    android:versionName="1.0.1" >
+    android:versionCode="4"
+    android:versionName="1.0.2" >
 
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -49,6 +49,10 @@
             android:name=".provider.SnapContentProvider"
             android:authorities="ca.hashbrown.snapable.provider"
             android:exported="false" />
+
+        <meta-data
+            android:name="com.crashlytics.ApiKey"
+            android:value="720497953609e6695431b598443025911fbfa2d7" />
     </application>
 
 </manifest>
