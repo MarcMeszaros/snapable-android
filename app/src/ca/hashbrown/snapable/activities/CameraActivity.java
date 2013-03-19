@@ -5,6 +5,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import ca.hashbrown.snapable.BuildConfig;
+import com.crashlytics.android.Crashlytics;
 import com.google.analytics.tracking.android.EasyTracker;
 import com.snapable.api.models.Event;
 
@@ -52,8 +54,11 @@ public class CameraActivity extends Activity implements OnClickListener, Picture
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_camera);
+        if (!BuildConfig.DEBUG) {
+            Crashlytics.start(this);
+        }
 
-		// get the extra bundle data for the fragment
+        // get the extra bundle data for the fragment
     	Bundle bundle = getIntent().getExtras();
 		event = bundle.getParcelable("event");
 

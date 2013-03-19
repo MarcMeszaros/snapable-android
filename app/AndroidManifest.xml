@@ -49,6 +49,10 @@
             android:name=".provider.SnapContentProvider"
             android:authorities="ca.hashbrown.snapable.provider"
             android:exported="false" />
+
+        <meta-data
+            android:name="com.crashlytics.ApiKey"
+            android:value="720497953609e6695431b598443025911fbfa2d7" />
     </application>
 
 </manifest>

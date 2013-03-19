@@ -7,12 +7,14 @@ import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 
+import ca.hashbrown.snapable.BuildConfig;
 import ca.hashbrown.snapable.R;
 import ca.hashbrown.snapable.provider.SnapableContract;
 import ca.hashbrown.snapable.utils.SnapBitmapFactory;
 import ca.hashbrown.snapable.utils.SnapStorage;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.crashlytics.android.Crashlytics;
 import com.google.analytics.tracking.android.EasyTracker;
 
 import com.snapable.api.SnapApi;
@@ -52,9 +54,12 @@ public class PhotoUpload extends SherlockFragmentActivity implements OnClickList
     public void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
     	setContentView(R.layout.activity_photo_upload);
-    	
-    	findViewById(R.id.fragment_photo_upload__button_done).setOnClickListener(this);
-    	
+        if (!BuildConfig.DEBUG) {
+            Crashlytics.start(this);
+        }
+
+        findViewById(R.id.fragment_photo_upload__button_done).setOnClickListener(this);
+
     	// get the extra bundle data
     	Bundle bundle = getIntent().getExtras();
     	event = bundle.getParcelable("event");
