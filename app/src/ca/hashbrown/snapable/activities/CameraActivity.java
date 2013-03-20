@@ -1,30 +1,11 @@
 package ca.hashbrown.snapable.activities;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-
-import android.graphics.*;
-import ca.hashbrown.snapable.BuildConfig;
-import com.crashlytics.android.Crashlytics;
-import com.google.analytics.tracking.android.EasyTracker;
-import com.snapable.api.models.Event;
-
-import ca.hashbrown.snapable.R;
-import ca.hashbrown.snapable.activities.PhotoUpload;
-import ca.hashbrown.snapable.utils.SnapStorage;
-import ca.hashbrown.snapable.utils.SnapSurfaceView;
-import ca.hashbrown.snapable.utils.SnapSurfaceView.OnCameraReadyListener;
-
-import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.*;
 import android.hardware.Camera;
-import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.Parameters;
 import android.hardware.Camera.PictureCallback;
-import android.media.ExifInterface;
 import android.media.MediaScannerConnection;
 import android.os.Bundle;
 import android.provider.MediaStore.Images.ImageColumns;
@@ -32,13 +13,19 @@ import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.Button;
-import android.widget.FrameLayout;
-import android.widget.ImageButton;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
+import android.widget.*;
+import ca.hashbrown.snapable.R;
+import ca.hashbrown.snapable.utils.SnapStorage;
+import ca.hashbrown.snapable.utils.SnapSurfaceView;
+import ca.hashbrown.snapable.utils.SnapSurfaceView.OnCameraReadyListener;
+import com.snapable.api.models.Event;
 
-public class CameraActivity extends Activity implements OnClickListener, PictureCallback, OnCameraReadyListener {
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+public class CameraActivity extends BaseActivity implements OnClickListener, PictureCallback, OnCameraReadyListener {
 
 	private static final String TAG = "CameraActivity";
 
@@ -46,14 +33,11 @@ public class CameraActivity extends Activity implements OnClickListener, Picture
 	private SnapSurfaceView cameraSurfaceView;
 	private Button shutterButton;
 	private String lastFlashMode;
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_camera);
-        if (!BuildConfig.DEBUG) {
-            Crashlytics.start(this);
-        }
 
         // get the extra bundle data for the fragment
     	Bundle bundle = getIntent().getExtras();
@@ -104,18 +88,6 @@ public class CameraActivity extends Activity implements OnClickListener, Picture
 		((LinearLayout.LayoutParams)second.getLayoutParams()).weight = blackBarWeight;
 		((LinearLayout.LayoutParams)transparent.getLayoutParams()).weight = transparentWeight;
 		overlay.requestLayout();
-	}
-
-	@Override
-	protected void onStart() {
-		super.onStart();
-		EasyTracker.getInstance().activityStart(this);
-	}
-
-	@Override
-	protected void onStop() {
-		super.onStop();
-		EasyTracker.getInstance().activityStop(this);
 	}
 
 	/**
@@ -180,7 +152,7 @@ public class CameraActivity extends Activity implements OnClickListener, Picture
 			upload.putExtra("event", event);
 			upload.putExtra("imagePath", filename.getAbsolutePath());
 			startActivity(upload);
-			
+
 		} catch (FileNotFoundException e) {
 			Log.e(TAG, "file not found", e);
 		} catch (IOException e) {
@@ -198,16 +170,16 @@ public class CameraActivity extends Activity implements OnClickListener, Picture
 		case R.id.activity_camera__image_picker:
 			Intent intent = new Intent(Intent.ACTION_PICK);
 			intent.setType("image/jpeg");
-			
+
 			startActivityForResult(intent, 0); // TODO the code shouldn't be hardcoded
 			break;
-		
+
 		case R.id.activity_camera__flash_mode:
 			toggleFlashMode();
 			break;
 		}
 	}
-	
+
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
@@ -218,7 +190,7 @@ public class CameraActivity extends Activity implements OnClickListener, Picture
 				  cursor.moveToFirst();  //if not doing this, 01-22 19:17:04.564: ERROR/AndroidRuntime(26264): Caused by: android.database.CursorIndexOutOfBoundsException: Index -1 requested, with a size of 1
 				  int idx = cursor.getColumnIndex(ImageColumns.DATA);
 				  String fileSrc = cursor.getString(idx);
-				  
+
 				  // pass all the data to the photo upload activity
 				  Intent upload = new Intent(this, PhotoUpload.class);
 				  upload.putExtra("event", event);
@@ -231,7 +203,7 @@ public class CameraActivity extends Activity implements OnClickListener, Picture
 
 	/**
 	 * Set the new flash mode for the camera and updates the UI accordinggly.
-	 * 
+	 *
 	 * @param newMode the new flash mode for the camera
 	 */
 	private void setFlashMode(String newMode) {
@@ -263,12 +235,12 @@ public class CameraActivity extends Activity implements OnClickListener, Picture
 
 	/**
 	 * Set the flash mode button background.
-	 * 
+	 *
 	 * @param newMode the camera mode the backgroud need to be set too
 	 */
 	private void setFlashModeButton(String newMode) {
 		ImageButton flashButton = (ImageButton) findViewById(R.id.activity_camera__flash_mode);
-		
+
 		// if the flash mode isn't null, set it, otherwise hide the button
 		if (newMode != null) {
 			cameraSurfaceView.setFlashMode(newMode);

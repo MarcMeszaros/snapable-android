@@ -1,39 +1,12 @@
 package ca.hashbrown.snapable.activities;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileDescriptor;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-
-import ca.hashbrown.snapable.BuildConfig;
-import ca.hashbrown.snapable.R;
-import ca.hashbrown.snapable.provider.SnapableContract;
-import ca.hashbrown.snapable.utils.SnapBitmapFactory;
-import ca.hashbrown.snapable.utils.SnapStorage;
-
-import com.actionbarsherlock.app.SherlockFragmentActivity;
-import com.crashlytics.android.Crashlytics;
-import com.google.analytics.tracking.android.EasyTracker;
-
-import com.snapable.api.SnapApi;
-import com.snapable.api.SnapClient;
-import com.snapable.api.models.Event;
-import com.snapable.api.resources.PhotoResource;
-
-import android.app.Activity;
 import android.content.ContentUris;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
-import android.graphics.drawable.BitmapDrawable;
-import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -41,11 +14,20 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import ca.hashbrown.snapable.R;
+import ca.hashbrown.snapable.provider.SnapableContract;
+import com.snapable.api.SnapApi;
+import com.snapable.api.SnapClient;
+import com.snapable.api.models.Event;
+import com.snapable.api.resources.PhotoResource;
 
-public class PhotoUpload extends SherlockFragmentActivity implements OnClickListener {
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+
+public class PhotoUpload extends BaseFragmentActivity implements OnClickListener {
 
 	private static final String TAG = "PhotoUpload";
-	
+
 	private Event event;
 	//private Bitmap imageBitmap;
 	private String imagePath;
@@ -54,9 +36,6 @@ public class PhotoUpload extends SherlockFragmentActivity implements OnClickList
     public void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
     	setContentView(R.layout.activity_photo_upload);
-        if (!BuildConfig.DEBUG) {
-            Crashlytics.start(this);
-        }
 
         findViewById(R.id.fragment_photo_upload__button_done).setOnClickListener(this);
 
@@ -73,22 +52,10 @@ public class PhotoUpload extends SherlockFragmentActivity implements OnClickList
 
     	// set the scaled image in the image view
     	photo.setImageBitmap(bmScaled);
-    	
+
     	// set the action bar title
     	getSupportActionBar().setTitle(event.getTitle());
     }
-
-	@Override
-	protected void onStart() {
-		super.onStart();
-		EasyTracker.getInstance().activityStart(this);
-	}
-
-	@Override
-	protected void onStop() {
-		super.onStop();
-		EasyTracker.getInstance().activityStop(this);
-	}
 
 	public void onClick(View v) {
 		switch (v.getId()) {
@@ -98,36 +65,36 @@ public class PhotoUpload extends SherlockFragmentActivity implements OnClickList
 
 			// get the image data ready for uploading via the API
 	        PhotoUploadTask uploadTask = new PhotoUploadTask(event, caption.getText().toString(), imagePath);
-	        uploadTask.execute();	
+	        uploadTask.execute();
 			break;
 
 		default:
 			break;
 		}
-		
+
 	}
-	
+
 	public static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
 	    // Raw height and width of image
 	    final int height = options.outHeight;
 	    final int width = options.outWidth;
 	    int inSampleSize = 1;
-	
+
 	    if (height > reqHeight || width > reqWidth) {
-	
+
 	        // Calculate ratios of height and width to requested height and width
 	        final int heightRatio = Math.round((float) height / (float) reqHeight);
 	        final int widthRatio = Math.round((float) width / (float) reqWidth);
-	
+
 	        // Choose the smallest ratio as inSampleSize value, this will guarantee
 	        // a final image with both dimensions larger than or equal to the
 	        // requested height and width.
 	        inSampleSize = heightRatio < widthRatio ? heightRatio : widthRatio;
 	    }
-	
+
 	    return inSampleSize;
 	}
-	
+
 	public static Bitmap decodeSampledBitmapFromPath(String path, int reqWidth, int reqHeight) {
 
 	    // First decode with inJustDecodeBounds=true to check dimensions
@@ -142,19 +109,19 @@ public class PhotoUpload extends SherlockFragmentActivity implements OnClickList
 	    options.inJustDecodeBounds = false;
 	    return BitmapFactory.decodeFile(path, options);
 	}
-	
+
 	private class PhotoUploadTask extends AsyncTask<Void, Void, Void> {
 
 		private Event event;
 		private String caption;
 		private String photoPath;
-		
+
 		public PhotoUploadTask(Event event, String caption, String photoPath) {
 			this.event = event;
 			this.caption = caption;
 			this.photoPath = photoPath;
 		}
-		
+
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
@@ -163,24 +130,24 @@ public class PhotoUpload extends SherlockFragmentActivity implements OnClickList
 			pb.setVisibility(View.VISIBLE);
 			butt.setVisibility(View.INVISIBLE);
 		}
-		
+
 		@Override
 		protected Void doInBackground(Void... params) {
 			Bitmap photo = BitmapFactory.decodeFile(photoPath);
-			
+
 			// turn the bitmap into an input stream
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();  
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 	        photo.compress(Bitmap.CompressFormat.JPEG, 50, baos);
 	        ByteArrayInputStream inStream = new ByteArrayInputStream(baos.toByteArray());
-	        
+
 	        // get local cached event info
 	        Uri queryUri = ContentUris.withAppendedId(SnapableContract.EventCredentials.CONTENT_URI, event.getId());
 	        Cursor c = getContentResolver().query(queryUri, null, null, null, null);
-	        
+
 	        // upload via the API
 	        try {
 	        	PhotoResource photoRes = SnapClient.getInstance().build(PhotoResource.class);
-	        	
+
 	        	// if we have a guest id, upload the photo with the id
 	        	if (c.moveToFirst()) {
 	        		long guest_id = c.getLong(c.getColumnIndex(SnapableContract.EventCredentials.GUEST_ID));
@@ -202,7 +169,7 @@ public class PhotoUpload extends SherlockFragmentActivity implements OnClickList
 	        }
 			return null;
 		}
-		
+
 		@Override
 		protected void onPostExecute(Void result) {
 			super.onPostExecute(result);
