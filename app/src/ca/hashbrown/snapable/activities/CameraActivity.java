@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import android.graphics.*;
 import ca.hashbrown.snapable.BuildConfig;
 import com.crashlytics.android.Crashlytics;
 import com.google.analytics.tracking.android.EasyTracker;
@@ -19,9 +20,6 @@ import ca.hashbrown.snapable.utils.SnapSurfaceView.OnCameraReadyListener;
 import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Point;
 import android.hardware.Camera;
 import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.Parameters;
@@ -145,30 +143,35 @@ public class CameraActivity extends Activity implements OnClickListener, Picture
 		shutterButton.setEnabled(true);
 
 		try {
-			// save the image
-			Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
-			Bitmap cropBitmap = null;
-			// tweak the bitmap so it's square before saving
-			if (bitmap.getWidth() > bitmap.getHeight()) {
-				int x = (bitmap.getWidth() - bitmap.getHeight()) / 2;
-				int y = 0;
-				cropBitmap = Bitmap.createBitmap(bitmap, x, y, bitmap.getHeight(), bitmap.getHeight());
+			// get the bitmap details
+			BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+            bmOptions.inJustDecodeBounds = true;
+            BitmapFactory.decodeByteArray(data, 0, data.length, bmOptions);
+			// figure out the square bitmap dimensions before saving
+            int x = 0;
+            int y = 0;
+            int length = 0;
+			if (bmOptions.outWidth > bmOptions.outHeight) {
+				x = (bmOptions.outWidth - bmOptions.outHeight) / 2;
+				length = bmOptions.outHeight;
 			} else {
-				int x = 0;
-				int y = (bitmap.getHeight() - bitmap.getWidth()) / 2;
-				cropBitmap = Bitmap.createBitmap(bitmap, x, y, bitmap.getWidth(), bitmap.getWidth());
+				y = (bmOptions.outHeight - bmOptions.outWidth) / 2;
+                length = bmOptions.outWidth;
 			}
-            // release memory
-            bitmap.recycle();
-            bitmap = null;
+            // setup & perform the crop
+            BitmapRegionDecoder regionDecoder = BitmapRegionDecoder.newInstance(data, 0, data.length, true);
+            BitmapFactory.Options cropOptions = new BitmapFactory.Options();
+            cropOptions.inPurgeable = true;
+            Rect cropArea = new Rect(x, y, x+length, y+length);
+            Bitmap bitmap = regionDecoder.decodeRegion(cropArea, cropOptions);
 
 			// save the file to storage
 			File filename = SnapStorage.getOutputMediaFile(SnapStorage.MEDIA_TYPE_IMAGE);
 			FileOutputStream out = new FileOutputStream(filename);
-			cropBitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+			bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
             // release memory
-            cropBitmap.recycle();
-            cropBitmap = null;
+            bitmap.recycle();
+            bitmap = null;
             // alert the media scanner of new file
 			MediaScannerConnection.scanFile(this, new String[]{filename.getAbsolutePath()}, null, null); // tell the system to scan the image
 
@@ -180,7 +183,9 @@ public class CameraActivity extends Activity implements OnClickListener, Picture
 			
 		} catch (FileNotFoundException e) {
 			Log.e(TAG, "file not found", e);
-		}
+		} catch (IOException e) {
+            Log.e(TAG, "there was a problem with a r/w operation", e);
+        }
 	}
 
 	public void onClick(View v) {
