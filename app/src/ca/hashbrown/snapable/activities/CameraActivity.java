@@ -7,6 +7,7 @@ import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
 import android.hardware.Camera.PictureCallback;
 import android.media.MediaScannerConnection;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore.Images.ImageColumns;
 import android.util.Log;
@@ -131,6 +132,10 @@ public class CameraActivity extends BaseActivity implements OnClickListener, Pic
                 length = bmOptions.outWidth;
 			}
             // setup & perform the crop
+            if (Build.VERSION.SDK_INT < 15) {
+                Log.d(TAG, "Running garbage collection for Bitmaps");
+                System.gc();
+            }
             BitmapRegionDecoder regionDecoder = BitmapRegionDecoder.newInstance(data, 0, data.length, true);
             BitmapFactory.Options cropOptions = new BitmapFactory.Options();
             cropOptions.inPurgeable = true;
