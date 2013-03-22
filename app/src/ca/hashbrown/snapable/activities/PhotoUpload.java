@@ -133,7 +133,9 @@ public class PhotoUpload extends BaseFragmentActivity implements OnClickListener
 
 		@Override
 		protected Void doInBackground(Void... params) {
-			Bitmap photo = BitmapFactory.decodeFile(photoPath);
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inPurgeable = true;
+			Bitmap photo = BitmapFactory.decodeFile(photoPath, options);
 
 			// turn the bitmap into an input stream
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();

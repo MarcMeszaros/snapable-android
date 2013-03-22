@@ -207,7 +207,7 @@ public class CameraActivity extends BaseActivity implements OnClickListener, Pic
 	}
 
 	/**
-	 * Set the new flash mode for the camera and updates the UI accordinggly.
+	 * Set the new flash mode for the camera and updates the UI accordingly.
 	 *
 	 * @param newMode the new flash mode for the camera
 	 */
@@ -241,7 +241,7 @@ public class CameraActivity extends BaseActivity implements OnClickListener, Pic
 	/**
 	 * Set the flash mode button background.
 	 *
-	 * @param newMode the camera mode the backgroud need to be set too
+	 * @param newMode the camera mode the background needs to be set too
 	 */
 	private void setFlashModeButton(String newMode) {
 		ImageButton flashButton = (ImageButton) findViewById(R.id.activity_camera__flash_mode);
