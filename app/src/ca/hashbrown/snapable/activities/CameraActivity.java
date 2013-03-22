@@ -1,46 +1,32 @@
 package ca.hashbrown.snapable.activities;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-
-import ca.hashbrown.snapable.BuildConfig;
-import com.crashlytics.android.Crashlytics;
-import com.google.analytics.tracking.android.EasyTracker;
-import com.snapable.api.models.Event;
-
-import ca.hashbrown.snapable.R;
-import ca.hashbrown.snapable.activities.PhotoUpload;
-import ca.hashbrown.snapable.utils.SnapStorage;
-import ca.hashbrown.snapable.utils.SnapSurfaceView;
-import ca.hashbrown.snapable.utils.SnapSurfaceView.OnCameraReadyListener;
-
-import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Point;
+import android.graphics.*;
 import android.hardware.Camera;
-import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.Parameters;
 import android.hardware.Camera.PictureCallback;
-import android.media.ExifInterface;
 import android.media.MediaScannerConnection;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore.Images.ImageColumns;
 import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.Button;
-import android.widget.FrameLayout;
-import android.widget.ImageButton;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
+import android.widget.*;
+import ca.hashbrown.snapable.R;
+import ca.hashbrown.snapable.utils.SnapStorage;
+import ca.hashbrown.snapable.utils.SnapSurfaceView;
+import ca.hashbrown.snapable.utils.SnapSurfaceView.OnCameraReadyListener;
+import com.snapable.api.models.Event;
 
-public class CameraActivity extends Activity implements OnClickListener, PictureCallback, OnCameraReadyListener {
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+public class CameraActivity extends BaseActivity implements OnClickListener, PictureCallback, OnCameraReadyListener {
 
 	private static final String TAG = "CameraActivity";
 
@@ -48,14 +34,11 @@ public class CameraActivity extends Activity implements OnClickListener, Picture
 	private SnapSurfaceView cameraSurfaceView;
 	private Button shutterButton;
 	private String lastFlashMode;
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_camera);
-        if (!BuildConfig.DEBUG) {
-            Crashlytics.start(this);
-        }
 
         // get the extra bundle data for the fragment
     	Bundle bundle = getIntent().getExtras();
@@ -108,18 +91,6 @@ public class CameraActivity extends Activity implements OnClickListener, Picture
 		overlay.requestLayout();
 	}
 
-	@Override
-	protected void onStart() {
-		super.onStart();
-		EasyTracker.getInstance().activityStart(this);
-	}
-
-	@Override
-	protected void onStop() {
-		super.onStop();
-		EasyTracker.getInstance().activityStop(this);
-	}
-
 	/**
 	 * Save the "lastFlashMode" so it persists when the user returns from the upload activity.
 	 */
@@ -145,30 +116,39 @@ public class CameraActivity extends Activity implements OnClickListener, Picture
 		shutterButton.setEnabled(true);
 
 		try {
-			// save the image
-			Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
-			Bitmap cropBitmap = null;
-			// tweak the bitmap so it's square before saving
-			if (bitmap.getWidth() > bitmap.getHeight()) {
-				int x = (bitmap.getWidth() - bitmap.getHeight()) / 2;
-				int y = 0;
-				cropBitmap = Bitmap.createBitmap(bitmap, x, y, bitmap.getHeight(), bitmap.getHeight());
+			// get the bitmap details
+			BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+            bmOptions.inJustDecodeBounds = true;
+            BitmapFactory.decodeByteArray(data, 0, data.length, bmOptions);
+			// figure out the square bitmap dimensions before saving
+            int x = 0;
+            int y = 0;
+            int length = 0;
+			if (bmOptions.outWidth > bmOptions.outHeight) {
+				x = (bmOptions.outWidth - bmOptions.outHeight) / 2;
+				length = bmOptions.outHeight;
 			} else {
-				int x = 0;
-				int y = (bitmap.getHeight() - bitmap.getWidth()) / 2;
-				cropBitmap = Bitmap.createBitmap(bitmap, x, y, bitmap.getWidth(), bitmap.getWidth());
+				y = (bmOptions.outHeight - bmOptions.outWidth) / 2;
+                length = bmOptions.outWidth;
 			}
-            // release memory
-            bitmap.recycle();
-            bitmap = null;
+            // setup & perform the crop
+            if (Build.VERSION.SDK_INT < 15) {
+                Log.d(TAG, "Running garbage collection for Bitmaps");
+                System.gc();
+            }
+            BitmapRegionDecoder regionDecoder = BitmapRegionDecoder.newInstance(data, 0, data.length, true);
+            BitmapFactory.Options cropOptions = new BitmapFactory.Options();
+            cropOptions.inPurgeable = true;
+            Rect cropArea = new Rect(x, y, x+length, y+length);
+            Bitmap bitmap = regionDecoder.decodeRegion(cropArea, cropOptions);
 
 			// save the file to storage
 			File filename = SnapStorage.getOutputMediaFile(SnapStorage.MEDIA_TYPE_IMAGE);
 			FileOutputStream out = new FileOutputStream(filename);
-			cropBitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+			bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
             // release memory
-            cropBitmap.recycle();
-            cropBitmap = null;
+            bitmap.recycle();
+            bitmap = null;
             // alert the media scanner of new file
 			MediaScannerConnection.scanFile(this, new String[]{filename.getAbsolutePath()}, null, null); // tell the system to scan the image
 
@@ -177,10 +157,12 @@ public class CameraActivity extends Activity implements OnClickListener, Picture
 			upload.putExtra("event", event);
 			upload.putExtra("imagePath", filename.getAbsolutePath());
 			startActivity(upload);
-			
+
 		} catch (FileNotFoundException e) {
 			Log.e(TAG, "file not found", e);
-		}
+		} catch (IOException e) {
+            Log.e(TAG, "there was a problem with a r/w operation", e);
+        }
 	}
 
 	public void onClick(View v) {
@@ -193,16 +175,16 @@ public class CameraActivity extends Activity implements OnClickListener, Picture
 		case R.id.activity_camera__image_picker:
 			Intent intent = new Intent(Intent.ACTION_PICK);
 			intent.setType("image/jpeg");
-			
+
 			startActivityForResult(intent, 0); // TODO the code shouldn't be hardcoded
 			break;
-		
+
 		case R.id.activity_camera__flash_mode:
 			toggleFlashMode();
 			break;
 		}
 	}
-	
+
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
@@ -213,7 +195,7 @@ public class CameraActivity extends Activity implements OnClickListener, Picture
 				  cursor.moveToFirst();  //if not doing this, 01-22 19:17:04.564: ERROR/AndroidRuntime(26264): Caused by: android.database.CursorIndexOutOfBoundsException: Index -1 requested, with a size of 1
 				  int idx = cursor.getColumnIndex(ImageColumns.DATA);
 				  String fileSrc = cursor.getString(idx);
-				  
+
 				  // pass all the data to the photo upload activity
 				  Intent upload = new Intent(this, PhotoUpload.class);
 				  upload.putExtra("event", event);
@@ -225,8 +207,8 @@ public class CameraActivity extends Activity implements OnClickListener, Picture
 	}
 
 	/**
-	 * Set the new flash mode for the camera and updates the UI accordinggly.
-	 * 
+	 * Set the new flash mode for the camera and updates the UI accordingly.
+	 *
 	 * @param newMode the new flash mode for the camera
 	 */
 	private void setFlashMode(String newMode) {
@@ -258,12 +240,12 @@ public class CameraActivity extends Activity implements OnClickListener, Picture
 
 	/**
 	 * Set the flash mode button background.
-	 * 
-	 * @param newMode the camera mode the backgroud need to be set too
+	 *
+	 * @param newMode the camera mode the background needs to be set too
 	 */
 	private void setFlashModeButton(String newMode) {
 		ImageButton flashButton = (ImageButton) findViewById(R.id.activity_camera__flash_mode);
-		
+
 		// if the flash mode isn't null, set it, otherwise hide the button
 		if (newMode != null) {
 			cameraSurfaceView.setFlashMode(newMode);

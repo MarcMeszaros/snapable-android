@@ -1,38 +1,16 @@
 package ca.hashbrown.snapable.activities;
 
-import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
-import ca.hashbrown.snapable.BuildConfig;
-import ca.hashbrown.snapable.R;
-import ca.hashbrown.snapable.activities.CameraActivity;
-import ca.hashbrown.snapable.activities.EventList;
-import ca.hashbrown.snapable.fragments.PhotoListFragment;
-
-import com.actionbarsherlock.app.SherlockFragmentActivity;
-import com.actionbarsherlock.view.MenuItem;
-import com.crashlytics.android.Crashlytics;
-import com.google.analytics.tracking.android.EasyTracker;
-
-import com.snapable.api.SnapClient;
-import com.snapable.api.models.Event;
-import com.snapable.api.resources.EventResource;
-import com.snapable.api.resources.PhotoResource;
-
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
-import android.provider.MediaStore;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.Toast;
+import ca.hashbrown.snapable.R;
+import ca.hashbrown.snapable.fragments.PhotoListFragment;
+import com.actionbarsherlock.view.MenuItem;
+import com.snapable.api.models.Event;
 
-public class EventPhotoList extends SherlockFragmentActivity implements OnClickListener {
+public class EventPhotoList extends BaseFragmentActivity implements OnClickListener {
 
 	private static final String TAG = "EventPhotoList";
 
@@ -43,9 +21,6 @@ public class EventPhotoList extends SherlockFragmentActivity implements OnClickL
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_photo_list);
-		if (!BuildConfig.DEBUG) {
-            Crashlytics.start(this);
-        }
 
         // add click listener
 		findViewById(R.id.activity_photo_list__photo_button).setOnClickListener(this);
@@ -63,18 +38,6 @@ public class EventPhotoList extends SherlockFragmentActivity implements OnClickL
 		// make the action bar button home button go back
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		getSupportActionBar().setTitle(event.getTitle());
-	}
-
-	@Override
-	protected void onStart() {
-		super.onStart();
-		EasyTracker.getInstance().activityStart(this);
-	}
-
-	@Override
-	protected void onStop() {
-		super.onStop();
-		EasyTracker.getInstance().activityStop(this);
 	}
 
 	public void onClick(View v) {
