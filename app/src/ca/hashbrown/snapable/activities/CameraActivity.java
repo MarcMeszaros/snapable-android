@@ -6,6 +6,7 @@ import android.graphics.*;
 import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
 import android.hardware.Camera.PictureCallback;
+import android.media.ExifInterface;
 import android.media.MediaScannerConnection;
 import android.os.Build;
 import android.os.Bundle;
@@ -116,10 +117,19 @@ public class CameraActivity extends BaseActivity implements OnClickListener, Pic
 		shutterButton.setEnabled(true);
 
 		try {
-			// get the bitmap details
+            File filename = SnapStorage.getOutputMediaFile(SnapStorage.MEDIA_TYPE_IMAGE);
+            FileOutputStream out = new FileOutputStream(filename);
+            out.write(data, 0, data.length);
+            out.close();
+
+            // get the original image rotation
+            ExifInterface exifOrig = new ExifInterface(filename.getAbsolutePath());
+            int exifOrigRotation = exifOrig.getAttributeInt(ExifInterface.TAG_ORIENTATION, -1);
+
+            // get the bitmap details
 			BitmapFactory.Options bmOptions = new BitmapFactory.Options();
             bmOptions.inJustDecodeBounds = true;
-            BitmapFactory.decodeByteArray(data, 0, data.length, bmOptions);
+            BitmapFactory.decodeFile(filename.getAbsolutePath(), bmOptions);
 			// figure out the square bitmap dimensions before saving
             int x = 0;
             int y = 0;
@@ -136,15 +146,36 @@ public class CameraActivity extends BaseActivity implements OnClickListener, Pic
                 Log.d(TAG, "Running garbage collection for Bitmaps");
                 System.gc();
             }
-            BitmapRegionDecoder regionDecoder = BitmapRegionDecoder.newInstance(data, 0, data.length, true);
+            BitmapRegionDecoder regionDecoder = BitmapRegionDecoder.newInstance(filename.getAbsolutePath(), true);
             BitmapFactory.Options cropOptions = new BitmapFactory.Options();
             cropOptions.inPurgeable = true;
             Rect cropArea = new Rect(x, y, x+length, y+length);
             Bitmap bitmap = regionDecoder.decodeRegion(cropArea, cropOptions);
 
-			// save the file to storage
-			File filename = SnapStorage.getOutputMediaFile(SnapStorage.MEDIA_TYPE_IMAGE);
-			FileOutputStream out = new FileOutputStream(filename);
+            // create a new rotated bitmap if required
+            switch (exifOrigRotation) {
+                case ExifInterface.ORIENTATION_ROTATE_90: {
+                    Matrix matrix = new Matrix();
+                    matrix.postRotate(90);
+                    bitmap = Bitmap.createBitmap(bitmap, 0, 0, length, length, matrix, true);
+                    break;
+                }
+                case ExifInterface.ORIENTATION_ROTATE_180:{
+                    Matrix matrix = new Matrix();
+                    matrix.postRotate(180);
+                    bitmap = Bitmap.createBitmap(bitmap, 0, 0, length, length, matrix, true);
+                    break;
+                }
+                case ExifInterface.ORIENTATION_ROTATE_270: {
+                    Matrix matrix = new Matrix();
+                    matrix.postRotate(270);
+                    bitmap = Bitmap.createBitmap(bitmap, 0, 0, length, length, matrix, true);
+                    break;
+                }
+            }
+
+            // save the file to storage
+			out = new FileOutputStream(filename);
 			bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
             // release memory
             bitmap.recycle();
@@ -152,7 +183,7 @@ public class CameraActivity extends BaseActivity implements OnClickListener, Pic
             // alert the media scanner of new file
 			MediaScannerConnection.scanFile(this, new String[]{filename.getAbsolutePath()}, null, null); // tell the system to scan the image
 
-			// pass all the data to the photo upload activity
+            // pass all the data to the photo upload activity
 			Intent upload = new Intent(this, PhotoUpload.class);
 			upload.putExtra("event", event);
 			upload.putExtra("imagePath", filename.getAbsolutePath());
