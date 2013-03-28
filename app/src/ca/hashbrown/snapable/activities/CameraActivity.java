@@ -92,6 +92,16 @@ public class CameraActivity extends BaseActivity implements OnClickListener, Pic
 		overlay.requestLayout();
 	}
 
+    /**
+     * Setup some stuff after resume.
+     */
+    protected void onResume() {
+        super.onResume();
+        // Re-enable the shutter button so that we can take another picture
+        shutterButton.setEnabled(true);
+
+    }
+
 	/**
 	 * Save the "lastFlashMode" so it persists when the user returns from the upload activity.
 	 */
@@ -106,15 +116,12 @@ public class CameraActivity extends BaseActivity implements OnClickListener, Pic
 	 */
 	@Override
 	protected void onRestoreInstanceState(Bundle savedInstanceState) {
-		lastFlashMode = savedInstanceState.getString("lastFlashMode");
+        lastFlashMode = savedInstanceState.getString("lastFlashMode");
 		super.onRestoreInstanceState(savedInstanceState);
 	}
 
 	public void onPictureTaken(byte[] data, Camera camera) {
 		Log.d(TAG, "picture taken");
-		// Restart the preview and re-enable the shutter button so that we can take another picture
-		camera.startPreview();
-		shutterButton.setEnabled(true);
 
 		try {
             File filename = SnapStorage.getOutputMediaFile(SnapStorage.MEDIA_TYPE_IMAGE);
