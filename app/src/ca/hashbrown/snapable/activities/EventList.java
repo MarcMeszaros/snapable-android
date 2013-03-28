@@ -44,8 +44,15 @@ public class EventList extends BaseFragmentActivity implements OnQueryTextListen
 
 	@Override
 	public boolean onQueryTextChange(String newText) {
-		// TODO Auto-generated method stub
-		return false;
+		Log.d(TAG, "new query: " + newText.isEmpty() + " " + newText);
+        if (newText.isEmpty()) {
+            // get the fragment, and reset the search loader
+            EventListFragment frag = (EventListFragment) getSupportFragmentManager().findFragmentById(R.id.activity_event_list__fragment_event_list);
+            frag.getLoaderManager().restartLoader(EventListFragment.LOADERS.EVENTS, null, frag);
+            return true;
+        } else {
+            return false;
+        }
 	}
 
 }
