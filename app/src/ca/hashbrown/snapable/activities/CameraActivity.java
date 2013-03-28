@@ -34,6 +34,7 @@ public class CameraActivity extends BaseActivity implements OnClickListener, Pic
 	private Event event;
 	private SnapSurfaceView cameraSurfaceView;
 	private Button shutterButton;
+    private ProgressBar cameraProgress;
 	private String lastFlashMode;
 
 	@Override
@@ -54,6 +55,7 @@ public class CameraActivity extends BaseActivity implements OnClickListener, Pic
 		// grab shutter button so we can reference it later
 		shutterButton = (Button) findViewById(R.id.activity_camera__shutter_button);
 		shutterButton.setOnClickListener(this);
+        cameraProgress = (ProgressBar) findViewById(R.id.activity_camera__progressBar);
 		findViewById(R.id.activity_camera__image_picker).setOnClickListener(this);
 		findViewById(R.id.activity_camera__flash_mode).setOnClickListener(this);
 
@@ -98,8 +100,9 @@ public class CameraActivity extends BaseActivity implements OnClickListener, Pic
     protected void onResume() {
         super.onResume();
         // Re-enable the shutter button so that we can take another picture
+        cameraProgress.setVisibility(View.GONE);
+        shutterButton.setVisibility(View.VISIBLE);
         shutterButton.setEnabled(true);
-
     }
 
 	/**
@@ -207,6 +210,8 @@ public class CameraActivity extends BaseActivity implements OnClickListener, Pic
 		switch (v.getId()) {
 		case R.id.activity_camera__shutter_button:
 			shutterButton.setEnabled(false);
+            shutterButton.setVisibility(View.GONE);
+            cameraProgress.setVisibility(View.VISIBLE);
 			cameraSurfaceView.takePicture(this);
 			break;
 
