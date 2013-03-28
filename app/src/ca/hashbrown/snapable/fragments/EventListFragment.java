@@ -43,6 +43,7 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 	private LocationManager locationManager;
 	private Handler msgHandler;
 	private boolean mLoading = false;
+    private Bundle lastLatLng;
 
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
@@ -85,9 +86,16 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 				} else {
 					Log.d(TAG, "CursorLoader: getLatLng()");
 					startLoadingSpinner(false);
-					getLatLng();
-					return new Loader<Cursor>(getActivity());
-				}
+					if (lastLatLng == null) {
+                        getLatLng();
+                        return new Loader<Cursor>(getActivity());
+                    } else {
+                        Log.d(TAG, "CursorLoader: lat|lng");
+                        String selection = "lat=? lng=?";
+                        String[] selectionArgs = {lastLatLng.getString("lat"), lastLatLng.getString("lng")};
+                        return new CursorLoader(getActivity(), SnapableContract.Event.CONTENT_URI, null, selection, selectionArgs, null);
+                    }
+                }
 			}
 			default: {
 				return null;
@@ -106,6 +114,7 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 
 		default:
 			eventAdapter.changeCursor(data);
+            stopLoadingSpinner(true);
 			break;
 		}
 	}
@@ -157,13 +166,15 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 	public void onLocationChanged(Location location) {
 		Log.d(TAG, location.getLatitude() + " | " + location.getLongitude());
 
-		Bundle args = new Bundle(2);
-		args.putString("lat", String.valueOf(location.getLatitude()));
-		args.putString("lng", String.valueOf(location.getLongitude()));
+		if (lastLatLng == null) {
+            lastLatLng = new Bundle(2);
+        }
+        lastLatLng.putString("lat", String.valueOf(location.getLatitude()));
+		lastLatLng.putString("lng", String.valueOf(location.getLongitude()));
 
 		// Prepare the loader. (Re-connect with an existing one, or start a new one.)
 		locationManager.removeUpdates(this); // stop updates
-		getLoaderManager().restartLoader(LOADERS.EVENTS, args, this);
+		getLoaderManager().restartLoader(LOADERS.EVENTS, lastLatLng, this);
 		msgHandler.removeCallbacksAndMessages(null); // remove all messages in the handler
 	}
 
