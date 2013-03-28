@@ -48,7 +48,7 @@ public class PhotoUpload extends BaseFragmentActivity implements OnClickListener
 		// create a scaled bitmap
 		ImageView photo = (ImageView) findViewById(R.id.fragment_photo_upload__image);
     	//Bitmap bmScaled = Bitmap.createScaledBitmap(imageBitmap, 150, 150, false);
-    	Bitmap bmScaled = PhotoUpload.decodeSampledBitmapFromPath(bundle.getString("imagePath"), 150, 150);
+    	Bitmap bmScaled = PhotoUpload.decodeSampledBitmapFromPath(bundle.getString("imagePath"), 300, 300);
 
     	// set the scaled image in the image view
     	photo.setImageBitmap(bmScaled);
