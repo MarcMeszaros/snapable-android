@@ -1,21 +1,18 @@
 package ca.hashbrown.snapable.utils;
 
+import android.app.Activity;
+import android.content.Context;
+import android.hardware.Camera;
+import android.hardware.Camera.*;
+import android.util.Log;
+import android.view.Surface;
+import android.view.SurfaceHolder;
+import android.widget.Toast;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-
-import android.app.Activity;
-import android.content.Context;
-import android.hardware.Camera;
-import android.hardware.Camera.AutoFocusCallback;
-import android.hardware.Camera.CameraInfo;
-import android.hardware.Camera.Parameters;
-import android.hardware.Camera.PictureCallback;
-import android.hardware.Camera.Size;
-import android.util.Log;
-import android.view.Surface;
-import android.view.SurfaceHolder;
 
 public class SnapSurfaceView extends android.view.SurfaceView implements SurfaceHolder.Callback, AutoFocusCallback {
 
@@ -28,7 +25,7 @@ public class SnapSurfaceView extends android.view.SurfaceView implements Surface
 
 	/**
 	 * An interface for various events that are fired when the surfaceview/camera are in different
-	 * states. 
+	 * states.
 	 */
 	public interface OnCameraReadyListener {
 		public void onCameraReady(Camera.Parameters params);
@@ -112,10 +109,10 @@ public class SnapSurfaceView extends android.view.SurfaceView implements Surface
 			cameraParams.setPictureSize(cameraSizes.get(cameraSizes.size()-1).width, cameraSizes.get(cameraSizes.size()-1).height);
 			cameraParams.setPreviewSize(cameraPreviewSizes.get(cameraPreviewSizes.size()-1).width, cameraPreviewSizes.get(cameraPreviewSizes.size()-1).height);
 			camera.setParameters(cameraParams);
-			for (Size size : cameraSizes) {	
+			for (Size size : cameraSizes) {
 				Log.d(TAG, "camera size: " + size.width + "x" + size.height);
 			}
-			for (Size size : cameraPreviewSizes) {	
+			for (Size size : cameraPreviewSizes) {
 				Log.d(TAG, "camera preview size: " + size.width + "x" + size.height);
 			}
 
@@ -128,7 +125,10 @@ public class SnapSurfaceView extends android.view.SurfaceView implements Surface
 			camera.setPreviewDisplay(holder);
 		} catch (IOException e) {
 			Log.e(TAG, "problem setting up the surface view", e);
-		}
+		} catch (RuntimeException e) {
+            Log.e(TAG, "unable to initiate the camera", e);
+            Toast.makeText(getContext(), "Unable to initiate the camera.", Toast.LENGTH_LONG).show();
+        }
 	}
 
 	public void surfaceDestroyed(SurfaceHolder holder) {
@@ -146,7 +146,7 @@ public class SnapSurfaceView extends android.view.SurfaceView implements Surface
 
 	/**
 	 * Set the listner to callback when the camera is ready.
-	 * 
+	 *
 	 * @param listener the listener to callback when the camera is ready
 	 */
 	public void setOnCameraReadyListener(OnCameraReadyListener listener){
@@ -154,7 +154,7 @@ public class SnapSurfaceView extends android.view.SurfaceView implements Surface
 	}
 
 	/**
-	 * 
+	 *
 	 * @param reversed true = clockwise vs false = counterclockwise
 	 * @return
 	 */
@@ -194,7 +194,7 @@ public class SnapSurfaceView extends android.view.SurfaceView implements Surface
 			return null;
 		}
 	}
-	
+
 	public void setFlashMode(String mode) {
 		if (cameraParams.getFlashMode() != null) {
 			cameraParams.setFlashMode(mode);
