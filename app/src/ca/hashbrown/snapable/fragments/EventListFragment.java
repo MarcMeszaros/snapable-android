@@ -290,7 +290,7 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
                 fragmentReference.stopLoadingSpinner(true);
 			}
 		}
-    	msgHandler.postDelayed(new GpsTimeout(this, locationManager, this), 30000);
+    	msgHandler.postDelayed(new GpsTimeout(this, locationManager, this), 10000);
 	}
 
 }
