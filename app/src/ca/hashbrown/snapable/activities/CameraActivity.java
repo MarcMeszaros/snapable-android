@@ -134,7 +134,8 @@ public class CameraActivity extends BaseActivity implements OnClickListener, Pic
 
             // get the original image rotation
             ExifInterface exifOrig = new ExifInterface(filename.getAbsolutePath());
-            int exifOrigRotation = exifOrig.getAttributeInt(ExifInterface.TAG_ORIENTATION, -1);
+            int exifOrigRotation = exifOrig.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
+            Log.d(TAG, "exifOrig: " + exifOrig.getAttribute(ExifInterface.TAG_ORIENTATION));
 
             // get the bitmap details
 			BitmapFactory.Options bmOptions = new BitmapFactory.Options();
@@ -162,31 +163,14 @@ public class CameraActivity extends BaseActivity implements OnClickListener, Pic
             Rect cropArea = new Rect(x, y, x+length, y+length);
             Bitmap bitmap = regionDecoder.decodeRegion(cropArea, cropOptions);
 
-            // create a new rotated bitmap if required
-            switch (exifOrigRotation) {
-                case ExifInterface.ORIENTATION_ROTATE_90: {
-                    Matrix matrix = new Matrix();
-                    matrix.postRotate(90);
-                    bitmap = Bitmap.createBitmap(bitmap, 0, 0, length, length, matrix, true);
-                    break;
-                }
-                case ExifInterface.ORIENTATION_ROTATE_180:{
-                    Matrix matrix = new Matrix();
-                    matrix.postRotate(180);
-                    bitmap = Bitmap.createBitmap(bitmap, 0, 0, length, length, matrix, true);
-                    break;
-                }
-                case ExifInterface.ORIENTATION_ROTATE_270: {
-                    Matrix matrix = new Matrix();
-                    matrix.postRotate(270);
-                    bitmap = Bitmap.createBitmap(bitmap, 0, 0, length, length, matrix, true);
-                    break;
-                }
-            }
-
             // save the file to storage
 			out = new FileOutputStream(filename);
 			bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+            out.close();
+            ExifInterface exifCrop = new ExifInterface(filename.getAbsolutePath());
+            exifCrop.setAttribute(ExifInterface.TAG_ORIENTATION, String.valueOf(exifOrigRotation));
+            exifCrop.saveAttributes();
+            Log.d(TAG, "exifCrop: " + exifCrop.getAttribute(ExifInterface.TAG_ORIENTATION));
             // release memory
             bitmap.recycle();
             bitmap = null;

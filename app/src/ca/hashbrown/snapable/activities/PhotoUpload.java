@@ -4,16 +4,16 @@ import android.content.ContentUris;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.ProgressBar;
+import android.widget.*;
 import ca.hashbrown.snapable.R;
 import ca.hashbrown.snapable.provider.SnapableContract;
 import com.snapable.api.SnapApi;
@@ -21,8 +21,7 @@ import com.snapable.api.SnapClient;
 import com.snapable.api.models.Event;
 import com.snapable.api.resources.PhotoResource;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+import java.io.*;
 
 public class PhotoUpload extends BaseFragmentActivity implements OnClickListener {
 
@@ -42,15 +41,44 @@ public class PhotoUpload extends BaseFragmentActivity implements OnClickListener
     	// get the extra bundle data
     	Bundle bundle = getIntent().getExtras();
     	event = bundle.getParcelable("event");
-		//imageBitmap = BitmapFactory.decodeFile(bundle.getString("imagePath"));
+		//Bitmap bmScaled = BitmapFactory.decodeFile(bundle.getString("imagePath"));
     	imagePath = bundle.getString("imagePath");
 
-		// create a scaled bitmap
+        // create a scaled bitmap
 		ImageView photo = (ImageView) findViewById(R.id.fragment_photo_upload__image);
     	//Bitmap bmScaled = Bitmap.createScaledBitmap(imageBitmap, 150, 150, false);
     	Bitmap bmScaled = PhotoUpload.decodeSampledBitmapFromPath(bundle.getString("imagePath"), 300, 300);
 
-    	// set the scaled image in the image view
+        try {
+            // get exif data
+            ExifInterface exif = new ExifInterface(imagePath);
+            int exifRotation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
+
+            // rotate bitmap
+            switch (exifRotation) {
+                case ExifInterface.ORIENTATION_ROTATE_90: {
+                    Matrix matrix = new Matrix();
+                    matrix.postRotate(90);
+                    bmScaled = Bitmap.createBitmap(bmScaled, 0, 0, bmScaled.getWidth(), bmScaled.getHeight(), matrix, true);
+                    break;
+                }
+                case ExifInterface.ORIENTATION_ROTATE_180:{
+                    Matrix matrix = new Matrix();
+                    matrix.postRotate(180);
+                    bmScaled = Bitmap.createBitmap(bmScaled, 0, 0, bmScaled.getWidth(), bmScaled.getHeight(), matrix, true);
+                    break;
+                }
+                case ExifInterface.ORIENTATION_ROTATE_270: {
+                    Matrix matrix = new Matrix();
+                    matrix.postRotate(270);
+                    bmScaled = Bitmap.createBitmap(bmScaled, 0, 0, bmScaled.getWidth(), bmScaled.getHeight(), matrix, true);
+                    break;
+                }
+            }
+        } catch (IOException e) {
+            // TODO log here
+        }
+        // set the scaled image in the image view
     	photo.setImageBitmap(bmScaled);
 
     	// set the action bar title
@@ -110,6 +138,15 @@ public class PhotoUpload extends BaseFragmentActivity implements OnClickListener
 	    return BitmapFactory.decodeFile(path, options);
 	}
 
+    //@TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
+    protected int sizeOf(Bitmap data) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB_MR1) {
+            return data.getRowBytes() * data.getHeight();
+        } else {
+            return data.getByteCount();
+        }
+    }
+
 	private class PhotoUploadTask extends AsyncTask<Void, Void, Void> {
 
 		private Event event;
@@ -133,22 +170,80 @@ public class PhotoUpload extends BaseFragmentActivity implements OnClickListener
 
 		@Override
 		protected Void doInBackground(Void... params) {
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inPurgeable = true;
-			Bitmap photo = BitmapFactory.decodeFile(photoPath, options);
+            try {
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inPurgeable = true;
+                Bitmap photo = BitmapFactory.decodeFile(photoPath, options);
+                Log.d(TAG, "size of photo: " + sizeOf(photo));
+                ExifInterface exif = new ExifInterface(photoPath);
+                int exifRotation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
 
-			// turn the bitmap into an input stream
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-	        photo.compress(Bitmap.CompressFormat.JPEG, 50, baos);
-	        ByteArrayInputStream inStream = new ByteArrayInputStream(baos.toByteArray());
+			    // turn the bitmap into a temp compressed file
+                FileOutputStream tmpout = new FileOutputStream(photoPath + ".tmp");
+                photo.compress(Bitmap.CompressFormat.JPEG, 50, tmpout);
+                tmpout.close();
+                // make sure memory is released
+                photo.recycle();
+                photo = null;
 
-	        // get local cached event info
-	        Uri queryUri = ContentUris.withAppendedId(SnapableContract.EventCredentials.CONTENT_URI, event.getId());
-	        Cursor c = getContentResolver().query(queryUri, null, null, null, null);
+                // decode temp file and rotate
+                Bitmap tmpBm = BitmapFactory.decodeFile(photoPath + ".tmp");
+                Log.d(TAG, "size of tmpBm: " + sizeOf(tmpBm));
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                // create a new rotated bitmap if required
+                switch (exifRotation) {
+                    case ExifInterface.ORIENTATION_ROTATE_90: {
+                        Matrix matrix = new Matrix();
+                        matrix.postRotate(90);
+                        Bitmap rotatedBm = Bitmap.createBitmap(tmpBm, 0, 0, tmpBm.getWidth(), tmpBm.getHeight(), matrix, true);
+                        Log.d(TAG, "size of rotatedBm: " + sizeOf(rotatedBm));
+                        rotatedBm.compress(Bitmap.CompressFormat.JPEG, 50, baos);
+                        tmpBm.recycle();
+                        tmpBm = null;
+                        rotatedBm.recycle();
+                        rotatedBm = null;
+                        break;
+                    }
+                    case ExifInterface.ORIENTATION_ROTATE_180:{
+                        Matrix matrix = new Matrix();
+                        matrix.postRotate(180);
+                        Bitmap rotatedBm = Bitmap.createBitmap(tmpBm, 0, 0, tmpBm.getWidth(), tmpBm.getHeight(), matrix, true);
+                        Log.d(TAG, "size of rotatedBm: " + sizeOf(rotatedBm));
+                        rotatedBm.compress(Bitmap.CompressFormat.JPEG, 50, baos);
+                        tmpBm.recycle();
+                        tmpBm = null;
+                        rotatedBm.recycle();
+                        rotatedBm = null;
+                        break;
+                    }
+                    case ExifInterface.ORIENTATION_ROTATE_270: {
+                        Matrix matrix = new Matrix();
+                        matrix.postRotate(270);
+                        Bitmap rotatedBm = Bitmap.createBitmap(tmpBm, 0, 0, tmpBm.getWidth(), tmpBm.getHeight(), matrix, true);
+                        Log.d(TAG, "size of rotatedBm: " + sizeOf(rotatedBm));
+                        rotatedBm.compress(Bitmap.CompressFormat.JPEG, 50, baos);
+                        tmpBm.recycle();
+                        tmpBm = null;
+                        rotatedBm.recycle();
+                        rotatedBm = null;
+                        break;
+                    }
 
-	        // upload via the API
-	        try {
-	        	PhotoResource photoRes = SnapClient.getInstance().build(PhotoResource.class);
+                    default:
+                        tmpBm.compress(Bitmap.CompressFormat.JPEG, 50, baos);
+                        tmpBm.recycle();
+                        break;
+                }
+
+                Log.d(TAG, "size of baos: " + baos.size());
+                ByteArrayInputStream inStream = new ByteArrayInputStream(baos.toByteArray());
+
+                // get local cached event info
+                Uri queryUri = ContentUris.withAppendedId(SnapableContract.EventCredentials.CONTENT_URI, event.getId());
+                Cursor c = getContentResolver().query(queryUri, null, null, null, null);
+
+	            // upload via the API
+	            PhotoResource photoRes = SnapClient.getInstance().build(PhotoResource.class);
 
 	        	// if we have a guest id, upload the photo with the id
 	        	if (c.moveToFirst()) {
@@ -164,11 +259,20 @@ public class PhotoUpload extends BaseFragmentActivity implements OnClickListener
 				}
 	        } catch (org.codegist.crest.CRestException e) {
 	        	Log.e(TAG, "problem with the response?", e);
-	        } finally {
-	        	// make sure memory is released
-	        	photo.recycle();
-	        	photo = null;
-	        }
+                //Toast.makeText(getApplicationContext(), "There was a problem uploading the photo.", Toast.LENGTH_LONG).show();
+	        } catch(FileNotFoundException e) {
+                Log.e(TAG, "problem finding a file", e);
+                Toast.makeText(getApplicationContext(), "There was a problem uploading the photo.", Toast.LENGTH_LONG).show();
+            } catch (IOException e) {
+                Log.e(TAG, "some IO exception", e);
+                Toast.makeText(getApplicationContext(), "There was a problem uploading the photo.", Toast.LENGTH_LONG).show();
+            } finally {
+                Log.d(TAG, "delete temp file");
+                File tmpFile = new File(photoPath + ".tmp");
+                tmpFile.delete();
+            }
+
+            // return nothing
 			return null;
 		}
 
