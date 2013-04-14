@@ -76,8 +76,18 @@ public class SnapSurfaceView extends android.view.SurfaceView implements Surface
 		camera.startPreview();
 
 		// setup he auto focus
-		camera.autoFocus(this);
-	}
+        List<String> focusModes = cameraParams.getSupportedFocusModes();
+        // TODO update the SDK version compiled against so "FOCUS_MODE_CONTINUOUS_PICTURE" constant can be used
+        if (focusModes.contains("continuous-picture")) {
+            Log.d(TAG, "device supports continuous autofocus");
+            cameraParams.setFocusMode("continuous-picture");
+            camera.autoFocus(this);
+        } else if(focusModes.contains(Parameters.FOCUS_MODE_AUTO)) {
+            Log.d(TAG, "device supports autofocus");
+            cameraParams.setFocusMode(Parameters.FOCUS_MODE_AUTO);
+            camera.autoFocus(this);
+        }
+    }
 
 	public void surfaceCreated(SurfaceHolder holder) {
 		Log.d(TAG, "surfaceCreated");
