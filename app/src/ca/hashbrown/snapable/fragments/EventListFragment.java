@@ -65,6 +65,13 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 		return inflater.inflate(R.layout.fragment_event_list, container, false);
 	}
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        locationManager.removeUpdates(this); // stop GPS updates
+        msgHandler.removeCallbacksAndMessages(null); // remove all messages in the handler
+    }
+
 	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 		// This is called when a new Loader needs to be created.
 		// First, pick the base URI to use depending on whether we are
