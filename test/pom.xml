@@ -30,20 +30,20 @@
         <dependency>
             <groupId>ca.hashbrown.snapable</groupId>
             <artifactId>app</artifactId>
-            <version>${project.version}</version>
+            <version>${app.version}</version>
             <scope>provided</scope>
             <type>apk</type>
         </dependency>
-        
+
         <!-- required: compile time dependency, so that we can read from the R.java and other -->
         <dependency>
             <groupId>ca.hashbrown.snapable</groupId>
             <artifactId>app</artifactId>
-            <version>${project.version}</version>
+            <version>${app.version}</version>
             <scope>provided</scope>
             <type>jar</type>
         </dependency>
-        
+
         <!-- Testing -->
 		<dependency>
 			<groupId>junit</groupId>
@@ -68,6 +68,6 @@
 
         </plugins>
 
-    </build>    
+    </build>
 
 </project>
