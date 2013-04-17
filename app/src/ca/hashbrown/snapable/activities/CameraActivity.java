@@ -1,5 +1,6 @@
 package ca.hashbrown.snapable.activities;
 
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.*;
@@ -8,9 +9,11 @@ import android.hardware.Camera.Parameters;
 import android.hardware.Camera.PictureCallback;
 import android.media.ExifInterface;
 import android.media.MediaScannerConnection;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore.Images.ImageColumns;
+import android.util.FloatMath;
 import android.util.Log;
 import android.view.Display;
 import android.view.View;
@@ -125,69 +128,8 @@ public class CameraActivity extends BaseActivity implements OnClickListener, Pic
 
 	public void onPictureTaken(byte[] data, Camera camera) {
 		Log.d(TAG, "picture taken");
-
-		try {
-            File filename = SnapStorage.getOutputMediaFile(SnapStorage.MEDIA_TYPE_IMAGE);
-            FileOutputStream out = new FileOutputStream(filename);
-            out.write(data, 0, data.length);
-            out.close();
-
-            // get the original image rotation
-            ExifInterface exifOrig = new ExifInterface(filename.getAbsolutePath());
-            int exifOrigRotation = exifOrig.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
-            Log.d(TAG, "exifOrig: " + exifOrig.getAttribute(ExifInterface.TAG_ORIENTATION));
-
-            // get the bitmap details
-			BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-            bmOptions.inJustDecodeBounds = true;
-            BitmapFactory.decodeFile(filename.getAbsolutePath(), bmOptions);
-			// figure out the square bitmap dimensions before saving
-            int x = 0;
-            int y = 0;
-            int length = 0;
-			if (bmOptions.outWidth > bmOptions.outHeight) {
-				x = (bmOptions.outWidth - bmOptions.outHeight) / 2;
-				length = bmOptions.outHeight;
-			} else {
-				y = (bmOptions.outHeight - bmOptions.outWidth) / 2;
-                length = bmOptions.outWidth;
-			}
-            // setup & perform the crop
-            if (Build.VERSION.SDK_INT < 15) {
-                Log.d(TAG, "Running garbage collection for Bitmaps");
-                System.gc();
-            }
-            BitmapRegionDecoder regionDecoder = BitmapRegionDecoder.newInstance(filename.getAbsolutePath(), true);
-            BitmapFactory.Options cropOptions = new BitmapFactory.Options();
-            cropOptions.inPurgeable = true;
-            Rect cropArea = new Rect(x, y, x+length, y+length);
-            Bitmap bitmap = regionDecoder.decodeRegion(cropArea, cropOptions);
-
-            // save the file to storage
-			out = new FileOutputStream(filename);
-			bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
-            out.close();
-            ExifInterface exifCrop = new ExifInterface(filename.getAbsolutePath());
-            exifCrop.setAttribute(ExifInterface.TAG_ORIENTATION, String.valueOf(exifOrigRotation));
-            exifCrop.saveAttributes();
-            Log.d(TAG, "exifCrop: " + exifCrop.getAttribute(ExifInterface.TAG_ORIENTATION));
-            // release memory
-            bitmap.recycle();
-            bitmap = null;
-            // alert the media scanner of new file
-			MediaScannerConnection.scanFile(this, new String[]{filename.getAbsolutePath()}, null, null); // tell the system to scan the image
-
-            // pass all the data to the photo upload activity
-			Intent upload = new Intent(this, PhotoUpload.class);
-			upload.putExtra("event", event);
-			upload.putExtra("imagePath", filename.getAbsolutePath());
-			startActivity(upload);
-
-		} catch (FileNotFoundException e) {
-			Log.e(TAG, "file not found", e);
-		} catch (IOException e) {
-            Log.e(TAG, "there was a problem with a r/w operation", e);
-        }
+        CropTask cropTask = new CropTask(this, data, camera);
+        cropTask.execute();
 	}
 
 	public void onClick(View v) {
@@ -299,5 +241,241 @@ public class CameraActivity extends BaseActivity implements OnClickListener, Pic
 			setFlashMode(lastFlashMode);
 		}
 	}
+
+    /**
+     * Custom class that crops the image after being taken. It then initializes the
+     * photo uploading activity.
+     *
+     * A lot of code taken from (CropImage.java):
+     * https://android.googlesource.com/platform/packages/apps/Gallery2/+/5e86fd1570b943e02d8435b2ce27a1806b72ee2c
+     */
+    private class CropTask extends AsyncTask<Void, Void, Void> {
+
+        private static final int MAX_PIXEL_COUNT = 5 * 1000000; // 5M pixels
+        private static final int TILE_SIZE = 512;
+
+
+        private Context context;
+        private byte[] data;
+        private Camera camera;
+
+        public CropTask(Context context, byte[] data, Camera camera) {
+            this.context = context;
+            this.data = data;
+            this.camera = camera;
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            try {
+                File filename = SnapStorage.getOutputMediaFile(SnapStorage.MEDIA_TYPE_IMAGE);
+                FileOutputStream out = new FileOutputStream(filename);
+                out.write(data, 0, data.length);
+                out.close();
+
+                // get the original image rotation
+                ExifInterface exifOrig = new ExifInterface(filename.getAbsolutePath());
+                int exifOrigRotation = exifOrig.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
+                Log.d(TAG, "exifOrig: " + exifOrig.getAttribute(ExifInterface.TAG_ORIENTATION));
+
+                // get the bitmap details
+                BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+                bmOptions.inJustDecodeBounds = true;
+                BitmapFactory.decodeFile(filename.getAbsolutePath(), bmOptions);
+                // figure out the square bitmap dimensions before saving
+                int x = 0;
+                int y = 0;
+                int length = 0;
+                if (bmOptions.outWidth > bmOptions.outHeight) {
+                    x = (bmOptions.outWidth - bmOptions.outHeight) / 2;
+                    length = bmOptions.outHeight;
+                } else {
+                    y = (bmOptions.outHeight - bmOptions.outWidth) / 2;
+                    length = bmOptions.outWidth;
+                }
+
+                // setup & perform the crop
+                if (Build.VERSION.SDK_INT < 15) {
+                    Log.d(TAG, "Running garbage collection for Bitmaps");
+                    System.gc();
+                }
+                BitmapRegionDecoder regionDecoder = BitmapRegionDecoder.newInstance(filename.getAbsolutePath(), true);
+
+                ////////////////////
+                Rect rect = new Rect(x, y, x+length, y+length);
+                int outputX = length;
+                int outputY = length;
+                // figure out the scaling
+                if (outputX * outputY > MAX_PIXEL_COUNT) {
+                    float scale = FloatMath.sqrt((float) MAX_PIXEL_COUNT / outputX / outputY);
+                    Log.w(TAG, "scale down the cropped image: " + scale);
+                    outputX = Math.round(scale * outputX);
+                    outputY = Math.round(scale * outputY);
+                }
+
+                // (rect.width() * scaleX, rect.height() * scaleY) =
+                // the size of drawing area in output bitmap
+                float scaleX = (float) outputX / rect.width();
+                float scaleY = (float) outputY / rect.height();
+                Rect dest = new Rect(0, 0, outputX, outputY);
+
+                // Keep the content in the center (or crop the content)
+                int rectWidth = Math.round(bmOptions.outWidth * scaleX);
+                int rectHeight = Math.round(bmOptions.outHeight * scaleY);
+                dest.set(Math.round((outputX - rectWidth) / 2f),
+                        Math.round((outputY - rectHeight) / 2f),
+                        Math.round((outputX + rectWidth) / 2f),
+                        Math.round((outputY + rectHeight) / 2f));
+
+                // use region decoder
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                int sample = computeSampleSizeLarger(Math.max(scaleX, scaleY));
+                options.inSampleSize = sample;
+
+                Bitmap bitmap;
+                // The decoding result is what we want if
+                //   1. The size of the decoded bitmap match the destination's size
+                //   2. The destination covers the whole output bitmap
+                if ((rect.width() / sample) == dest.width()
+                        && (rect.height() / sample) == dest.height()
+                        && (outputX == dest.width()) && (outputY == dest.height())) {
+                    // To prevent concurrent access in GLThread
+                    synchronized (regionDecoder) {
+                        bitmap = regionDecoder.decodeRegion(rect, options);
+                    }
+                } else {
+                    bitmap = Bitmap.createBitmap(outputX, outputY, Bitmap.Config.ARGB_8888);
+                    Canvas canvas = new Canvas(bitmap);
+                    drawInTiles(canvas, regionDecoder, rect, dest, sample);
+                }
+
+                //////////////
+
+                // save the file to storage
+                out = new FileOutputStream(filename);
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+                out.close();
+                ExifInterface exifCrop = new ExifInterface(filename.getAbsolutePath());
+                exifCrop.setAttribute(ExifInterface.TAG_ORIENTATION, String.valueOf(exifOrigRotation));
+                exifCrop.saveAttributes();
+                Log.d(TAG, "exifCrop: " + exifCrop.getAttribute(ExifInterface.TAG_ORIENTATION));
+                // release memory
+                bitmap.recycle();
+                bitmap = null;
+                // alert the media scanner of new file
+                MediaScannerConnection.scanFile(context, new String[]{filename.getAbsolutePath()}, null, null); // tell the system to scan the image
+
+                // pass all the data to the photo upload activity
+                Intent upload = new Intent(context, PhotoUpload.class);
+                upload.putExtra("event", event);
+                upload.putExtra("imagePath", filename.getAbsolutePath());
+                startActivity(upload);
+
+            } catch (FileNotFoundException e) {
+                Log.e(TAG, "file not found", e);
+            } catch (IOException e) {
+                Log.e(TAG, "there was a problem with a r/w operation", e);
+            }
+
+            // return nothing
+            return null;
+        }
+
+
+        /*
+         * Compute the sample size as a function of minSideLength
+         * and maxNumOfPixels.
+         * minSideLength is used to specify that minimal width or height of a
+         * bitmap.
+         * maxNumOfPixels is used to specify the maximal size in pixels that is
+         * tolerable in terms of memory usage.
+         *
+         * The function returns a sample size based on the constraints.
+         * Both size and minSideLength can be passed in as UNCONSTRAINED,
+         * which indicates no care of the corresponding constraint.
+         * The functions prefers returning a sample size that
+         * generates a smaller bitmap, unless minSideLength = UNCONSTRAINED.
+         *
+         * Also, the function rounds up the sample size to a power of 2 or multiple
+         * of 8 because BitmapFactory only honors sample size this way.
+         * For example, BitmapFactory downsamples an image by 2 even though the
+         * request is 3. So we round up the sample size to avoid OOM.
+         */
+        private int computeSampleSize(int width, int height, int minSideLength, int maxNumOfPixels) {
+            int initialSize = computeInitialSampleSize(width, height, minSideLength, maxNumOfPixels);
+
+            return (initialSize <= 8) ? nextPowerOf2(initialSize) : (initialSize + 7) / 8 * 8;
+        }
+
+        private int computeInitialSampleSize(int w, int h, int minSideLength, int maxNumOfPixels) {
+            if (maxNumOfPixels == -1 && minSideLength == -1) return 1;
+
+            int lowerBound = (maxNumOfPixels == -1) ? 1 : (int) FloatMath.ceil(FloatMath.sqrt((float) (w * h) / maxNumOfPixels));
+
+            if (minSideLength == -1) {
+                return lowerBound;
+            } else {
+                int sampleSize = Math.min(w / minSideLength, h / minSideLength);
+                return Math.max(sampleSize, lowerBound);
+            }
+        }
+
+        // Find the min x that 1 / x >= scale
+        public int computeSampleSizeLarger(float scale) {
+            int initialSize = (int) FloatMath.floor(1f / scale);
+            if (initialSize <= 1) return 1;
+
+            return (initialSize <= 8) ? prevPowerOf2(initialSize) : initialSize / 8 * 8;
+        }
+
+        // Returns the next power of two.
+        // Returns the input if it is already power of 2.
+        // Throws IllegalArgumentException if the input is <= 0 or
+        // the answer overflows.
+        public int nextPowerOf2(int n) {
+            if (n <= 0 || n > (1 << 30)) throw new IllegalArgumentException("n is invalid: " + n);
+            n -= 1;
+            n |= n >> 16;
+            n |= n >> 8;
+            n |= n >> 4;
+            n |= n >> 2;
+            n |= n >> 1;
+            return n + 1;
+        }
+
+        // Returns the previous power of two.
+        // Returns the input if it is already power of 2.
+        // Throws IllegalArgumentException if the input is <= 0
+        public int prevPowerOf2(int n) {
+            if (n <= 0) throw new IllegalArgumentException();
+            return Integer.highestOneBit(n);
+        }
+
+        private void drawInTiles(Canvas canvas, BitmapRegionDecoder decoder, Rect rect, Rect dest, int sample) {
+            int tileSize = TILE_SIZE * sample;
+            Rect tileRect = new Rect();
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+            options.inSampleSize = sample;
+            canvas.translate(dest.left, dest.top);
+            canvas.scale((float) sample * dest.width() / rect.width(), (float) sample * dest.height() / rect.height());
+            Paint paint = new Paint(Paint.FILTER_BITMAP_FLAG);
+            for (int tx = rect.left, x = 0; tx < rect.right; tx += tileSize, x += TILE_SIZE) {
+                for (int ty = rect.top, y = 0; ty < rect.bottom; ty += tileSize, y += TILE_SIZE) {
+                    tileRect.set(tx, ty, tx + tileSize, ty + tileSize);
+                    if (tileRect.intersect(rect)) {
+                        Bitmap bitmap;
+
+                        // To prevent concurrent access in GLThread
+                        synchronized (decoder) {
+                            bitmap = decoder.decodeRegion(tileRect, options);
+                        }
+                        canvas.drawBitmap(bitmap, x, y, paint);
+                        bitmap.recycle();
+                    }
+                }
+            }
+        }
+    }
 
 }
