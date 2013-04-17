@@ -199,6 +199,15 @@
 			<build>
                 <finalName>${app.name}-${app.version}-release</finalName>
 				<plugins>
+                    <!-- Build number -->
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>buildnumber-maven-plugin</artifactId>
+                        <configuration>
+                            <doCheck>true</doCheck>
+                        </configuration>
+                    </plugin>
+
 					<!-- android maven plugin -->
 					<plugin>
 						<groupId>com.jayway.maven.plugins.android.generation2</groupId>
