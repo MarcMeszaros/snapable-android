@@ -31,7 +31,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentTop="true"
-                android:layout_margin="5dp"
+                android:layout_margin="15dp"
                 android:src="@drawable/button__flash_mode__auto" />
         </RelativeLayout>
 
@@ -75,7 +75,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:layout_alignParentRight="true"
-                android:layout_margin="5dp"
+                android:layout_margin="15dp"
                 android:padding="5dp"
                 android:src="@drawable/button__image_picker" />
         </RelativeLayout>
