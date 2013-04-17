@@ -9,11 +9,13 @@ import android.os.AsyncTask;
 import android.support.v4.util.LruCache;
 import android.util.Log;
 import android.widget.ImageView;
+import ca.hashbrown.snapable.Snapable;
 import com.snapable.api.SnapClient;
 import com.snapable.api.resources.EventResource;
 import com.snapable.api.resources.PhotoResource;
 import org.codegist.crest.CRestException;
 
+import java.io.File;
 import java.lang.ref.WeakReference;
 
 /**
@@ -112,8 +114,8 @@ public class SnapCache {
 	 */
 	public static class EventWorkerTask extends BitmapWorkerTask {
 
-		// 4MB of bitmap cache
-		private static LruCache<String, Bitmap> mCache = new LruCache<String, Bitmap>(4 * 1024 * 1024) {
+		// 2MB of memory bitmap cache
+		private static LruCache<String, Bitmap> mCache = new LruCache<String, Bitmap>(2 * 1024 * 1024) {
 			@Override
 			protected int sizeOf(String key, Bitmap value) {
 				return value.getRowBytes() * value.getHeight();
@@ -160,7 +162,7 @@ public class SnapCache {
 		}
 
 		public static Bitmap getBitmapFromCache(String key) {
-			return mCache.get(key);
+            return mCache.get(key);
 		}
 
 	}
@@ -170,15 +172,18 @@ public class SnapCache {
 	 */
 	public static class PhotoWorkerTask extends BitmapWorkerTask {
 
-		// 8MB of bitmap cache
-		private static LruCache<String, Bitmap> mCache = new LruCache<String, Bitmap>(8 * 1024 * 1024) {
+		// 4MB of bitmap cache
+		private static LruCache<String, Bitmap> mCache = new LruCache<String, Bitmap>(4 * 1024 * 1024) {
 			@Override
 			protected int sizeOf(String key, Bitmap value) {
 				return value.getRowBytes() * value.getHeight();
 			}
 		};
 
-		public PhotoWorkerTask(ImageView imageView) {
+        // 32MB disk cache
+        private static DiskLruImageCache dCache = new DiskLruImageCache(new File(Snapable.getContext().getExternalCacheDir(), "cache_photo"), Snapable.getVersionCode(), 1, (32 * 1024 *1024));;
+
+        public PhotoWorkerTask(ImageView imageView) {
 			super(imageView);
 		}
 
@@ -214,11 +219,23 @@ public class SnapCache {
 		public static void addBitmapToCache(String key, Bitmap bitmap) {
 			if (getBitmapFromCache(key) == null) {
 				mCache.put(key, bitmap);
+                dCache.putBitmap(key, bitmap);
 			}
 		}
 
+        public static Bitmap getBitmapFromCacheMemory(String key) {
+            return mCache.get(key); // try and get from memory
+        }
+
 		public static Bitmap getBitmapFromCache(String key) {
-			return mCache.get(key);
+			Bitmap result = mCache.get(key); // try and get from memory
+            if (result == null) {
+                result = dCache.getBitmap(key); // try and get from disk
+                if (result != null) {
+                    mCache.put(key, result); // add to memory if found on disk
+                }
+            }
+            return result;
 		}
 
 	}

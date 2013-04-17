@@ -59,6 +59,12 @@
 		</dependency>
 
         <dependency>
+            <groupId>com.jakewharton</groupId>
+            <artifactId>disklrucache</artifactId>
+            <version>${disklrucache.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.crashlytics.android</groupId>
             <artifactId>crashlytics</artifactId>
             <version>${crashlytics.version}</version>

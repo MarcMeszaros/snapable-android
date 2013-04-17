@@ -54,7 +54,7 @@ public class PhotoListAdapter extends CursorAdapter {
 
 		// get the image, if there is one
 		final String imageKey = cursor.getLong(cursor.getColumnIndex(Photo.FIELD_ID)) + "_480x480";
-		Bitmap bm = SnapCache.PhotoWorkerTask.getBitmapFromCache(imageKey);
+		Bitmap bm = SnapCache.PhotoWorkerTask.getBitmapFromCacheMemory(imageKey);
 		if (bm != null) {
 			viewHolder.photo.setImageBitmap(bm);
 		} else if (SnapCache.PhotoWorkerTask.cancelPotentialWork(cursor.getLong(cursor.getColumnIndex(Photo.FIELD_ID)), viewHolder.photo)) {
