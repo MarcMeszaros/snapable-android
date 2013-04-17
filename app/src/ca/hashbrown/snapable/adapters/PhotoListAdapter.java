@@ -1,19 +1,5 @@
 package ca.hashbrown.snapable.adapters;
 
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-
-import ca.hashbrown.snapable.R;
-import ca.hashbrown.snapable.provider.SnapCache;
-import ca.hashbrown.snapable.provider.SnapCache.AsyncDrawable;
-import ca.hashbrown.snapable.provider.SnapCache.BitmapWorkerTask;
-import ca.hashbrown.snapable.provider.SnapCache.EventWorkerTask;
-import ca.hashbrown.snapable.provider.SnapCache.PhotoWorkerTask;
-
-import com.snapable.api.SnapClient;
-import com.snapable.api.models.Photo;
-import com.snapable.api.resources.PhotoResource;
-
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -24,23 +10,28 @@ import android.view.ViewGroup;
 import android.widget.CursorAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import ca.hashbrown.snapable.R;
+import ca.hashbrown.snapable.provider.SnapCache;
+import ca.hashbrown.snapable.provider.SnapCache.AsyncDrawable;
+import ca.hashbrown.snapable.provider.SnapCache.PhotoWorkerTask;
+import com.snapable.api.models.Photo;
 
 public class PhotoListAdapter extends CursorAdapter {
 
 	private static final String TAG = "PhotoListAdapter";
 	private final Bitmap placeholder;
-	
+
 	public PhotoListAdapter(Context context, Cursor c) {
 		super(context, c);
 		this.placeholder = BitmapFactory.decodeResource(context.getResources(), R.drawable.photo_blank);
 	}
-	
+
 	static class ViewHolder {
         protected ImageView photo;
         protected TextView caption;
         protected TextView authorName;
     }
-	
+
 	@Override
 	public boolean hasStableIds() {
 		return true;
@@ -49,12 +40,18 @@ public class PhotoListAdapter extends CursorAdapter {
 	@Override
 	public void bindView(View view, Context context, Cursor cursor) {
 		ViewHolder viewHolder = (ViewHolder) view.getTag();
-		
+
 		// set the text
-		viewHolder.caption.setText(cursor.getString(cursor.getColumnIndex(Photo.FIELD_CAPTION)));
+        String caption = cursor.getString(cursor.getColumnIndex(Photo.FIELD_CAPTION));
+        if (caption.isEmpty()) {
+            viewHolder.caption.setVisibility(View.GONE);
+        } else {
+            viewHolder.caption.setVisibility(View.VISIBLE);
+		    viewHolder.caption.setText(caption);
+        }
 		String authorName = cursor.getString(cursor.getColumnIndex(Photo.FIELD_AUTHOR_NAME));
 		viewHolder.authorName.setText((authorName.isEmpty()) ? "Anonymous" : authorName);
-		
+
 		// get the image, if there is one
 		final String imageKey = cursor.getLong(cursor.getColumnIndex(Photo.FIELD_ID)) + "_480x480";
 		Bitmap bm = SnapCache.PhotoWorkerTask.getBitmapFromCache(imageKey);
@@ -72,14 +69,14 @@ public class PhotoListAdapter extends CursorAdapter {
 	public View newView(Context context, Cursor cursor, ViewGroup parent) {
 		LayoutInflater inflater = LayoutInflater.from(context);
 		View v = inflater.inflate(R.layout.listview_row_eventphoto, parent, false);
-		
+
 		// bind the various views to the viewholder
 		final ViewHolder viewHolder = new ViewHolder();
 		viewHolder.photo = (ImageView) v.findViewById(R.id.listview_row_eventphoto_photo);
 		viewHolder.caption = (TextView) v.findViewById(R.id.listview_row_eventphoto_caption);
 		viewHolder.authorName = (TextView) v.findViewById(R.id.listview_row_eventphoto_author_name);
 		v.setTag(viewHolder);
-		
+
 		bindView(v, context, cursor);
 		return v;
 	}

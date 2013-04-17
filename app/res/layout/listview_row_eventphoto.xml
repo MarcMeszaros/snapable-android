@@ -12,7 +12,6 @@
         android:layout_height="300dp"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:padding="5dp"
         android:scaleType="fitCenter"
         android:src="@drawable/photo_blank" />
 
@@ -22,7 +21,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/listview_row_eventphoto_photo"
         android:layout_centerHorizontal="true"
-        android:padding="5dp" />
+        android:gravity="center_horizontal" />
 
     <TextView
         android:id="@+id/listview_row_eventphoto_author_name"
@@ -30,6 +29,8 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/listview_row_eventphoto_caption"
         android:layout_centerHorizontal="true"
-        android:padding="5dp" />
+        android:layout_margin="4dp"
+        android:textColor="@android:color/darker_gray"
+        android:textStyle="italic" />
 
 </RelativeLayout>
