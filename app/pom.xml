@@ -58,15 +58,6 @@
 			</exclusions>
 		</dependency>
 
-		<!-- Hack for Eclipse/IntelliJ -->
-		<dependency>
-			<groupId>com.actionbarsherlock</groupId>
-			<artifactId>actionbarsherlock</artifactId>
-			<type>jar</type>
-			<version>${abs.version}</version>
-			<scope>provided</scope>
-		</dependency>
-
         <dependency>
             <groupId>com.crashlytics.android</groupId>
             <artifactId>crashlytics</artifactId>
@@ -137,7 +128,7 @@
                         <artifactId>android-maven-plugin</artifactId>
                         <configuration>
                             <proguard>
-                                <skip>true</skip>
+                                <skip>false</skip>
                             </proguard>
                             <sign>
                                 <debug>false</debug>
@@ -193,7 +184,7 @@
 						<artifactId>android-maven-plugin</artifactId>
 						<configuration>
 							<proguard>
-								<skip>true</skip>
+								<skip>false</skip>
 							</proguard>
 							<sign>
 								<debug>false</debug>
