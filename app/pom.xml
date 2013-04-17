@@ -18,7 +18,7 @@
 
     <!-- define some module properties -->
     <properties>
-        <app.version.name>${app.version}-DEV (${maven.build.timestamp})</app.version.name>
+        <app.version.name>${app.version}-DEV [${buildNumber} ${maven.build.timestamp}]</app.version.name>
     </properties>
 
 	<!-- include required dependencies declared in the parent POM -->
@@ -96,6 +96,11 @@
         </resources>
 
 		<plugins>
+            <!-- Build Number -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>buildnumber-maven-plugin</artifactId>
+            </plugin>
 
 			<!-- android maven plugin -->
 			<plugin>
@@ -123,11 +128,22 @@
             <id>beta</id>
             <!-- define some module properties -->
             <properties>
-                <app.version.name>${app.version}-BETA (${maven.build.timestamp})</app.version.name>
+                <app.version.name>${app.version}-BETA [${buildNumber}]</app.version.name>
+                <android.release>true</android.release>
             </properties>
             <build>
                 <finalName>${app.name}-${app.version}-beta</finalName>
                 <plugins>
+                    <!-- Build number -->
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>buildnumber-maven-plugin</artifactId>
+                        <configuration>
+                            <doCheck>true</doCheck>
+                            <doUpdate>true</doUpdate>
+                        </configuration>
+                    </plugin>
+
                     <!-- android maven plugin -->
                     <plugin>
                         <groupId>com.jayway.maven.plugins.android.generation2</groupId>
