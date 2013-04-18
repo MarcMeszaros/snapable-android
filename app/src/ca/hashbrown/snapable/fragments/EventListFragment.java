@@ -68,8 +68,12 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
     @Override
     public void onPause() {
         super.onPause();
-        locationManager.removeUpdates(this); // stop GPS updates
-        msgHandler.removeCallbacksAndMessages(null); // remove all messages in the handler
+        if (locationManager != null) {
+            locationManager.removeUpdates(this); // stop GPS updates
+        }
+        if (msgHandler != null) {
+            msgHandler.removeCallbacksAndMessages(null); // remove all messages in the handler
+        }
     }
 
 	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
