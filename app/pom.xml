@@ -15,7 +15,11 @@
 	<artifactId>app</artifactId>
 	<packaging>apk</packaging>
 	<name>Snapable - app</name>
-    <version>1.0.5</version>
+
+    <!-- define some module properties -->
+    <properties>
+        <app.version.name>${app.version}-DEV [${buildNumber} ${maven.build.timestamp}]</app.version.name>
+    </properties>
 
 	<!-- include required dependencies declared in the parent POM -->
 	<dependencies>
@@ -45,7 +49,7 @@
 			<groupId>com.actionbarsherlock</groupId>
 			<artifactId>actionbarsherlock</artifactId>
 			<type>apklib</type>
-			<version>4.2.0</version>
+			<version>${abs.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>com.google.android</groupId>
@@ -54,42 +58,65 @@
 			</exclusions>
 		</dependency>
 
-		<!-- Hack for Eclipse/IntelliJ -->
-		<dependency>
-			<groupId>com.actionbarsherlock</groupId>
-			<artifactId>actionbarsherlock</artifactId>
-			<type>jar</type>
-			<version>4.2.0</version>
-			<scope>provided</scope>
-		</dependency>
+        <dependency>
+            <groupId>com.jakewharton</groupId>
+            <artifactId>disklrucache</artifactId>
+            <version>${disklrucache.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>com.crashlytics.android</groupId>
             <artifactId>crashlytics</artifactId>
-            <version>0.9.4</version>
+            <version>${crashlytics.version}</version>
         </dependency>
 
         <!-- Google Analytics Android Library (from http://nexus.snapable.com) -->
 		<dependency>
 			<groupId>com.google.android</groupId>
 			<artifactId>analytics</artifactId>
-			<version>2.0-beta4</version>
 		</dependency>
 
 	</dependencies>
 
 	<!-- override some defaults with module specific parameters -->
 	<build>
-		<finalName>Snapable-${project.version}</finalName>
+		<finalName>${app.name}-${app.version}</finalName>
 		<sourceDirectory>src</sourceDirectory>
 
+        <resources>
+            <!-- filter manifest and put filtered file in target/filtered-manifest/ -->
+            <resource>
+                <directory>${project.basedir}</directory>
+                <filtering>true</filtering>
+                <targetPath>${project.build.directory}/filtered-manifest</targetPath>
+                <includes>
+                    <include>AndroidManifest.xml</include>
+                </includes>
+            </resource>
+        </resources>
+
 		<plugins>
+            <!-- Build Number -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>buildnumber-maven-plugin</artifactId>
+            </plugin>
 
 			<!-- android maven plugin -->
 			<plugin>
 				<groupId>com.jayway.maven.plugins.android.generation2</groupId>
 				<artifactId>android-maven-plugin</artifactId>
+                <inherited>true</inherited>
+                <configuration>
+                    <!-- tell build process to use filtered manifest -->
+                    <androidManifestFile>${project.build.directory}/filtered-manifest/AndroidManifest.xml</androidManifestFile>
+                </configuration>
 			</plugin>
+
+            <!-- Text replace in resources -->
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+            </plugin>
 
 		</plugins>
 
@@ -97,21 +124,97 @@
 
 	<!-- build profiles -->
 	<profiles>
+        <profile>
+            <id>beta</id>
+            <!-- define some module properties -->
+            <properties>
+                <app.version.name>${app.version}-BETA [${buildNumber}]</app.version.name>
+                <android.release>true</android.release>
+            </properties>
+            <build>
+                <finalName>${app.name}-${app.version}-beta</finalName>
+                <plugins>
+                    <!-- Build number -->
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>buildnumber-maven-plugin</artifactId>
+                        <configuration>
+                            <doCheck>true</doCheck>
+                        </configuration>
+                    </plugin>
+
+                    <!-- android maven plugin -->
+                    <plugin>
+                        <groupId>com.jayway.maven.plugins.android.generation2</groupId>
+                        <artifactId>android-maven-plugin</artifactId>
+                        <configuration>
+                            <proguard>
+                                <skip>false</skip>
+                            </proguard>
+                            <sign>
+                                <debug>false</debug>
+                            </sign>
+                            <zipalign>
+                                <skip>false</skip>
+                            </zipalign>
+                            <zipalignInputApk>${project.build.directory}/${app.name}-${app.version}-beta.apk</zipalignInputApk>
+                            <zipalignOutputApk>${project.build.directory}/${app.name}-${app.version}-beta.apk</zipalignOutputApk>
+                        </configuration>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>properties-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>initialize</phase>
+                                <goals>
+                                    <goal>read-project-properties</goal>
+                                </goals>
+                                <configuration>
+                                    <files>
+                                        <file>../release.properties</file>
+                                    </files>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-jarsigner-plugin</artifactId>
+                    </plugin>
+
+                </plugins>
+            </build>
+        </profile>
+
 		<profile>
 			<id>release</id>
-			<properties>
-				<android.release>true</android.release>
+            <!-- define some module properties -->
+            <properties>
+                <app.version.name>${app.version}</app.version.name>
+            	<android.release>true</android.release>
 			</properties>
 			<build>
+                <finalName>${app.name}-${app.version}-release</finalName>
 				<plugins>
+                    <!-- Build number -->
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>buildnumber-maven-plugin</artifactId>
+                        <configuration>
+                            <doCheck>true</doCheck>
+                        </configuration>
+                    </plugin>
+
 					<!-- android maven plugin -->
 					<plugin>
 						<groupId>com.jayway.maven.plugins.android.generation2</groupId>
 						<artifactId>android-maven-plugin</artifactId>
-						<inherited>true</inherited>
 						<configuration>
 							<proguard>
-								<skip>true</skip>
+								<skip>false</skip>
 							</proguard>
 							<sign>
 								<debug>false</debug>
@@ -119,25 +222,14 @@
 							<zipalign>
 								<skip>false</skip>
 							</zipalign>
-							<zipalignInputApk>${project.build.directory}/Snapable-${project.version}.apk</zipalignInputApk>
-							<zipalignOutputApk>${project.build.directory}/Snapable-${project.version}-final.apk</zipalignOutputApk>
-							<zipalignVerbose>true</zipalignVerbose>
+							<zipalignInputApk>${project.build.directory}/${app.name}-${app.version}-release.apk</zipalignInputApk>
+							<zipalignOutputApk>${project.build.directory}/${app.name}-${app.version}-release.apk</zipalignOutputApk>
 						</configuration>
-						<executions>
-							<execution>
-								<id>alignApk</id>
-								<phase>install</phase>
-								<goals>
-									<goal>zipalign</goal>
-								</goals>
-							</execution>
-						</executions>
 					</plugin>
 
 					<plugin>
 						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>properties-maven-plugin</artifactId>
-						<version>1.0-alpha-2</version>
 						<executions>
 							<execution>
 								<phase>initialize</phase>
@@ -156,33 +248,6 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-jarsigner-plugin</artifactId>
-						<version>1.2</version>
-						<executions>
-							<execution>
-								<id>signing</id>
-								<goals>
-									<goal>sign</goal>
-								</goals>
-								<phase>package</phase>
-								<inherited>true</inherited>
-								<configuration>
-									<!-- Required arguments because Java 7 changes default signing algorithm (breaks on Android) -->
-									<arguments>
-										<argument>-digestalg</argument><argument>SHA1</argument>
-										<argument>-sigalg</argument><argument>MD5withRSA</argument>
-									</arguments>
-									<keystore>${sign.keystore}</keystore>
-									<alias>${sign.alias}</alias>
-									<storepass>${sign.storepass}</storepass>
-									<keypass>${sign.keypass}</keypass>
-									<archiveDirectory>target</archiveDirectory>
-									<includes>
-										<include>Snapable-${project.version}.apk</include>
-									</includes>
-									<removeExistingSignatures>true</removeExistingSignatures>
-								</configuration>
-							</execution>
-						</executions>
 					</plugin>
 
 				</plugins>

@@ -15,10 +15,35 @@
 		<maven>3.0.3</maven>
 	</prerequisites>
 
-	<!-- define some project-wide properties -->
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	</properties>
+    <scm>
+        <connection>scm:git:git://bitbucket.com/snapable/android.git</connection>
+    </scm>
+
+    <!-- define some project-wide properties -->
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <app.name>Snapable</app.name>
+        <app.version>1.0.6</app.version>
+        <app.version.code>8</app.version.code>
+
+        <android.version>4.0.3_r3</android.version>
+        <android.api.version>15</android.api.version>
+        <android.maven.version>3.5.3</android.maven.version>
+
+        <!-- Thirdparty -->
+        <crest.version>2.0.0-RC2-SNAPSHOT</crest.version>
+        <abs.version>4.2.0</abs.version>
+        <disklrucache.version>2.0.0</disklrucache.version>
+        <crashlytics.version>0.9.4</crashlytics.version>
+        <analytics.version>2.0-beta5</analytics.version>
+
+        <!-- Plugins -->
+        <plugin.properties.version>1.0-alpha-2</plugin.properties.version>
+        <plugin.buildnumber.version>1.2</plugin.buildnumber.version>
+
+        <!-- Timestamp Stuff -->
+        <maven.build.timestamp.format>yyyy-MM-dd HH:mm:ss</maven.build.timestamp.format>
+    </properties>
 
 	<repositories>
         <repository>
@@ -33,7 +58,6 @@
             <id>crashlytics-repo</id>
             <url>http://download.crashlytics.com/maven</url>
         </repository>
-
     </repositories>
 
 	<dependencyManagement>
@@ -42,13 +66,13 @@
 			<dependency>
 				<groupId>android</groupId>
 				<artifactId>android</artifactId>
-				<version>4.0.3_r3</version>
+				<version>${android.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.codegist.crest</groupId>
 				<artifactId>codegist-crest</artifactId>
-				<version>2.0.0-RC2-SNAPSHOT</version>
+				<version>${crest.version}</version>
 			</dependency>
 
 			<dependency>
@@ -63,24 +87,63 @@
 				<version>11</version>
 			</dependency>
 
+            <!-- Google Analytics Android Library (from http://nexus.snapable.com) -->
+            <dependency>
+                <groupId>com.google.android</groupId>
+                <artifactId>analytics</artifactId>
+                <version>${analytics.version}</version>
+            </dependency>
+
 		</dependencies>
 	</dependencyManagement>
 
 	<build>
 		<pluginManagement>
 			<plugins>
+                <!-- Build number -->
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>buildnumber-maven-plugin</artifactId>
+                    <version>${plugin.buildnumber.version}</version>
+                    <executions>
+                        <execution>
+                            <phase>validate</phase>
+                            <goals>
+                                <goal>create</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <shortRevisionLength>16</shortRevisionLength>
+                        <doCheck>false</doCheck>
+                        <doUpdate>false</doUpdate>
+                    </configuration>
+                </plugin>
+
 				<!-- the Android Maven plugin -->
 				<plugin>
 					<groupId>com.jayway.maven.plugins.android.generation2</groupId>
 					<artifactId>android-maven-plugin</artifactId>
-					<version>3.5.0</version>
+					<version>${android.maven.version}</version>
 					<extensions>true</extensions>
 					<configuration>
 						<sdk>
 							<!-- platform/api version (api v15 = Android 4.0.3) -->
-							<platform>15</platform>
+							<platform>${android.api.version}</platform>
 						</sdk>
+                        <zipalignInputApk>${project.build.directory}/${app.name}-${app.version}.apk</zipalignInputApk>
+                        <zipalignOutputApk>${project.build.directory}/${app.name}-${app.version}.apk</zipalignOutputApk>
+                        <zipalignVerbose>true</zipalignVerbose>
 					</configuration>
+                    <executions>
+                        <execution>
+                            <id>alignApk</id>
+                            <phase>install</phase>
+                            <goals>
+                                <goal>zipalign</goal>
+                            </goals>
+                        </execution>
+                    </executions>
 				</plugin>
 
 				<!-- Tweak the compiler -->
@@ -93,6 +156,60 @@
 						<target>1.6</target>
 					</configuration>
 				</plugin>
+
+                <!-- Text replace in resources -->
+                <plugin>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>2.5</version>
+                    <executions>
+                        <execution>
+                            <phase>initialize</phase>
+                            <goals>
+                                <goal>resources</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <!-- Used to read properties from a file -->
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>properties-maven-plugin</artifactId>
+                    <version>${plugin.properties.version}</version>
+                </plugin>
+
+                <!-- jarsigner plugin used for release -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jarsigner-plugin</artifactId>
+                    <version>1.2</version>
+                    <executions>
+                        <execution>
+                            <id>signing</id>
+                            <goals>
+                                <goal>sign</goal>
+                            </goals>
+                            <phase>package</phase>
+                            <inherited>true</inherited>
+                            <configuration>
+                                <!-- Required arguments because Java 7 changes default signing algorithm (breaks on Android) -->
+                                <arguments>
+                                    <argument>-digestalg</argument><argument>SHA1</argument>
+                                    <argument>-sigalg</argument><argument>MD5withRSA</argument>
+                                </arguments>
+                                <keystore>${sign.keystore}</keystore>
+                                <alias>${sign.alias}</alias>
+                                <storepass>${sign.storepass}</storepass>
+                                <keypass>${sign.keypass}</keypass>
+                                <archiveDirectory>target</archiveDirectory>
+                                <includes>
+                                    <include>${app.name}-${app.version}.apk</include>
+                                </includes>
+                                <removeExistingSignatures>true</removeExistingSignatures>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
 
 				<!-- Tweak the JavaDoc -->
 				<plugin>

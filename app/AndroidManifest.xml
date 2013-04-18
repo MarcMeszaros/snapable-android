@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="ca.hashbrown.snapable"
-    android:versionCode="7"
-    android:versionName="1.0.5" >
+    android:versionCode="${app.version.code}"
+    android:versionName="${app.version.name}" >
 
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -19,7 +19,8 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/Theme.Styled"
-        android:name="Snapable" >
+        android:name="Snapable"
+        android:allowBackup="false" >
 
         <activity
             android:name=".activities.CameraActivity"
