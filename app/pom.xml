@@ -162,7 +162,7 @@
                         <artifactId>android-maven-plugin</artifactId>
                         <configuration>
                             <proguard>
-                                <skip>false</skip>
+                                <skip>true</skip>
                             </proguard>
                             <sign>
                                 <debug>false</debug>
@@ -227,7 +227,7 @@
 						<artifactId>android-maven-plugin</artifactId>
 						<configuration>
 							<proguard>
-								<skip>false</skip>
+								<skip>true</skip>
 							</proguard>
 							<sign>
 								<debug>false</debug>
