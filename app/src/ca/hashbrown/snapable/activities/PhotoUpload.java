@@ -1,6 +1,7 @@
 package ca.hashbrown.snapable.activities;
 
 import android.content.ContentUris;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -28,7 +29,6 @@ public class PhotoUpload extends BaseFragmentActivity implements OnClickListener
 	private static final String TAG = "PhotoUpload";
 
 	private Event event;
-	//private Bitmap imageBitmap;
 	private String imagePath;
 
 	@Override
@@ -41,12 +41,10 @@ public class PhotoUpload extends BaseFragmentActivity implements OnClickListener
     	// get the extra bundle data
     	Bundle bundle = getIntent().getExtras();
     	event = bundle.getParcelable("event");
-		//Bitmap bmScaled = BitmapFactory.decodeFile(bundle.getString("imagePath"));
-    	imagePath = bundle.getString("imagePath");
+		imagePath = bundle.getString("imagePath");
 
         // create a scaled bitmap
 		ImageView photo = (ImageView) findViewById(R.id.fragment_photo_upload__image);
-    	//Bitmap bmScaled = Bitmap.createScaledBitmap(imageBitmap, 150, 150, false);
     	Bitmap bmScaled = PhotoUpload.decodeSampledBitmapFromPath(bundle.getString("imagePath"), 300, 300);
 
         try {
@@ -283,8 +281,12 @@ public class PhotoUpload extends BaseFragmentActivity implements OnClickListener
 			pb.setVisibility(View.INVISIBLE);
 			Log.d(TAG, "upload complete");
 
-			// we finished uploading the photo, close the activity
-			finish();
+            // Go back to the photo list when we are done uploading.
+            Intent parentActivityIntent = new Intent(getApplicationContext(), EventPhotoList.class);
+            parentActivityIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            parentActivityIntent.putExtra("event", event);
+            startActivity(parentActivityIntent);
+            finish();
 		}
 
 	}
