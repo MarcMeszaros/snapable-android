@@ -1,26 +1,25 @@
 package com.snapable.api;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.TimeZone;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-
 /**
- * Helper methods used to genenerate the various parts of the authentication
+ * Helper methods used to generate the various parts of the authentication
  * header required when calling the Snapable API.
- * 
+ *
  * @author Marc Meszaros (marc@snapable.com)
  */
 public class SnapApi {
 
 	// API information
 	public static final String api_version = "private_v1";
-	private static String api_key = "abc123"; // default: abc123
-	private static String api_secret = "123"; // default: 123
+	private static String api_key = "key123"; // default: key123
+	private static String api_secret = "sec123"; // default: sec123
 
 	// information used to generate signature
 	private static final String HMAC_SHA1_ALGORITHM = "HmacSHA1";
@@ -28,7 +27,7 @@ public class SnapApi {
 
 	/**
 	 * Generate a random nonce string.
-	 * 
+	 *
 	 * @param length The length the generated nonce should be.
 	 * @return a string containing a random nonce
 	 */
@@ -48,7 +47,7 @@ public class SnapApi {
 
 	/**
 	 * Generate a date timestamp to use for API key signing.
-	 * 
+	 *
 	 * @return a string containing the current datetime
 	 */
 	public static String getDate() {
@@ -60,7 +59,7 @@ public class SnapApi {
 	/**
 	 * Create a HMAC signature for an API request and return an array with all
 	 * the required parts required to build the API call.
-	 * 
+	 *
 	 * @param verb The HTTP verb for the request.
 	 * @param path The HTTP path of the request.
 	 * @return a HashMap containing the signature parts
@@ -73,7 +72,7 @@ public class SnapApi {
 	/**
 	 * Create a HMAC signature for an API request and return an array with all
 	 * the required parts required to build the API call.
-	 * 
+	 *
 	 * @param verb The HTTP verb for the request.
 	 * @param path The HTTP path of the request.
 	 * @param nonce The nonce that should be used in the request.
@@ -114,7 +113,7 @@ public class SnapApi {
 
 	/**
 	 * Helper method to set the API key and secret.
-	 * 
+	 *
 	 * @param key the API key
 	 * @param secret the API secret
 	 */
