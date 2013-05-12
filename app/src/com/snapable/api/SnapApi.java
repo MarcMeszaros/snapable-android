@@ -3,10 +3,8 @@ package com.snapable.api;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.SecureRandom;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.TimeZone;
 
 /**
  * Helper methods used to generate the various parts of the authentication
@@ -51,9 +49,7 @@ public class SnapApi {
 	 * @return a string containing the current datetime
 	 */
 	public static String getDate() {
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
-		dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-		return dateFormat.format(new Date());
+        return String.valueOf(new Date().getTime()/1000);
 	}
 
 	/**
@@ -76,15 +72,15 @@ public class SnapApi {
 	 * @param verb The HTTP verb for the request.
 	 * @param path The HTTP path of the request.
 	 * @param nonce The nonce that should be used in the request.
-	 * @param date The datetime string that should be used in the request.
+	 * @param timestamp The timestamp string that should be used in the request.
 	 * @return a HashMap containing the signature parts
 	 */
-	public static HashMap<String, String> sign(String verb, String path, String nonce, String date) {
+	public static HashMap<String, String> sign(String verb, String path, String nonce, String timestamp) {
 		// build the string to sign
-		String x_snap_nonce = (nonce != null) ? nonce : SnapApi.getNonce(16);
-		String x_snap_date = (date != null) ? date : SnapApi.getDate();
+		String snap_nonce = (nonce != null) ? nonce : SnapApi.getNonce(16);
+		String snap_timestamp = (timestamp != null) ? timestamp : SnapApi.getDate();
 		StringBuilder enc = new StringBuilder();
-		String raw_signature = SnapApi.api_key + verb.toUpperCase() + path + x_snap_nonce + x_snap_date;
+		String raw_signature = SnapApi.api_key + verb.toUpperCase() + path + snap_nonce + snap_timestamp;
 		try {
 			// generate the HMAC signature
 			Mac mac = Mac.getInstance(HMAC_SHA1_ALGORITHM);
@@ -103,8 +99,8 @@ public class SnapApi {
 
 		// build the response hashmap
 		HashMap<String, String> resp = new HashMap<String, String>(3);
-		resp.put("x_snap_nonce", x_snap_nonce);
-		resp.put("x_snap_date", x_snap_date);
+		resp.put("nonce", snap_nonce);
+		resp.put("timestamp", snap_timestamp);
 		resp.put("api_key", SnapApi.api_key);
 		resp.put("signature", enc.toString());
 
