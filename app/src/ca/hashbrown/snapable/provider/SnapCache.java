@@ -156,7 +156,7 @@ public class SnapCache {
 		}
 
 		public static void addBitmapToCache(String key, Bitmap bitmap) {
-			if (getBitmapFromCache(key) == null) {
+			if (getBitmapFromCache(key) == null && bitmap != null) {
 				mCache.put(key, bitmap);
 			}
 		}
@@ -217,7 +217,7 @@ public class SnapCache {
 		}
 
 		public static void addBitmapToCache(String key, Bitmap bitmap) {
-			if (getBitmapFromCache(key) == null) {
+			if (getBitmapFromCache(key) == null && bitmap != null) {
 				mCache.put(key, bitmap);
                 dCache.putBitmap(key, bitmap);
 			}
