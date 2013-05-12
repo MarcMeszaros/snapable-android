@@ -347,6 +347,7 @@ public class CameraActivity extends BaseActivity implements OnClickListener, Pic
                     bitmap = Bitmap.createBitmap(outputX, outputY, Bitmap.Config.ARGB_8888);
                     Canvas canvas = new Canvas(bitmap);
                     drawInTiles(canvas, regionDecoder, rect, dest, sample);
+                    canvas = null; // let the GC do it's thing
                 }
 
                 //////////////
