@@ -11,7 +11,6 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.ListFragment;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -29,9 +28,10 @@ import ca.hashbrown.snapable.activities.EventPhotoList;
 import ca.hashbrown.snapable.adapters.EventListAdapter;
 import ca.hashbrown.snapable.cursors.EventCursor;
 import ca.hashbrown.snapable.provider.SnapableContract;
+import com.actionbarsherlock.app.SherlockListFragment;
 import com.snapable.api.models.Event;
 
-public class EventListFragment extends ListFragment implements LoaderCallbacks<Cursor>, OnItemClickListener, LocationListener {
+public class EventListFragment extends SherlockListFragment implements LoaderCallbacks<Cursor>, OnItemClickListener, LocationListener {
 
 	private static final String TAG = "EventListFragment";
 
@@ -66,10 +66,20 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 	}
 
     @Override
+    public void onResume() {
+        super.onResume();
+        if (locationManager != null && msgHandler != null) {
+            // restart the loader
+            getLoaderManager().initLoader(LOADERS.EVENTS, null, this);
+        }
+    }
+
+    @Override
     public void onPause() {
         super.onPause();
         if (locationManager != null) {
             locationManager.removeUpdates(this); // stop GPS updates
+            stopLoadingSpinner(false);
         }
         if (msgHandler != null) {
             msgHandler.removeCallbacksAndMessages(null); // remove all messages in the handler
@@ -282,7 +292,7 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
     		locationManager.requestLocationUpdates(providerName, 1000, 1, this);
     	}
 
-    	// add a message to kill the location updater if it takes more than 30 sec.
+    	// add a message to kill the location updater if it takes more than 5 sec.
     	class GpsTimeout implements Runnable {
 
             private EventListFragment fragmentReference;
@@ -301,7 +311,7 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
                 fragmentReference.stopLoadingSpinner(true);
 			}
 		}
-    	msgHandler.postDelayed(new GpsTimeout(this, locationManager, this), 10000);
+    	msgHandler.postDelayed(new GpsTimeout(this, locationManager, this), 5000);
 	}
 
 }

@@ -1,35 +1,26 @@
 package ca.hashbrown.snapable.fragments;
 
-import com.snapable.api.models.Event;
-
-import ca.hashbrown.snapable.R;
-import ca.hashbrown.snapable.adapters.PhotoListAdapter;
-import ca.hashbrown.snapable.provider.SnapableContract;
-
-import android.database.Cursor;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.ListFragment;
-import android.support.v4.app.LoaderManager.LoaderCallbacks;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import ca.hashbrown.snapable.R;
+import com.actionbarsherlock.app.SherlockFragment;
+import com.snapable.api.models.Event;
 
-public class PhotoUploadFragment extends Fragment {
-	
+public class PhotoUploadFragment extends SherlockFragment {
+
 	private static final String TAG = "PhotoUploadFragment";
-	
+
 	Event event;
-	
+
 	public PhotoUploadFragment() {
 	}
-	
+
 	public PhotoUploadFragment(Event event) {
 		this.event = event;
 	}
-	
+
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
