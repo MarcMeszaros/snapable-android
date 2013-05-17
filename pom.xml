@@ -23,8 +23,8 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <app.name>Snapable</app.name>
-        <app.version>1.0.6</app.version>
-        <app.version.code>8</app.version.code>
+        <app.version>1.0.7</app.version>
+        <app.version.code>9</app.version.code>
 
         <android.version>4.0.3_r3</android.version>
         <android.support.version>12</android.support.version>
