@@ -293,6 +293,9 @@ public class CameraActivity extends BaseActivity implements OnClickListener, Pic
                     y = (bmOptions.outHeight - bmOptions.outWidth) / 2;
                     length = bmOptions.outWidth;
                 }
+                Rect origRect = new Rect(0, 0, bmOptions.outWidth, bmOptions.outHeight);
+                Log.d(TAG, String.format("orig dimensions (width,height): (%d,%d)", bmOptions.outWidth, bmOptions.outHeight));
+                Log.d(TAG, String.format("crop dimensions (x,y,length): (%d,%d,%d)", x, y, length));
 
                 // setup & perform the crop
                 if (Build.VERSION.SDK_INT < 15) {
@@ -312,12 +315,14 @@ public class CameraActivity extends BaseActivity implements OnClickListener, Pic
                     outputX = Math.round(scale * outputX);
                     outputY = Math.round(scale * outputY);
                 }
+                Log.d(TAG, "crop rectangle: " + rect);
 
                 // (rect.width() * scaleX, rect.height() * scaleY) =
                 // the size of drawing area in output bitmap
                 float scaleX = (float) outputX / rect.width();
                 float scaleY = (float) outputY / rect.height();
                 Rect dest = new Rect(0, 0, outputX, outputY);
+                Log.d(TAG, "dest rectangle: " + dest);
 
                 // Keep the content in the center (or crop the content)
                 int rectWidth = Math.round(bmOptions.outWidth * scaleX);
@@ -326,11 +331,13 @@ public class CameraActivity extends BaseActivity implements OnClickListener, Pic
                         Math.round((outputY - rectHeight) / 2f),
                         Math.round((outputX + rectWidth) / 2f),
                         Math.round((outputY + rectHeight) / 2f));
+                Log.d(TAG, "dest rectangle(adjusted): " + dest);
 
                 // use region decoder
                 BitmapFactory.Options options = new BitmapFactory.Options();
                 int sample = computeSampleSizeLarger(Math.max(scaleX, scaleY));
                 options.inSampleSize = sample;
+                Log.d(TAG, "sample: " + sample);
 
                 Bitmap bitmap;
                 // The decoding result is what we want if
@@ -339,14 +346,16 @@ public class CameraActivity extends BaseActivity implements OnClickListener, Pic
                 if ((rect.width() / sample) == dest.width()
                         && (rect.height() / sample) == dest.height()
                         && (outputX == dest.width()) && (outputY == dest.height())) {
+                    Log.d(TAG, "do regionDecode crop");
                     // To prevent concurrent access in GLThread
                     synchronized (regionDecoder) {
                         bitmap = regionDecoder.decodeRegion(rect, options);
                     }
                 } else {
+                    Log.d(TAG, "do canvas Crop");
                     bitmap = Bitmap.createBitmap(outputX, outputY, Bitmap.Config.ARGB_8888);
                     Canvas canvas = new Canvas(bitmap);
-                    drawInTiles(canvas, regionDecoder, rect, dest, sample);
+                    drawInTiles(canvas, regionDecoder, origRect, dest, sample);
                     canvas = null; // let the GC do it's thing
                 }
 
