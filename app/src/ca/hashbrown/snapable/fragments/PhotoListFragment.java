@@ -119,7 +119,8 @@ public class PhotoListFragment extends SherlockListFragment implements LoaderCal
 		switch (loader.getId()) {
             case PHOTOS:
                 photoAdapter.changeCursor(data);
-                refreshActionItem.showProgress(false);
+                if (refreshActionItem != null)
+                    refreshActionItem.showProgress(false);
                 break;
 
             default:
