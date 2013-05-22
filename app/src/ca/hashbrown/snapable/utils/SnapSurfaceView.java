@@ -76,16 +76,22 @@ public class SnapSurfaceView extends android.view.SurfaceView implements Surface
 		camera.startPreview();
 
 		// setup he auto focus
-        List<String> focusModes = cameraParams.getSupportedFocusModes();
-        // TODO update the SDK version compiled against so "FOCUS_MODE_CONTINUOUS_PICTURE" constant can be used
-        if (focusModes.contains("continuous-picture")) {
-            Log.d(TAG, "device supports continuous autofocus");
-            cameraParams.setFocusMode("continuous-picture");
-            camera.autoFocus(this);
-        } else if(focusModes.contains(Parameters.FOCUS_MODE_AUTO)) {
-            Log.d(TAG, "device supports autofocus");
-            cameraParams.setFocusMode(Parameters.FOCUS_MODE_AUTO);
-            camera.autoFocus(this);
+        // we need a try/catch because some devices report being able to set the focus mode,
+        // but actually fail when you try to set it to set it to a mode it says it supports
+        try {
+            List<String> focusModes = cameraParams.getSupportedFocusModes();
+            // TODO update the SDK version compiled against so "FOCUS_MODE_CONTINUOUS_PICTURE" constant can be used
+            if (focusModes.contains("continuous-picture")) {
+                Log.d(TAG, "device supports continuous autofocus");
+                cameraParams.setFocusMode("continuous-picture");
+                camera.autoFocus(this);
+            } else if(focusModes.contains(Parameters.FOCUS_MODE_AUTO)) {
+                Log.d(TAG, "device supports autofocus");
+                cameraParams.setFocusMode(Parameters.FOCUS_MODE_AUTO);
+                camera.autoFocus(this);
+            }
+        } catch (RuntimeException e) {
+            Log.e(TAG, "can't set focus mode", e);
         }
     }
 
