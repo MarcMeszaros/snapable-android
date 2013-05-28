@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.widget.Toast;
+import com.crashlytics.android.Crashlytics;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -92,6 +93,7 @@ public class SnapSurfaceView extends android.view.SurfaceView implements Surface
             }
         } catch (RuntimeException e) {
             Log.e(TAG, "can't set focus mode", e);
+            Crashlytics.logException(e);
         }
     }
 

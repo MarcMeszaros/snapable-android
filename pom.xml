@@ -35,7 +35,7 @@
         <crest.version>2.0.0-RC2-SNAPSHOT</crest.version>
         <abs.version>4.3.0</abs.version>
         <disklrucache.version>2.0.0</disklrucache.version>
-        <crashlytics.version>0.9.4</crashlytics.version>
+        <crashlytics.version>0.10.2</crashlytics.version>
         <analytics.version>2.0-beta5</analytics.version>
 
         <!-- Plugins -->
