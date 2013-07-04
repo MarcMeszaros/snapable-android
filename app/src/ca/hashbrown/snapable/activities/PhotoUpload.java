@@ -176,7 +176,7 @@ public class PhotoUpload extends BaseFragmentActivity implements OnClickListener
                 ExifInterface exif = new ExifInterface(photoPath);
                 int exifRotation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
 
-			    // turn the bitmap into a temp compressed file
+                // turn the bitmap into a temp compressed file
                 FileOutputStream tmpout = new FileOutputStream(photoPath + ".tmp");
                 photo.compress(Bitmap.CompressFormat.JPEG, 50, tmpout);
                 tmpout.close();
@@ -184,56 +184,15 @@ public class PhotoUpload extends BaseFragmentActivity implements OnClickListener
                 photo.recycle();
                 photo = null;
 
-                // decode temp file and rotate
-                Bitmap tmpBm = BitmapFactory.decodeFile(photoPath + ".tmp");
-                Log.d(TAG, "size of tmpBm: " + sizeOf(tmpBm));
+                // re-apply the exif rotation
+                ExifInterface exitComp = new ExifInterface(photoPath + ".tmp");
+                exitComp.setAttribute(ExifInterface.TAG_ORIENTATION, "");
+                exitComp.saveAttributes();
+
+                // decode temp file
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                // create a new rotated bitmap if required
-                switch (exifRotation) {
-                    case ExifInterface.ORIENTATION_ROTATE_90: {
-                        Matrix matrix = new Matrix();
-                        matrix.postRotate(90);
-                        Bitmap rotatedBm = Bitmap.createBitmap(tmpBm, 0, 0, tmpBm.getWidth(), tmpBm.getHeight(), matrix, true);
-                        Log.d(TAG, "size of rotatedBm: " + sizeOf(rotatedBm));
-                        rotatedBm.compress(Bitmap.CompressFormat.JPEG, 50, baos);
-                        tmpBm.recycle();
-                        tmpBm = null;
-                        rotatedBm.recycle();
-                        rotatedBm = null;
-                        break;
-                    }
-                    case ExifInterface.ORIENTATION_ROTATE_180:{
-                        Matrix matrix = new Matrix();
-                        matrix.postRotate(180);
-                        Bitmap rotatedBm = Bitmap.createBitmap(tmpBm, 0, 0, tmpBm.getWidth(), tmpBm.getHeight(), matrix, true);
-                        Log.d(TAG, "size of rotatedBm: " + sizeOf(rotatedBm));
-                        rotatedBm.compress(Bitmap.CompressFormat.JPEG, 50, baos);
-                        tmpBm.recycle();
-                        tmpBm = null;
-                        rotatedBm.recycle();
-                        rotatedBm = null;
-                        break;
-                    }
-                    case ExifInterface.ORIENTATION_ROTATE_270: {
-                        Matrix matrix = new Matrix();
-                        matrix.postRotate(270);
-                        Bitmap rotatedBm = Bitmap.createBitmap(tmpBm, 0, 0, tmpBm.getWidth(), tmpBm.getHeight(), matrix, true);
-                        Log.d(TAG, "size of rotatedBm: " + sizeOf(rotatedBm));
-                        rotatedBm.compress(Bitmap.CompressFormat.JPEG, 50, baos);
-                        tmpBm.recycle();
-                        tmpBm = null;
-                        rotatedBm.recycle();
-                        rotatedBm = null;
-                        break;
-                    }
-
-                    default:
-                        tmpBm.compress(Bitmap.CompressFormat.JPEG, 50, baos);
-                        tmpBm.recycle();
-                        break;
-                }
-
-                Log.d(TAG, "size of baos: " + baos.size());
+                Bitmap photoComp = BitmapFactory.decodeFile(photoPath + ".tmp");
+                photoComp.compress(Bitmap.CompressFormat.JPEG, 100, baos);
                 ByteArrayInputStream inStream = new ByteArrayInputStream(baos.toByteArray());
 
                 // get local cached event info

@@ -7,10 +7,8 @@ import android.graphics.*;
 import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
 import android.hardware.Camera.PictureCallback;
-import android.media.ExifInterface;
 import android.media.MediaScannerConnection;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore.Images.ImageColumns;
 import android.util.FloatMath;
@@ -273,105 +271,6 @@ public class CameraActivity extends BaseActivity implements OnClickListener, Pic
                 out.write(data, 0, data.length);
                 out.close();
 
-                // get the original image rotation
-                ExifInterface exifOrig = new ExifInterface(filename.getAbsolutePath());
-                int exifOrigRotation = exifOrig.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
-                Log.d(TAG, "exifOrig: " + exifOrig.getAttribute(ExifInterface.TAG_ORIENTATION));
-
-                // get the bitmap details
-                BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-                bmOptions.inJustDecodeBounds = true;
-                BitmapFactory.decodeFile(filename.getAbsolutePath(), bmOptions);
-                // figure out the square bitmap dimensions before saving
-                int x = 0;
-                int y = 0;
-                int length = 0;
-                if (bmOptions.outWidth > bmOptions.outHeight) {
-                    x = (bmOptions.outWidth - bmOptions.outHeight) / 2;
-                    length = bmOptions.outHeight;
-                } else {
-                    y = (bmOptions.outHeight - bmOptions.outWidth) / 2;
-                    length = bmOptions.outWidth;
-                }
-                Rect origRect = new Rect(0, 0, bmOptions.outWidth, bmOptions.outHeight);
-                Log.d(TAG, String.format("orig dimensions (width,height): (%d,%d)", bmOptions.outWidth, bmOptions.outHeight));
-                Log.d(TAG, String.format("crop dimensions (x,y,length): (%d,%d,%d)", x, y, length));
-
-                // setup & perform the crop
-                if (Build.VERSION.SDK_INT < 15) {
-                    Log.d(TAG, "Running garbage collection for Bitmaps");
-                    System.gc();
-                }
-                BitmapRegionDecoder regionDecoder = BitmapRegionDecoder.newInstance(filename.getAbsolutePath(), true);
-
-                ////////////////////
-                Rect rect = new Rect(x, y, x+length, y+length);
-                int outputX = length;
-                int outputY = length;
-                // figure out the scaling
-                if (outputX * outputY > MAX_PIXEL_COUNT) {
-                    float scale = FloatMath.sqrt((float) MAX_PIXEL_COUNT / outputX / outputY);
-                    Log.w(TAG, "scale down the cropped image: " + scale);
-                    outputX = Math.round(scale * outputX);
-                    outputY = Math.round(scale * outputY);
-                }
-                Log.d(TAG, "crop rectangle: " + rect);
-
-                // (rect.width() * scaleX, rect.height() * scaleY) =
-                // the size of drawing area in output bitmap
-                float scaleX = (float) outputX / rect.width();
-                float scaleY = (float) outputY / rect.height();
-                Rect dest = new Rect(0, 0, outputX, outputY);
-                Log.d(TAG, "dest rectangle: " + dest);
-
-                // Keep the content in the center (or crop the content)
-                int rectWidth = Math.round(bmOptions.outWidth * scaleX);
-                int rectHeight = Math.round(bmOptions.outHeight * scaleY);
-                dest.set(Math.round((outputX - rectWidth) / 2f),
-                        Math.round((outputY - rectHeight) / 2f),
-                        Math.round((outputX + rectWidth) / 2f),
-                        Math.round((outputY + rectHeight) / 2f));
-                Log.d(TAG, "dest rectangle(adjusted): " + dest);
-
-                // use region decoder
-                BitmapFactory.Options options = new BitmapFactory.Options();
-                int sample = computeSampleSizeLarger(Math.max(scaleX, scaleY));
-                options.inSampleSize = sample;
-                Log.d(TAG, "sample: " + sample);
-
-                Bitmap bitmap;
-                // The decoding result is what we want if
-                //   1. The size of the decoded bitmap match the destination's size
-                //   2. The destination covers the whole output bitmap
-                if ((rect.width() / sample) == dest.width()
-                        && (rect.height() / sample) == dest.height()
-                        && (outputX == dest.width()) && (outputY == dest.height())) {
-                    Log.d(TAG, "do regionDecode crop");
-                    // To prevent concurrent access in GLThread
-                    synchronized (regionDecoder) {
-                        bitmap = regionDecoder.decodeRegion(rect, options);
-                    }
-                } else {
-                    Log.d(TAG, "do canvas Crop");
-                    bitmap = Bitmap.createBitmap(outputX, outputY, Bitmap.Config.ARGB_8888);
-                    Canvas canvas = new Canvas(bitmap);
-                    drawInTiles(canvas, regionDecoder, origRect, dest, sample);
-                    canvas = null; // let the GC do it's thing
-                }
-
-                //////////////
-
-                // save the file to storage
-                out = new FileOutputStream(filename);
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
-                out.close();
-                ExifInterface exifCrop = new ExifInterface(filename.getAbsolutePath());
-                exifCrop.setAttribute(ExifInterface.TAG_ORIENTATION, String.valueOf(exifOrigRotation));
-                exifCrop.saveAttributes();
-                Log.d(TAG, "exifCrop: " + exifCrop.getAttribute(ExifInterface.TAG_ORIENTATION));
-                // release memory
-                bitmap.recycle();
-                bitmap = null;
                 // alert the media scanner of new file
                 MediaScannerConnection.scanFile(context, new String[]{filename.getAbsolutePath()}, null, null); // tell the system to scan the image
 
