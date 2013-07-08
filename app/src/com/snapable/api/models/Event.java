@@ -1,17 +1,16 @@
 package com.snapable.api.models;
 
-import java.util.Date;
-
-import org.codegist.common.lang.ToStringBuilder;
-import org.codehaus.jackson.annotate.JsonProperty;
-
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.provider.BaseColumns;
+import org.codegist.common.lang.ToStringBuilder;
+import org.codehaus.jackson.annotate.JsonProperty;
+
+import java.util.Date;
 
 public class Event implements Parcelable {
-	@JsonProperty("cover")
-    private long cover;
+	//@JsonProperty("cover")
+    //private String cover;
 	@JsonProperty("enabled")
     private boolean isEnabled;
 	@JsonProperty("end")
@@ -30,10 +29,10 @@ public class Event implements Parcelable {
     private String title;
     @JsonProperty("url")
     private String url;
-    
+
     // fields
     public static final String FIELD_ID = BaseColumns._ID;
-    public static final String FIELD_COVER = "cover";
+    //public static final String FIELD_COVER = "cover";
     public static final String FIELD_ENABLED = "isEnabled";
     public static final String FIELD_END = "end";
     public static final String FIELD_PHOTO_COUNT = "photoCount";
@@ -43,11 +42,11 @@ public class Event implements Parcelable {
     public static final String FIELD_START = "start";
     public static final String FIELD_TITLE = "title";
     public static final String FIELD_URL = "url";
-    
+
     // required for a Cursor implementation
     public static final String[] COLUMN_NAMES = {
     	FIELD_ID,
-    	FIELD_COVER,
+    	//FIELD_COVER,
     	FIELD_ENABLED,
     	FIELD_END,
     	FIELD_PHOTO_COUNT,
@@ -58,10 +57,10 @@ public class Event implements Parcelable {
     	FIELD_TITLE,
     	FIELD_URL
     };
-    
+
     public String toString() {
         return new ToStringBuilder(this)
-        	.append(FIELD_COVER, this.cover)
+        	//.append(FIELD_COVER, this.cover)
         	.append(FIELD_ENABLED, this.isEnabled)
         	.append(FIELD_END, this.end)
         	.append(FIELD_PHOTO_COUNT, this.photoCount)
@@ -75,14 +74,16 @@ public class Event implements Parcelable {
     }
 
     // properties
-    public long getCover() {
+    /*
+    public String getCover() {
         return this.cover;
     }
 
-    public void setCover(long cover) {
+    public void setCover(String cover) {
         this.cover = cover;
     }
-    
+    */
+
     public boolean getIsEnabled() {
         return this.isEnabled;
     }
@@ -90,7 +91,7 @@ public class Event implements Parcelable {
     public void setIsEnabled(boolean isEnabled) {
         this.isEnabled = isEnabled;
     }
-    
+
     public Date getEnd() {
         return this.end;
     }
@@ -106,7 +107,7 @@ public class Event implements Parcelable {
     public void setPhotoCount(long photoCount) {
         this.photoCount = photoCount;
     }
-    
+
     public String getPin() {
         return this.pin;
     }
@@ -114,7 +115,7 @@ public class Event implements Parcelable {
     public void setPin(String pin) {
         this.pin = pin;
     }
-    
+
     public boolean getIsPublic() {
         return this.isPublic;
     }
@@ -122,7 +123,7 @@ public class Event implements Parcelable {
     public void setIsPublic(boolean isPublic) {
         this.isPublic = isPublic;
     }
-    
+
     public String getResourceUri() {
         return this.resourceUri;
     }
@@ -130,7 +131,7 @@ public class Event implements Parcelable {
     public void setResourceUri(String resourceUri) {
         this.resourceUri = resourceUri;
     }
-    
+
     public Date getStart() {
         return this.start;
     }
@@ -138,7 +139,7 @@ public class Event implements Parcelable {
     public void setStart(Date start) {
         this.start = start;
     }
-    
+
     public String getTitle() {
         return this.title;
     }
@@ -146,7 +147,7 @@ public class Event implements Parcelable {
     public void setTitle(String title) {
         this.title = title;
     }
-    
+
     public String getUrl() {
         return this.url;
     }
@@ -154,7 +155,7 @@ public class Event implements Parcelable {
     public void setUrl(String url) {
         this.url = url;
     }
-    
+
     // virtual properties
     public long getId() {
     	String[] resourceParts = this.resourceUri.split("/");
@@ -176,13 +177,13 @@ public class Event implements Parcelable {
         this.setUrl(in.readString());
     }
     */
-    
+
     public int describeContents() {
 		return 0;
 	}
-	
+
 	public void writeToParcel(Parcel dest, int flags) {
-		dest.writeLong(this.getCover());
+		//dest.writeString(this.getCover());
 		dest.writeInt(this.getIsEnabled() ? 1 : 0);
 		dest.writeLong(this.getEnd().getTime());
 		dest.writeLong(this.getPhotoCount());
@@ -193,12 +194,12 @@ public class Event implements Parcelable {
 		dest.writeString(this.getTitle());
 		dest.writeString(this.getUrl());
 	}
-	
+
     public static final Parcelable.Creator<Event> CREATOR = new Parcelable.Creator<Event>() {
         public Event createFromParcel(Parcel in) {
             Event event = new Event();
-            
-            event.setCover(in.readLong());
+
+            //event.setCover(in.readString());
             event.setIsEnabled((in.readInt() == 0) ? false : true);
             event.setEnd(new Date(in.readLong()));
             event.setPhotoCount(in.readLong());
@@ -208,7 +209,7 @@ public class Event implements Parcelable {
             event.setStart(new Date(in.readLong()));
             event.setTitle(in.readString());
             event.setUrl(in.readString());
-            
+
             return event;
         }
 
