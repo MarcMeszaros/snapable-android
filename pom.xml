@@ -29,7 +29,7 @@
         <android.version>4.0.3_r3</android.version>
         <android.support.version>12</android.support.version>
         <android.api.version>15</android.api.version>
-        <android.maven.version>3.5.3</android.maven.version>
+        <android.maven.version>3.6.0</android.maven.version>
 
         <!-- Thirdparty -->
         <crest.version>2.0.0-RC2-SNAPSHOT</crest.version>
