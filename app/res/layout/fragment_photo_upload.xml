@@ -45,10 +45,13 @@
     <Button
         android:id="@+id/fragment_photo_upload__button_done"
         android:layout_width="wrap_content"
+        android:minWidth="144dp"
         android:layout_height="wrap_content"
         android:layout_below="@id/fragment_photo_upload__caption"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="15dp"
-        android:text="@string/fragment_photo_upload__button_done" />
+        android:text="@string/fragment_photo_upload__button_done"
+        android:background="@drawable/button__green"
+        android:textColor="@android:color/white"/>
 
 </RelativeLayout>
