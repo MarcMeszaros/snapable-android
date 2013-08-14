@@ -190,10 +190,8 @@ public class PhotoUpload extends BaseFragmentActivity implements OnClickListener
                 exitComp.saveAttributes();
 
                 // decode temp file
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                Bitmap photoComp = BitmapFactory.decodeFile(photoPath + ".tmp");
-                photoComp.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-                ByteArrayInputStream inStream = new ByteArrayInputStream(baos.toByteArray());
+                File tempFile = new File(photoPath + ".tmp");
+                FileInputStream inStream = new FileInputStream(tempFile);
 
                 // get local cached event info
                 Uri queryUri = ContentUris.withAppendedId(SnapableContract.EventCredentials.CONTENT_URI, event.getId());
@@ -205,14 +203,13 @@ public class PhotoUpload extends BaseFragmentActivity implements OnClickListener
 	        	// if we have a guest id, upload the photo with the id
 	        	if (c.moveToFirst()) {
 	        		long guest_id = c.getLong(c.getColumnIndex(SnapableContract.EventCredentials.GUEST_ID));
-	        		long type_id = c.getLong(c.getColumnIndex(SnapableContract.EventCredentials.TYPE_ID));
-	        		if(guest_id > 0 && type_id > 0) {
-	        			photoRes.postPhoto(inStream, event.getResourceUri(), "/"+SnapApi.api_version +"/guest/"+guest_id+"/", "/"+SnapApi.api_version +"/type/"+type_id+"/", caption);
+	        		if(guest_id > 0) {
+	        			photoRes.postPhoto(inStream, event.getResourceUri(), "/"+SnapApi.api_version +"/guest/"+guest_id+"/", caption);
 	        		} else {
-	        			photoRes.postPhoto(inStream, event.getResourceUri(), "/"+SnapApi.api_version +"/type/6/", caption);
-	        		}
+                        photoRes.postPhoto(inStream, event.getResourceUri(), caption);
+                    }
 	        	} else {
-	        		photoRes.postPhoto(inStream, event.getResourceUri(), "/"+SnapApi.api_version +"/type/6/", caption);
+	        		photoRes.postPhoto(inStream, event.getResourceUri(), caption);
 				}
 	        } catch (org.codegist.crest.CRestException e) {
 	        	Log.e(TAG, "problem with the response?", e);
