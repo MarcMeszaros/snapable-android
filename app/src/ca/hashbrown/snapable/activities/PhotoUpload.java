@@ -185,9 +185,9 @@ public class PhotoUpload extends BaseFragmentActivity implements OnClickListener
                 photo = null;
 
                 // re-apply the exif rotation
-                ExifInterface exitComp = new ExifInterface(photoPath + ".tmp");
-                exitComp.setAttribute(ExifInterface.TAG_ORIENTATION, "");
-                exitComp.saveAttributes();
+                ExifInterface exifComp = new ExifInterface(photoPath + ".tmp");
+                exifComp.setAttribute(ExifInterface.TAG_ORIENTATION, String.valueOf(exifRotation));
+                exifComp.saveAttributes();
 
                 // decode temp file
                 File tempFile = new File(photoPath + ".tmp");
