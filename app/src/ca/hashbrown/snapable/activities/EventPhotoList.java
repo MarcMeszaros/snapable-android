@@ -3,24 +3,34 @@ package ca.hashbrown.snapable.activities;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.View;
 import android.view.View.OnClickListener;
 import ca.hashbrown.snapable.R;
 import ca.hashbrown.snapable.fragments.PhotoListFragment;
+import ca.hashbrown.snapable.utils.SnapStorage;
 import com.actionbarsherlock.view.MenuItem;
 import com.snapable.api.models.Event;
+
+import java.io.File;
 
 public class EventPhotoList extends BaseFragmentActivity implements OnClickListener {
 
 	private static final String TAG = "EventPhotoList";
 
-	private Event event;
-	private Uri imageUri;
+    public static final int PHOTO_ACTION = 0x01;
+
+    private Event event;
+    private Uri imageUri;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_photo_list);
+
+        if (savedInstanceState != null && savedInstanceState.getString("imageUri") != null) {
+            imageUri = Uri.parse(savedInstanceState.getString("imageUri"));
+        }
 
         // add click listener
 		findViewById(R.id.activity_photo_list__photo_button).setOnClickListener(this);
@@ -40,13 +50,22 @@ public class EventPhotoList extends BaseFragmentActivity implements OnClickListe
 		getSupportActionBar().setTitle(event.getTitle());
 	}
 
-	public void onClick(View v) {
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (imageUri != null) {
+            outState.putString("imageUri", imageUri.getPath());
+        }
+    }
+
+    public void onClick(View v) {
 		switch (v.getId()) {
 		case R.id.activity_photo_list__photo_button:
-			Intent intent = new Intent(this, CameraActivity.class);
-			intent.putExtra("event", this.event);
-			startActivity(intent);
-			break;
+            Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            this.imageUri = SnapStorage.getOutputMediaFileUri(SnapStorage.MEDIA_TYPE_IMAGE);
+            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, this.imageUri);
+            startActivityForResult(takePictureIntent, PHOTO_ACTION);
+            break;
 
 		default:
 			break;
@@ -54,7 +73,28 @@ public class EventPhotoList extends BaseFragmentActivity implements OnClickListe
 
 	}
 
-	@Override
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == PHOTO_ACTION && resultCode == RESULT_OK) {
+            File filename = new File(this.imageUri.getPath());
+
+            // alert the media scanner of new file
+            Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+            mediaScanIntent.setData(this.imageUri);
+            this.sendBroadcast(mediaScanIntent);
+
+            // pass all the data to the photo upload activity
+            Intent upload = new Intent(this, PhotoUpload.class);
+            upload.putExtra("event", event);
+            upload.putExtra("imagePath", filename.getAbsolutePath());
+            startActivity(upload);
+        } else {
+            // the unhandled result calls the super (and passes it down to fragments)
+            super.onActivityResult(requestCode, resultCode, data);
+        }
+    }
+
+    @Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case android.R.id.home:

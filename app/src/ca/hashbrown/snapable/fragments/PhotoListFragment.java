@@ -1,7 +1,9 @@
 package ca.hashbrown.snapable.fragments;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -10,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import ca.hashbrown.snapable.R;
+import ca.hashbrown.snapable.activities.PhotoUpload;
 import ca.hashbrown.snapable.adapters.PhotoListAdapter;
 import ca.hashbrown.snapable.provider.SnapableContract;
 import com.actionbarsherlock.app.SherlockListFragment;
@@ -25,6 +28,8 @@ public class PhotoListFragment extends SherlockListFragment implements LoaderCal
 	private static final String TAG = "PhotoListFragment";
 
 	private static final int PHOTOS = 0x01;
+
+    public static final int GALLERY_ACTION = 0x02;
 
 	PhotoListAdapter photoAdapter;
 	Event event;
@@ -85,8 +90,33 @@ public class PhotoListFragment extends SherlockListFragment implements LoaderCal
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
 
+            case R.id.menu__fragment_photo_list__upload:
+                Intent intent = new Intent(Intent.ACTION_PICK);
+                intent.setType("image/jpeg");
+                startActivityForResult(intent, GALLERY_ACTION);
+                return true;
+
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (data != null) {
+            Cursor cursor = getActivity().getContentResolver().query(data.getData(), null, null, null, null);
+            cursor.moveToFirst();  //if not doing this, 01-22 19:17:04.564: ERROR/AndroidRuntime(26264): Caused by: android.database.CursorIndexOutOfBoundsException: Index -1 requested, with a size of 1
+            int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+            String fileSrc = cursor.getString(idx);
+
+            // pass all the data to the photo upload activity
+            Intent upload = new Intent(getActivity(), PhotoUpload.class);
+            upload.putExtra("event", event);
+            upload.putExtra("imagePath", fileSrc);
+            startActivity(upload);
+        } else {
+            // the unhandled result calls the super (and passes it down to fragments)
+            super.onActivityResult(requestCode, resultCode, data);
         }
     }
 

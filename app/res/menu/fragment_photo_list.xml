@@ -11,6 +11,12 @@
     -->
 
     <item
+        android:id="@+id/menu__fragment_photo_list__upload"
+        android:icon="@android:drawable/ic_menu_gallery"
+        android:showAsAction="always"
+        android:title="Gallery" />
+
+    <item
         android:id="@+id/menu__fragment_photo_list__refresh"
         android:actionViewClass="com.manuelpeinado.refreshactionitem.RefreshActionItem"
         android:showAsAction="always"
