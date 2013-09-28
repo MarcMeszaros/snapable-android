@@ -171,6 +171,7 @@ public class PhotoUpload extends BaseFragmentActivity implements OnClickListener
             try {
                 BitmapFactory.Options options = new BitmapFactory.Options();
                 options.inPurgeable = true;
+                // original photo to upload
                 Bitmap photo = BitmapFactory.decodeFile(photoPath, options);
                 Log.d(TAG, "size of photo: " + sizeOf(photo));
                 ExifInterface exif = new ExifInterface(photoPath);

@@ -272,7 +272,7 @@ public class CameraActivity extends BaseActivity implements OnClickListener, Pic
                 out.close();
 
                 // alert the media scanner of new file
-                MediaScannerConnection.scanFile(context, new String[]{filename.getAbsolutePath()}, null, null); // tell the system to scan the image
+                MediaScannerConnection.scanFile(context, new String[]{filename.getAbsolutePath()}, null, null);
 
                 // pass all the data to the photo upload activity
                 Intent upload = new Intent(context, PhotoUpload.class);
