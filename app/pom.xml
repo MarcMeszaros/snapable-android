@@ -84,7 +84,7 @@
         <dependency>
             <groupId>com.crashlytics.android</groupId>
             <artifactId>crashlytics</artifactId>
-            <version>${crashlytics.version}</version>
+            <version>[${crashlytics.version},)</version>
         </dependency>
 
         <!-- Google Analytics Android Library (from http://nexus.snapable.com) -->
@@ -133,6 +133,27 @@
             <!-- Text replace in resources -->
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
+            </plugin>
+
+            <!-- Crashlytics Plugin -->
+            <plugin>
+                <groupId>com.crashlytics</groupId>
+                <artifactId>crashlytics-maven</artifactId>
+                <version>${crashlytics.version}</version>
+                <executions>
+                    <execution>
+                        <id>GenerateResources</id>
+                        <goals>
+                            <goal>GenerateResources</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>CleanupResources</id>
+                        <goals>
+                            <goal>CleanupResources</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
 
 		</plugins>
