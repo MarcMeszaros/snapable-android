@@ -34,7 +34,7 @@
         <!-- Thirdparty -->
         <crest.version>2.0.0-RC2-SNAPSHOT</crest.version>
         <abs.version>4.4.0</abs.version>
-        <disklrucache.version>2.0.0</disklrucache.version>
+        <disklrucache.version>2.0.2</disklrucache.version>
         <crashlytics.version>1.0.2</crashlytics.version>
         <analytics.version>2.0-beta5</analytics.version>
 
@@ -86,7 +86,7 @@
 			<dependency>
 				<groupId>org.codehaus.jackson</groupId>
 				<artifactId>jackson-mapper-asl</artifactId>
-				<version>1.9.11</version>
+				<version>1.9.13</version>
 			</dependency>
 
 			<dependency>
