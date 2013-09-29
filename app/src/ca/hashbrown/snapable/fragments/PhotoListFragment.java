@@ -1,29 +1,24 @@
 package ca.hashbrown.snapable.fragments;
 
+import android.app.ListFragment;
+import android.app.LoaderManager.LoaderCallbacks;
+import android.content.CursorLoader;
 import android.content.Intent;
+import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.support.v4.app.LoaderManager.LoaderCallbacks;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.view.*;
 import ca.hashbrown.snapable.R;
 import ca.hashbrown.snapable.activities.PhotoUpload;
 import ca.hashbrown.snapable.adapters.PhotoListAdapter;
 import ca.hashbrown.snapable.provider.SnapableContract;
-import com.actionbarsherlock.app.SherlockListFragment;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
 import com.manuelpeinado.refreshactionitem.ProgressIndicatorType;
 import com.manuelpeinado.refreshactionitem.RefreshActionItem;
 import com.snapable.api.models.Event;
 
-public class PhotoListFragment extends SherlockListFragment implements LoaderCallbacks<Cursor>, RefreshActionItem.RefreshActionListener {
+public class PhotoListFragment extends ListFragment implements LoaderCallbacks<Cursor>, RefreshActionItem.RefreshActionListener {
 
 	private static final String TAG = "PhotoListFragment";
 

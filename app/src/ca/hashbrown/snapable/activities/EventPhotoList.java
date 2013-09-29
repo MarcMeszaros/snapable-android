@@ -4,12 +4,12 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import ca.hashbrown.snapable.R;
 import ca.hashbrown.snapable.fragments.PhotoListFragment;
 import ca.hashbrown.snapable.utils.SnapStorage;
-import com.actionbarsherlock.view.MenuItem;
 import com.snapable.api.models.Event;
 
 import java.io.File;
@@ -40,14 +40,14 @@ public class EventPhotoList extends BaseFragmentActivity implements OnClickListe
 		event = bundle.getParcelable("event");
 
 		// Create the list fragment and add it as our sole content.
-		PhotoListFragment photoListFragment = (PhotoListFragment) getSupportFragmentManager().findFragmentById(R.id.activity_photo_list__fragment_photo_list);
+		PhotoListFragment photoListFragment = (PhotoListFragment) getFragmentManager().findFragmentById(R.id.activity_photo_list__fragment_photo_list);
 		if (photoListFragment != null) {
 			photoListFragment.setEvent(event);
 		}
 
 		// make the action bar button home button go back
-		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-		getSupportActionBar().setTitle(event.getTitle());
+		getActionBar().setDisplayHomeAsUpEnabled(true);
+		getActionBar().setTitle(event.getTitle());
 	}
 
     @Override

@@ -2,13 +2,12 @@ package ca.hashbrown.snapable.activities;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.widget.SearchView;
 import ca.hashbrown.snapable.R;
 import ca.hashbrown.snapable.fragments.EventListFragment;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.widget.SearchView;
-import com.actionbarsherlock.widget.SearchView.OnQueryTextListener;
 
-public class EventList extends BaseFragmentActivity implements OnQueryTextListener {
+public class EventList extends BaseFragmentActivity implements SearchView.OnQueryTextListener {
 
 	private static final String TAG = "EventList";
 
@@ -21,7 +20,7 @@ public class EventList extends BaseFragmentActivity implements OnQueryTextListen
 	@Override
     public boolean onCreateOptionsMenu(Menu menu) {
         //Create the search view
-		getSupportMenuInflater().inflate(R.menu.fragment_event_list, menu);
+		getMenuInflater().inflate(R.menu.fragment_event_list, menu);
 		SearchView searchView = (SearchView) menu.findItem(R.id.menu__fragment_event_list__search).getActionView();
 		searchView.setQueryHint("Event Title or URL");
 		searchView.setOnQueryTextListener(this);
@@ -37,7 +36,7 @@ public class EventList extends BaseFragmentActivity implements OnQueryTextListen
 		args.putString("q", query);
 
 		// get the fragment, and init the new search loader (using the search param)
-		EventListFragment frag = (EventListFragment) getSupportFragmentManager().findFragmentById(R.id.activity_event_list__fragment_event_list);
+		EventListFragment frag = (EventListFragment) getFragmentManager().findFragmentById(R.id.activity_event_list__fragment_event_list);
 		frag.getLoaderManager().restartLoader(EventListFragment.LOADERS.EVENTS, args, frag);
 		return true;
 	}

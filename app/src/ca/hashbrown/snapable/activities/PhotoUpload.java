@@ -80,7 +80,7 @@ public class PhotoUpload extends BaseFragmentActivity implements OnClickListener
     	photo.setImageBitmap(bmScaled);
 
     	// set the action bar title
-    	getSupportActionBar().setTitle(event.getTitle());
+    	getActionBar().setTitle(event.getTitle());
     }
 
 	public void onClick(View v) {

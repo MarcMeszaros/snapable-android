@@ -1,12 +1,12 @@
 package ca.hashbrown.snapable.activities;
 
+import android.app.Activity;
 import android.os.Bundle;
 import ca.hashbrown.snapable.BuildConfig;
-import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.crashlytics.android.Crashlytics;
 import com.google.analytics.tracking.android.EasyTracker;
 
-public abstract class BaseFragmentActivity extends SherlockFragmentActivity {
+public abstract class BaseFragmentActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
