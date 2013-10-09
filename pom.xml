@@ -32,8 +32,8 @@
         <android.maven.version>3.6.1</android.maven.version>
 
         <!-- Thirdparty -->
+        <retrofit.version>1.2.2</retrofit.version>
         <crest.version>2.0.0-RC2-SNAPSHOT</crest.version>
-        <abs.version>4.4.0</abs.version>
         <disklrucache.version>2.0.2</disklrucache.version>
         <crashlytics.version>1.0.2</crashlytics.version>
         <analytics.version>2.0-beta5</analytics.version>
@@ -77,17 +77,11 @@
 				<version>${android.version}</version>
 			</dependency>
 
-			<dependency>
-				<groupId>org.codegist.crest</groupId>
-				<artifactId>codegist-crest</artifactId>
-				<version>${crest.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>org.codehaus.jackson</groupId>
-				<artifactId>jackson-mapper-asl</artifactId>
-				<version>1.9.13</version>
-			</dependency>
+            <dependency>
+                <groupId>com.squareup.retrofit</groupId>
+                <artifactId>retrofit</artifactId>
+                <version>${retrofit.version}</version>
+            </dependency>
 
 			<dependency>
 				<groupId>android.support</groupId>

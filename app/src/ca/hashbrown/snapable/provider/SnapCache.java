@@ -13,7 +13,7 @@ import ca.hashbrown.snapable.Snapable;
 import com.snapable.api.SnapClient;
 import com.snapable.api.resources.EventResource;
 import com.snapable.api.resources.PhotoResource;
-import org.codegist.crest.CRestException;
+import retrofit.RetrofitError;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
@@ -135,12 +135,13 @@ public class SnapCache {
 				return bm;
 			} else{
 				try {
-					bm = SnapClient.getInstance().build(EventResource.class).getEventPhotoBinary(params[0], "150x150");
+                    SnapClient client = new SnapClient();
+                    bm = client.getRestAdapter().create(EventResource.class).getEventPhotoBinary(params[0], "150x150").getBitmap();
 					SnapCache.EventWorkerTask.addBitmapToCache(params[0] + "_150x150", bm);
 					return bm;
-				} catch (CRestException e) {
-					Log.e(TAG, "problem getting the photo from the API", e);
-					return null;
+				} catch (RetrofitError e) {
+                    Log.e(TAG, "problem getting the photo from the API", e);
+                    return null;
 				}
 			}
 		}
@@ -196,12 +197,13 @@ public class SnapCache {
 				return bm;
 			} else{
 				try {
-					bm = SnapClient.getInstance().build(PhotoResource.class).getPhotoBinary(params[0], "480x480");
+                    SnapClient client = new SnapClient();
+					bm = client.getRestAdapter().create(PhotoResource.class).getPhotoBinary(params[0], "480x480").getBitmap();
 					SnapCache.PhotoWorkerTask.addBitmapToCache(params[0] + "_480x480", bm);
 					return bm;
-				} catch (CRestException e) {
+				} catch (RetrofitError e) {
 					Log.e(TAG, "problem getting the photo from the API", e);
-					return null;
+                    return null;
 				}
 			}
 		}

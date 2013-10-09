@@ -1,63 +1,136 @@
 package com.snapable.api;
 
-import org.codegist.crest.CRest;
-import org.codegist.crest.CRestBuilder;
-import org.codegist.crest.CRestException;
-import org.codegist.crest.security.Authorization;
-
 import ca.hashbrown.snapable.BuildConfig;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import retrofit.RestAdapter;
+import retrofit.client.*;
 
-import android.graphics.Bitmap;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
-public class SnapClient {
-	
-	private static volatile SnapClient instance = null;
-	private static final String live_api_key = "***REMOVED***";
-	private static final String live_api_secret = "***REMOVED***";
-	
-	// private class variable
-	private CRest crest;
+public class SnapClient implements Client {
+    Client wrapped = null;
+    SnapInterceptor interceptor = null;
+    SnapConverter converter = null;
 
-	/**
-	 * Create the Snapable API client which should be used to instantiate resources.
-	 */
-	private SnapClient() {
-		CRestBuilder builder = new CRestBuilder(); // get a CRestBuilder
+    private static final String live_api_key = "***REMOVED***";
+    private static final String live_api_secret = "***REMOVED***";
 
-		// set client values based on build mode
-		if (BuildConfig.DEBUG) {
-			builder.endpoint("http://devapi.snapable.com");
-		} else {
-			builder.endpoint("https://api.snapable.com");
-			SnapApi.setApiKeySecret(live_api_key, live_api_secret);
-		}
+    public SnapClient() {
+        try {
+            Class.forName("android.os.Build");
+            if (hasOkHttpOnClasspath()) {
+                wrapped = OkClientInstantiator.instantiate();
+            } else {
+                wrapped = new UrlConnectionClient();
+            }
+            interceptor = new SnapInterceptor();
+            // build the converter
+            GsonBuilder builder = new GsonBuilder();
+            builder.setDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+            Gson gson = builder.create();
+            converter = new SnapConverter(gson);
+        } catch (ClassNotFoundException ignored) {
+            if (hasOkHttpOnClasspath()) {
+                wrapped = OkClientInstantiator.instantiate();
+            } else {
+                wrapped = new UrlConnectionClient();
+            }
+            interceptor = new SnapInterceptor();
+            // build the converter
+            GsonBuilder builder = new GsonBuilder();
+            builder.setDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+            Gson gson = builder.create();
+            converter = new SnapConverter(gson);
+        }
+    }
 
-		// set some CRestBuilder params
-		Authorization auth = new SnapAuthorization(); // get our custom auth class
-		builder.property(Authorization.class.getName(), auth); // set the auth class to the builder
-		builder.bindDeserializer(SnapDeserializer.class, "image/jpeg"); // tell CRest to use our custom image deserializer
-		builder.bindSerializer(SnapBitmapSerializer.class, Bitmap.class); // tell CRest how to serialize Bitmap
+    public SnapClient(Client client) {
+        wrapped = client;
+        interceptor = new SnapInterceptor();
+        // build the converter
+        GsonBuilder builder = new GsonBuilder();
+        builder.setDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        Gson gson = builder.create();
+        converter = new SnapConverter(gson);
+    }
 
-        this.crest = builder.build(); // return the CRest object
-	}
+    public RestAdapter getRestAdapter() {
+        // build the RestAdapter
+        RestAdapter.Builder builder = new RestAdapter.Builder();
+        builder.setRequestInterceptor(interceptor);
+        builder.setConverter(converter);
+        builder.setClient(this);
 
-	public <T> T build(Class<T> interfaze) throws CRestException {
-		return this.crest.build(interfaze);
-	}
-	
-	/**
-	 * Gets an instance of a Snapable API CRest based client.
-	 * @return A handle on the API client.
-	 */
-	public static SnapClient getInstance() {
-		if (instance == null) {
-			synchronized (SnapClient.class) {
-				if (instance == null) {
-					instance = new SnapClient();
-				}
-			}
-		}
-		return instance;
-	}
+        // set client values based on build mode
+        if (BuildConfig.DEBUG) {
+            builder.setServer("http://devapi.snapable.com/" + SnapApi.api_version + "/");
+        } else {
+            builder.setServer("https://api.snapable.com/" + SnapApi.api_version + "/");
+            SnapApi.setApiKeySecret(live_api_key, live_api_secret);
+        }
 
+        return builder.build();
+    }
+
+    @Override public Response execute(Request request) throws IOException {
+        Request newRequest = sign(request);
+        return wrapped.execute(newRequest);
+    }
+
+    private Request sign(Request request) {
+
+        // get the path
+        String pattern = "https?:\\/\\/(\\w+\\.?)\\w+\\.\\w+([\\w\\/]+).*";
+        String path = request.getUrl().replaceAll(pattern, "$2");
+
+        HashMap<String, String> vals = SnapApi.sign(request.getMethod(), path);
+        StringBuilder sb = new StringBuilder();
+        sb.append("key=\"");
+        sb.append(vals.get("api_key"));
+        sb.append("\",signature=\"");
+        sb.append(vals.get("signature"));
+        sb.append("\",nonce=\"");
+        sb.append(vals.get("nonce"));
+        sb.append("\",timestamp=\"");
+        sb.append(vals.get("timestamp"));
+        sb.append("\"");
+        String authString = sb.toString();
+
+        // magic
+        List<Header> headers = request.getHeaders();
+        Header h = new Header("Authorization", "SNAP "+authString);
+
+        // add the signature to the list of headers
+        List<Header> headerList = new ArrayList<Header>();
+        headerList.addAll(headers);
+        headerList.add(h);
+
+        // return the signed request
+        Request signedRequest = new Request(request.getMethod(), request.getUrl(), headerList, request.getBody());
+        return signedRequest;
+    }
+
+    /** Determine whether or not OkHttp is present on the runtime classpath. */
+    private static boolean hasOkHttpOnClasspath() {
+        try {
+            Class.forName("com.squareup.okhttp.OkHttpClient");
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Indirection for OkHttp class to prevent VerifyErrors on Android 2.0 and earlier when the
+     * dependency is not present.
+     */
+    private static class OkClientInstantiator {
+        static Client instantiate() {
+            return new OkClient();
+        }
+    }
 }

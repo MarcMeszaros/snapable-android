@@ -1,44 +1,44 @@
 package com.snapable.api.resources;
 
-import org.codegist.crest.annotate.*;
+import com.snapable.api.SnapImage;
+import com.snapable.api.models.Event;
+import com.snapable.api.models.Pager;
+import retrofit.http.GET;
+import retrofit.http.Headers;
+import retrofit.http.Path;
+import retrofit.http.Query;
 
-import com.snapable.api.SnapApi;
-import com.snapable.api.models.*;
-
-@Path("/"+SnapApi.api_version+"/"+EventResource.RESOURCE_NAME+"/")
-@Consumes("application/json")
 public interface EventResource {
-	
+
 	public static final String RESOURCE_NAME = "event";
 
-    @GET
-    @Path("/")
-    Pager<Event[]> getEvents();
-    
-    @GET
-    @Path("/")
-    Pager<Event[]> getEvents(
-    	@QueryParam("lat") float lat,
-    	@QueryParam("lng") float lng
+    @GET("/event/")
+    @Headers("Accept: application/json")
+    Pager<Event> getEvents();
+
+    @GET("/event/")
+    @Headers("Accept: application/json")
+    Pager<Event> getEvents(
+    	@Query("lat") float lat,
+    	@Query("lng") float lng
     );
 
-    @GET
-    @Path("/search/")
-    Pager<Event[]> getEvents(
-    	@QueryParam("q") String query
+    @GET("/event/search/")
+    @Headers("Accept: application/json")
+    Pager<Event> getEvents(
+    	@Query("q") String query
     );
 
-    @GET
-    @Path("/{id}/")
+    @GET("/event/{id}/")
+    @Headers("Accept: application/json")
     Event getEvent(
-    	@PathParam("id") long id
+    	@Path("id") long id
     );
-    
-    @GET
-    @Path("/{id}/")
-    @Consumes("image/jpeg")
-    android.graphics.Bitmap getEventPhotoBinary(
-    	@PathParam("id") long id,
-    	@QueryParam("size") String size
+
+    @GET("/event/{id}/")
+    @Headers("Accept: image/jpeg")
+    SnapImage getEventPhotoBinary(
+    	@Path("id") long id,
+    	@Query("size") String size
     );
 }
