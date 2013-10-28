@@ -10,31 +10,41 @@ public interface PhotoResource {
 
 	public static final String RESOURCE_NAME = "photo";
 
-	@GET("/photo/")
+	@GET("/"+RESOURCE_NAME+"/")
     @Headers("Accept: application/json")
     Pager<Photo> getPhotos();
 
-    @GET("/photo/")
+    @GET("/"+RESOURCE_NAME+"/")
     @Headers("Accept: application/json")
     Pager<Photo> getPhotos(
     	@Query("event") long eventId
     );
 
-    @GET("/photo/{id}/")
+    @GET("/"+RESOURCE_NAME+"/{id}/")
     @Headers("Accept: application/json")
     Photo getPhoto(
     	@Path("id") long id
     );
 
-    @GET("/photo/{id}/")
+    @GET("/"+RESOURCE_NAME+"/{id}/")
     @Headers("Accept: image/jpeg")
     SnapImage getPhotoBinary(
     	@Path("id") long id,
     	@Query("size") String size
     );
 
+    @POST("/"+RESOURCE_NAME+"/{id}/")
+    @Headers({
+        "Accept: application/json",
+        "X-HTTP-Method-Override: PATCH" // retrofit doesn't support "PATCH" with response body
+    })
+    Photo patchPhoto(
+        @Path("id") int id,
+        @Body Photo data
+    );
+
     @Multipart
-    @POST("/photo/")
+    @POST("/"+RESOURCE_NAME+"/")
     @Headers("Accept: application/json")
     Photo postPhoto(
         @Part("image") SnapImage photo,
@@ -43,7 +53,7 @@ public interface PhotoResource {
     );
 
     @Multipart
-    @POST("/photo/")
+    @POST("/"+RESOURCE_NAME+"/")
     @Headers("Accept: application/json")
     Photo postPhoto(
         @Part("image") SnapImage photo,

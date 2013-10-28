@@ -12,30 +12,30 @@ public interface EventResource {
 
 	public static final String RESOURCE_NAME = "event";
 
-    @GET("/event/")
+    @GET("/"+RESOURCE_NAME+"/")
     @Headers("Accept: application/json")
     Pager<Event> getEvents();
 
-    @GET("/event/")
+    @GET("/"+RESOURCE_NAME+"/")
     @Headers("Accept: application/json")
     Pager<Event> getEvents(
     	@Query("lat") float lat,
     	@Query("lng") float lng
     );
 
-    @GET("/event/search/")
+    @GET("/"+RESOURCE_NAME+"/search/")
     @Headers("Accept: application/json")
     Pager<Event> getEvents(
     	@Query("q") String query
     );
 
-    @GET("/event/{id}/")
+    @GET("/"+RESOURCE_NAME+"/{id}/")
     @Headers("Accept: application/json")
     Event getEvent(
     	@Path("id") long id
     );
 
-    @GET("/event/{id}/")
+    @GET("/"+RESOURCE_NAME+"/{id}/")
     @Headers("Accept: image/jpeg")
     SnapImage getEventPhotoBinary(
     	@Path("id") long id,

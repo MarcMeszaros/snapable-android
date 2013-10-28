@@ -8,31 +8,31 @@ public interface GuestResource {
 
 	public static final String RESOURCE_NAME = "guest";
 
-	@GET("/guest/")
+	@GET("/"+RESOURCE_NAME+"/")
     @Headers("Accept: application/json")
     Pager<Guest> getGuests();
 
-    @GET("/guest/")
+    @GET("/"+RESOURCE_NAME+"/")
     @Headers("Accept: application/json")
     Pager<Guest> getGuests(
     	@Query("email") String email,
     	@Query("event") long event_id
     );
 
-    @GET("/guest/{id}/")
+    @GET("/"+RESOURCE_NAME+"/{id}/")
     @Headers("Accept: application/json")
     Guest getGuest(
     	@Path("id") long id
     );
 
-    @PUT("/guest/{id}/")
+    @PUT("/"+RESOURCE_NAME+"/{id}/")
     @Headers("Accept: application/json")
     Guest putGuest(
     	@Path("id") long id,
     	@Body Guest data
     );
 
-    @POST("/guest/")
+    @POST("/"+RESOURCE_NAME+"/")
     @Headers("Accept: application/json")
     Guest postGuest(
     	@Body Guest data
