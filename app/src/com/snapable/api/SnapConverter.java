@@ -22,7 +22,7 @@ public class SnapConverter extends GsonConverter {
 
     @Override
     public Object fromBody(TypedInput body, Type type) throws ConversionException {
-        if (type.getClass().isInstance(SnapImage.class)) {
+        if (body.mimeType().contains("image/jpeg") && type.getClass().isInstance(SnapImage.class)) {
             // if the output type is SnapImage, read the data and build the image object
             try {
                 ByteArrayOutputStream result = new ByteArrayOutputStream(2048);
