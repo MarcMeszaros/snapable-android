@@ -29,7 +29,7 @@
         <android.version>4.0.3_r3</android.version>
         <android.support.version>12</android.support.version>
         <android.api.version>15</android.api.version>
-        <android.maven.version>3.6.1</android.maven.version>
+        <android.maven.version>3.7.1-SNAPSHOT</android.maven.version>
 
         <!-- Thirdparty -->
         <retrofit.version>1.2.2</retrofit.version>
@@ -62,6 +62,15 @@
     </repositories>
 
     <pluginRepositories>
+        <pluginRepository>
+            <id>oss.sonatype.org-jayway-snapshots</id>
+            <name>Jayway OpenSource SNAPSHOTs on Sonatype.org</name>
+            <url>http://oss.sonatype.org/content/repositories/jayway-snapshots/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </pluginRepository>
+
         <pluginRepository>
             <id>crashlytics-plugin-repo</id>
             <url>http://download.crashlytics.com/maven</url>
