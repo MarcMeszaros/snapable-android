@@ -41,7 +41,6 @@ public class EventCursor extends MatrixCursor {
 			// add the values for the row
 			for (String column : c.getColumnNames()) {
 				if (column.equals(Event.FIELD_ID)) { row.add(c.getLong(c.getColumnIndex(Event.FIELD_ID))); }
-				//if (column.equals(Event.FIELD_COVER)) { row.add(c.getString(c.getColumnIndex(Event.FIELD_COVER))); }
 				if (column.equals(Event.FIELD_ENABLED)) { row.add(c.getInt(c.getColumnIndex(Event.FIELD_ENABLED))); }
 				if (column.equals(Event.FIELD_END)) { row.add(c.getLong(c.getColumnIndex(Event.FIELD_END))); }
 				if (column.equals(Event.FIELD_PHOTO_COUNT)) { row.add(c.getLong(c.getColumnIndex(Event.FIELD_PHOTO_COUNT))); }
@@ -70,16 +69,15 @@ public class EventCursor extends MatrixCursor {
 		// add the values for the row
 		for (String column : getColumnNames()) {
 			if (column.equals(Event.FIELD_ID)) { row.add(event.getId()); }
-			//if (column.equals(Event.FIELD_COVER)) { row.add(event.getCover()); }
-			if (column.equals(Event.FIELD_ENABLED)) { row.add((event.getIsEnabled()) ? 1 : 0); }
-			if (column.equals(Event.FIELD_END)) { row.add(event.getEnd().getTime()); }
-			if (column.equals(Event.FIELD_PHOTO_COUNT)) { row.add(event.getPhotoCount()); }
-			if (column.equals(Event.FIELD_PIN)) { row.add(event.getPin()); }
-			if (column.equals(Event.FIELD_PUBLIC)) { row.add((event.getIsPublic()) ? 1 : 0); }
-			if (column.equals(Event.FIELD_RESOURCE_URI)) { row.add(event.getResourceUri()); }
-			if (column.equals(Event.FIELD_START)) { row.add(event.getStart().getTime()); }
-			if (column.equals(Event.FIELD_TITLE)) { row.add(event.getTitle()); }
-			if (column.equals(Event.FIELD_URL)) { row.add(event.getUrl()); }
+			if (column.equals(Event.FIELD_ENABLED)) { row.add((event.enabled) ? 1 : 0); }
+			if (column.equals(Event.FIELD_END)) { row.add(event.end.getTime()); }
+			if (column.equals(Event.FIELD_PHOTO_COUNT)) { row.add(event.photo_count); }
+			if (column.equals(Event.FIELD_PIN)) { row.add(event.pin); }
+			if (column.equals(Event.FIELD_PUBLIC)) { row.add((event.is_public) ? 1 : 0); }
+			if (column.equals(Event.FIELD_RESOURCE_URI)) { row.add(event.resource_uri); }
+			if (column.equals(Event.FIELD_START)) { row.add(event.start.getTime()); }
+			if (column.equals(Event.FIELD_TITLE)) { row.add(event.title); }
+			if (column.equals(Event.FIELD_URL)) { row.add(event.url); }
 		}
 
 	}
@@ -94,16 +92,15 @@ public class EventCursor extends MatrixCursor {
 		Event event = new Event();
 
 		// populate the object
-		//event.setCover(this.getString(this.getColumnIndex(Event.FIELD_COVER)));
-		event.setIsEnabled((this.getInt(this.getColumnIndex(Event.FIELD_ENABLED)) == 0) ? false : true);
-		event.setEnd(new Date(this.getLong(this.getColumnIndex(Event.FIELD_END))));
-		event.setPhotoCount(this.getLong(this.getColumnIndex(Event.FIELD_PHOTO_COUNT)));
-		event.setPin(this.getString(this.getColumnIndex(Event.FIELD_PIN)));
-		event.setIsPublic((this.getInt(this.getColumnIndex(Event.FIELD_PUBLIC)) == 0) ? false : true);
-		event.setResourceUri(this.getString(this.getColumnIndex(Event.FIELD_RESOURCE_URI)));
-		event.setStart(new Date(this.getLong(this.getColumnIndex(Event.FIELD_START))));
-		event.setTitle(this.getString(this.getColumnIndex(Event.FIELD_TITLE)));
-		event.setUrl(this.getString(this.getColumnIndex(Event.FIELD_URL)));
+		event.enabled = (this.getInt(this.getColumnIndex(Event.FIELD_ENABLED)) == 0) ? false : true;
+		event.end = new Date(this.getLong(this.getColumnIndex(Event.FIELD_END)));
+		event.photo_count = this.getLong(this.getColumnIndex(Event.FIELD_PHOTO_COUNT));
+		event.pin = this.getString(this.getColumnIndex(Event.FIELD_PIN));
+		event.is_public = (this.getInt(this.getColumnIndex(Event.FIELD_PUBLIC)) == 0) ? false : true;
+		event.resource_uri = this.getString(this.getColumnIndex(Event.FIELD_RESOURCE_URI));
+		event.start = new Date(this.getLong(this.getColumnIndex(Event.FIELD_START)));
+		event.title = this.getString(this.getColumnIndex(Event.FIELD_TITLE));
+		event.url = this.getString(this.getColumnIndex(Event.FIELD_URL));
 
 		return event;
 	}

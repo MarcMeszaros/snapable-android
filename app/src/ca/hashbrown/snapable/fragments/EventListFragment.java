@@ -1,9 +1,8 @@
 package ca.hashbrown.snapable.fragments;
 
 import android.app.ListFragment;
-import android.content.ContentUris;
-import android.content.Context;
-import android.content.Intent;
+import android.app.LoaderManager.LoaderCallbacks;
+import android.content.*;
 import android.database.Cursor;
 import android.location.Criteria;
 import android.location.Location;
@@ -12,9 +11,6 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.app.LoaderManager.LoaderCallbacks;
-import android.content.CursorLoader;
-import android.content.Loader;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -220,11 +216,11 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 
         try {
             // we have a result
-            if (result.getCount() > 0 && event.getIsPublic()) {
+            if (result.getCount() > 0 && event.is_public) {
                 return true;
             }
             else if (result.getCount() > 0 && result.moveToFirst()) {
-                return result.getString(result.getColumnIndex(SnapableContract.EventCredentials.PIN)).equals(event.getPin());
+                return result.getString(result.getColumnIndex(SnapableContract.EventCredentials.PIN)).equals(event.pin);
             }
         } catch (NullPointerException e) {
             Log.e(TAG, "Null pointer while trying to access cached event PIN", e);

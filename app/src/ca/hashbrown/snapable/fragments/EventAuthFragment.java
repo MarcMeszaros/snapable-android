@@ -55,7 +55,7 @@ public class EventAuthFragment extends DialogFragment implements OnEditorActionL
         // set the title
         getDialog().setTitle(R.string.strings__fragment_event_auth__title);
 
-        if (this.event != null && this.event.getIsPublic() == true) {
+        if (this.event != null && this.event.is_public == true) {
         	// hide the pin stuff because the event is public
         	((LinearLayout)view).removeView(view.findViewById(R.id.fragment_event_auth__pin_group));
         	// Show soft keyboard automatically
@@ -78,7 +78,7 @@ public class EventAuthFragment extends DialogFragment implements OnEditorActionL
 	    		intent.putExtra("event", this.event);
 
 	    		// if the event is public login
-            	if (this.event.getIsPublic() == true && cachedPinMatchesEventPin(this.event) == false) {
+            	if (this.event.is_public == true && cachedPinMatchesEventPin(this.event) == false) {
             		// save the details in the local storage
             		ContentValues values = new ContentValues(3);
             		values.put(SnapableContract.EventCredentials._ID, this.event.getId());
@@ -95,7 +95,7 @@ public class EventAuthFragment extends DialogFragment implements OnEditorActionL
             		return true;
             	}
             	// if the event is private and the pins match
-            	else if (this.event.getIsPublic() != true && this.event.getPin().equals(pin.getText().toString())) {
+            	else if (this.event.is_public != true && this.event.pin.equals(pin.getText().toString())) {
             		// save the details in the local storage
             		ContentValues values = new ContentValues(3);
             		values.put(SnapableContract.EventCredentials.PIN, pin.getText().toString());
@@ -140,11 +140,11 @@ public class EventAuthFragment extends DialogFragment implements OnEditorActionL
 		Cursor result = getActivity().getContentResolver().query(requestUri, null, null, null, null);
 
 		// we have a result
-		if (result.getCount() > 0 && event.getIsPublic()) {
+		if (result.getCount() > 0 && event.is_public) {
 			return true;
 		}
 		else if (result.getCount() > 0 && result.moveToFirst()) {
-			return result.getString(result.getColumnIndex(SnapableContract.EventCredentials.PIN)).equals(event.getPin());
+			return result.getString(result.getColumnIndex(SnapableContract.EventCredentials.PIN)).equals(event.is_public);
 		}
 
 		// there was no result

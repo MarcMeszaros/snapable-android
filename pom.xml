@@ -29,11 +29,11 @@
         <android.version>4.0.3_r3</android.version>
         <android.support.version>12</android.support.version>
         <android.api.version>15</android.api.version>
-        <android.maven.version>3.6.1</android.maven.version>
+        <android.maven.version>3.7.1-SNAPSHOT</android.maven.version>
 
         <!-- Thirdparty -->
+        <retrofit.version>1.2.2</retrofit.version>
         <crest.version>2.0.0-RC2-SNAPSHOT</crest.version>
-        <abs.version>4.4.0</abs.version>
         <disklrucache.version>2.0.2</disklrucache.version>
         <crashlytics.version>1.0.2</crashlytics.version>
         <analytics.version>2.0-beta5</analytics.version>
@@ -63,6 +63,15 @@
 
     <pluginRepositories>
         <pluginRepository>
+            <id>oss.sonatype.org-jayway-snapshots</id>
+            <name>Jayway OpenSource SNAPSHOTs on Sonatype.org</name>
+            <url>http://oss.sonatype.org/content/repositories/jayway-snapshots/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </pluginRepository>
+
+        <pluginRepository>
             <id>crashlytics-plugin-repo</id>
             <url>http://download.crashlytics.com/maven</url>
         </pluginRepository>
@@ -77,17 +86,11 @@
 				<version>${android.version}</version>
 			</dependency>
 
-			<dependency>
-				<groupId>org.codegist.crest</groupId>
-				<artifactId>codegist-crest</artifactId>
-				<version>${crest.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>org.codehaus.jackson</groupId>
-				<artifactId>jackson-mapper-asl</artifactId>
-				<version>1.9.13</version>
-			</dependency>
+            <dependency>
+                <groupId>com.squareup.retrofit</groupId>
+                <artifactId>retrofit</artifactId>
+                <version>${retrofit.version}</version>
+            </dependency>
 
 			<dependency>
 				<groupId>android.support</groupId>

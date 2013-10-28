@@ -1,50 +1,41 @@
 package com.snapable.api.resources;
 
-import org.codegist.crest.annotate.*;
+import com.snapable.api.models.Guest;
+import com.snapable.api.models.Pager;
+import retrofit.http.*;
 
-import com.snapable.api.JsonEntityWriter;
-import com.snapable.api.SnapApi;
-import com.snapable.api.models.*;
-
-@Path("/"+SnapApi.api_version+"/"+GuestResource.RESOURCE_NAME+"/")
-@Consumes("application/json")
 public interface GuestResource {
-	
+
 	public static final String RESOURCE_NAME = "guest";
-	
-	@GET
-    @Path("/")
-    Pager<Guest[]> getGuests();
-    
-    @GET
-    @Path("/")
-    Pager<Guest[]> getGuests(
-    	@QueryParam("email") String email,
-    	@QueryParam("event") long event_id
+
+	@GET("/"+RESOURCE_NAME+"/")
+    @Headers("Accept: application/json")
+    Pager<Guest> getGuests();
+
+    @GET("/"+RESOURCE_NAME+"/")
+    @Headers("Accept: application/json")
+    Pager<Guest> getGuests(
+    	@Query("email") String email,
+    	@Query("event") long event_id
     );
-    
-    @GET
-    @Path("/{id}/")
+
+    @GET("/"+RESOURCE_NAME+"/{id}/")
+    @Headers("Accept: application/json")
     Guest getGuest(
-    	@PathParam("id") long id
+    	@Path("id") long id
     );
-    
-    @PUT
-    @Path("/{id}/")
-    @EntityWriter(JsonEntityWriter.class)
+
+    @PUT("/"+RESOURCE_NAME+"/{id}/")
+    @Headers("Accept: application/json")
     Guest putGuest(
-    	@PathParam("id") long id,
-    	@FormParam("name") String name
+    	@Path("id") long id,
+    	@Body Guest data
     );
-    
-    @POST
-    @Path("/")
-    @EntityWriter(JsonEntityWriter.class)
+
+    @POST("/"+RESOURCE_NAME+"/")
+    @Headers("Accept: application/json")
     Guest postGuest(
-    	@FormParam("event") String event_uri,
-    	@FormParam("type") String type_uri,
-    	@FormParam("email") String email,
-    	@FormParam("name") String name
+    	@Body Guest data
     );
 
 }

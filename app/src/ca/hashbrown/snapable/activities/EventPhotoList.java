@@ -47,7 +47,7 @@ public class EventPhotoList extends BaseFragmentActivity implements OnClickListe
 
 		// make the action bar button home button go back
 		getActionBar().setDisplayHomeAsUpEnabled(true);
-		getActionBar().setTitle(event.getTitle());
+		getActionBar().setTitle(event.title);
 	}
 
     @Override

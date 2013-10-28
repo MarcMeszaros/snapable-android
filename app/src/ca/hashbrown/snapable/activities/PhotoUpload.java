@@ -19,10 +19,15 @@ import ca.hashbrown.snapable.R;
 import ca.hashbrown.snapable.provider.SnapableContract;
 import com.snapable.api.SnapApi;
 import com.snapable.api.SnapClient;
+import com.snapable.api.SnapImage;
 import com.snapable.api.models.Event;
 import com.snapable.api.resources.PhotoResource;
+import retrofit.mime.TypedString;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 public class PhotoUpload extends BaseFragmentActivity implements OnClickListener {
 
@@ -80,7 +85,7 @@ public class PhotoUpload extends BaseFragmentActivity implements OnClickListener
     	photo.setImageBitmap(bmScaled);
 
     	// set the action bar title
-    	getActionBar().setTitle(event.getTitle());
+    	getActionBar().setTitle(event.title);
     }
 
 	public void onClick(View v) {
@@ -192,28 +197,30 @@ public class PhotoUpload extends BaseFragmentActivity implements OnClickListener
 
                 // decode temp file
                 File tempFile = new File(photoPath + ".tmp");
-                FileInputStream inStream = new FileInputStream(tempFile);
+                SnapImage tempImage = new SnapImage(tempFile);
+                //FileInputStream inStream = new FileInputStream(tempFile);
 
                 // get local cached event info
                 Uri queryUri = ContentUris.withAppendedId(SnapableContract.EventCredentials.CONTENT_URI, event.getId());
                 Cursor c = getContentResolver().query(queryUri, null, null, null, null);
 
 	            // upload via the API
-	            PhotoResource photoRes = SnapClient.getInstance().build(PhotoResource.class);
+                SnapClient client = new SnapClient();
+	            PhotoResource photoRes = client.getRestAdapter().create(PhotoResource.class);
 
 	        	// if we have a guest id, upload the photo with the id
 	        	if (c.moveToFirst()) {
 	        		long guest_id = c.getLong(c.getColumnIndex(SnapableContract.EventCredentials.GUEST_ID));
-	        		if(guest_id > 0) {
-	        			photoRes.postPhoto(inStream, event.getResourceUri(), "/"+SnapApi.api_version +"/guest/"+guest_id+"/", caption);
+                    if(guest_id > 0) {
+                        photoRes.postPhoto(tempImage, new TypedString(event.resource_uri), new TypedString("/"+SnapApi.api_version +"/guest/"+guest_id+"/"), new TypedString(caption));
 	        		} else {
-                        photoRes.postPhoto(inStream, event.getResourceUri(), caption);
+                        photoRes.postPhoto(tempImage, new TypedString(event.resource_uri), new TypedString(caption));
                     }
 	        	} else {
-	        		photoRes.postPhoto(inStream, event.getResourceUri(), caption);
+	        		photoRes.postPhoto(tempImage, new TypedString(event.resource_uri), new TypedString(caption));
 				}
-	        } catch (org.codegist.crest.CRestException e) {
-	        	Log.e(TAG, "problem with the response?", e);
+	        //} catch (org.codegist.crest.CRestException e) {
+	        //	Log.e(TAG, "problem with the response?", e);
                 //Toast.makeText(getApplicationContext(), "There was a problem uploading the photo.", Toast.LENGTH_LONG).show();
 	        } catch(FileNotFoundException e) {
                 Log.e(TAG, "problem finding a file", e);

@@ -30,15 +30,10 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<dependency>
-			<groupId>org.codegist.crest</groupId>
-			<artifactId>codegist-crest</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.codehaus.jackson</groupId>
-			<artifactId>jackson-mapper-asl</artifactId>
-		</dependency>
+        <dependency>
+            <groupId>com.squareup.retrofit</groupId>
+            <artifactId>retrofit</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>com.jakewharton</groupId>
