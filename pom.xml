@@ -35,7 +35,7 @@
         <retrofit.version>1.2.2</retrofit.version>
         <disklrucache.version>2.0.2</disklrucache.version>
         <crashlytics.version>1.0.4</crashlytics.version>
-        <analytics.version>2.0-beta5</analytics.version>
+        <analytics.version>3.01</analytics.version>
 
         <!-- Plugins -->
         <plugin.properties.version>1.0-alpha-2</plugin.properties.version>
