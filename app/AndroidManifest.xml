@@ -12,8 +12,8 @@
     <uses-feature android:name="android.hardware.camera" />
 
     <uses-sdk
-        android:minSdkVersion="10"
-        android:targetSdkVersion="15" />
+        android:minSdkVersion="15"
+        android:targetSdkVersion="17" />
 
     <application
         android:icon="@drawable/ic_launcher"
@@ -21,10 +21,6 @@
         android:theme="@style/Theme.Styled"
         android:name="Snapable"
         android:allowBackup="false" >
-
-        <activity
-            android:name=".activities.CameraActivity"
-            android:theme="@style/Theme.Styled.NoActionBar" />
 
         <activity android:name=".activities.EventList" >
             <intent-filter>

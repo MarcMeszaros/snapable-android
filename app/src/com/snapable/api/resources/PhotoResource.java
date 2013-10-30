@@ -1,78 +1,65 @@
 package com.snapable.api.resources;
 
-import android.graphics.Bitmap;
-import com.snapable.api.SnapApi;
+import com.snapable.api.SnapImage;
 import com.snapable.api.models.Pager;
 import com.snapable.api.models.Photo;
-import org.codegist.crest.annotate.*;
+import retrofit.http.*;
+import retrofit.mime.TypedString;
 
-import java.io.InputStream;
-
-@Path("/"+SnapApi.api_version+"/"+PhotoResource.RESOURCE_NAME+"/")
-@Consumes("application/json")
 public interface PhotoResource {
 
 	public static final String RESOURCE_NAME = "photo";
 
-	@GET
-    @Path("/")
-    Pager<Photo[]> getPhotos();
+	@GET("/"+RESOURCE_NAME+"/")
+    @Headers("Accept: application/json")
+    Pager<Photo> getPhotos();
 
-    @GET
-    @Path("/")
-    Pager<Photo[]> getPhotos(
-    	@QueryParam("event") long eventId
+    @GET("/"+RESOURCE_NAME+"/")
+    @Headers("Accept: application/json")
+    Pager<Photo> getPhotos(
+    	@Query("event") long eventId
     );
 
-    @GET
-    @Path("/{id}/")
+    @GET("/"+RESOURCE_NAME+"/{id}/")
+    @Headers("Accept: application/json")
     Photo getPhoto(
-    	@PathParam("id") long id
+    	@Path("id") long id
     );
 
-    @GET
-    @Path("/{id}/")
-    @Consumes("image/jpeg")
-    Bitmap getPhotoBinary(
-    	@PathParam("id") long id,
-    	@QueryParam("size") String size
+    @GET("/"+RESOURCE_NAME+"/{id}/")
+    @Headers("Accept: image/jpeg")
+    SnapImage getPhotoBinary(
+    	@Path("id") long id,
+    	@Query("size") String size
     );
 
-    @POST
-    @Path("/")
+    @POST("/"+RESOURCE_NAME+"/{id}/")
+    @Headers({
+        "Accept: application/json",
+        "X-HTTP-Method-Override: PATCH" // retrofit doesn't support "PATCH" with response body
+    })
+    Photo patchPhoto(
+        @Path("id") int id,
+        @Body Photo data
+    );
+
+    @Multipart
+    @POST("/"+RESOURCE_NAME+"/")
+    @Headers("Accept: application/json")
     Photo postPhoto(
-            @MultiPartParam(value="image", contentType="image/jpeg", fileName="image.jpg") InputStream photo,
-            @MultiPartParam(value="event") String event,
-            @MultiPartParam(value="caption", defaultValue="") String caption
+        @Part("image") SnapImage photo,
+        @Part("event") TypedString event,
+        @Part("caption") TypedString caption
     );
 
-    @POST
-    @Path("/")
+    @Multipart
+    @POST("/"+RESOURCE_NAME+"/")
+    @Headers("Accept: application/json")
     Photo postPhoto(
-            @MultiPartParam(value="image", contentType="image/jpeg", fileName="image.jpg") InputStream photo,
-            @MultiPartParam(value="event") String event,
-            @MultiPartParam(value="guest") String guest,
-            @MultiPartParam(value="caption", defaultValue="") String caption
-    );
-
-    @POST
-    @Path("/")
-    Photo postPhoto(
-    	@MultiPartParam(value="image", contentType="image/jpeg", fileName="image.jpg") InputStream photo,
-    	@MultiPartParam(value="event") String event,
-    	@MultiPartParam(value="guest") String guest,
-    	@MultiPartParam(value="type", defaultValue="/private_v1/type/6/") String type,
-    	@MultiPartParam(value="caption", defaultValue="") String caption
-    );
-
-    @POST
-    @Path("/")
-    Photo postPhoto(
-    	@MultiPartParam(value="image", contentType="image/jpeg", fileName="image.jpg") Bitmap photo,
-    	@MultiPartParam(value="event") String event,
-    	//@MultiPartParam(value="guest") String guest,
-    	@MultiPartParam(value="type", defaultValue="/private_v1/type/6/") String type,
-    	@MultiPartParam(value="caption", defaultValue="") String caption
+        @Part("image") SnapImage photo,
+        @Part("event") TypedString event,
+        @Part("guest") TypedString guest,
+        @Part("caption") TypedString caption
     );
 
 }

@@ -1,34 +1,17 @@
 package com.snapable.api.models;
 
-import org.codegist.common.lang.ToStringBuilder;
-import org.codehaus.jackson.annotate.JsonProperty;
+import com.snapable.api.ToStringBuilder;
 
-public class Pager<T> {
+import java.util.List;
 
-    @JsonProperty("meta")
-    private Meta meta;
-    @JsonProperty("objects")
-    private T objects;
+public class Pager<E> {
 
-    public Meta getMeta() {
-    	return meta;
-    }
-    
-    public void setMeta(Meta meta) {
-    	this.meta = meta;
-    }
-    
-    public T getObjects() {
-        return objects;
-    }
-
-    public void setObjects(T objects){
-    	this.objects = objects;
-    }
+    public Meta meta;
+    public List<E> objects;
 
     public String toString() {
         return new ToStringBuilder(this)
-        		.append("meta", meta)
+                .append("meta", meta)
                 .append("objects", objects)
                 .toString();
     }

@@ -1,8 +1,8 @@
 package ca.hashbrown.snapable.fragments;
 
-import android.content.ContentUris;
-import android.content.Context;
-import android.content.Intent;
+import android.app.ListFragment;
+import android.app.LoaderManager.LoaderCallbacks;
+import android.content.*;
 import android.database.Cursor;
 import android.location.Criteria;
 import android.location.Location;
@@ -11,9 +11,6 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.LoaderManager.LoaderCallbacks;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,10 +25,9 @@ import ca.hashbrown.snapable.activities.EventPhotoList;
 import ca.hashbrown.snapable.adapters.EventListAdapter;
 import ca.hashbrown.snapable.cursors.EventCursor;
 import ca.hashbrown.snapable.provider.SnapableContract;
-import com.actionbarsherlock.app.SherlockListFragment;
 import com.snapable.api.models.Event;
 
-public class EventListFragment extends SherlockListFragment implements LoaderCallbacks<Cursor>, OnItemClickListener, LocationListener {
+public class EventListFragment extends ListFragment implements LoaderCallbacks<Cursor>, OnItemClickListener, LocationListener {
 
 	private static final String TAG = "EventListFragment";
 
@@ -124,7 +120,7 @@ public class EventListFragment extends SherlockListFragment implements LoaderCal
 		}
 	}
 
-	public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
 		// Swap the new cursor in. (The framework will take care of closing the
 		// old cursor once we return.)
 		switch (loader.getId()) {
@@ -180,7 +176,7 @@ public class EventListFragment extends SherlockListFragment implements LoaderCal
 			// start the dialog with the event object
 			EventAuthFragment login = new EventAuthFragment();
 			login.setArguments(args);
-			login.show(getFragmentManager(), "login");
+            login.show(getFragmentManager(), "login");
 		}
 	}
 
@@ -220,11 +216,11 @@ public class EventListFragment extends SherlockListFragment implements LoaderCal
 
         try {
             // we have a result
-            if (result.getCount() > 0 && event.getIsPublic()) {
+            if (result.getCount() > 0 && event.is_public) {
                 return true;
             }
             else if (result.getCount() > 0 && result.moveToFirst()) {
-                return result.getString(result.getColumnIndex(SnapableContract.EventCredentials.PIN)).equals(event.getPin());
+                return result.getString(result.getColumnIndex(SnapableContract.EventCredentials.PIN)).equals(event.pin);
             }
         } catch (NullPointerException e) {
             Log.e(TAG, "Null pointer while trying to access cached event PIN", e);

@@ -1,17 +1,12 @@
 package ca.hashbrown.snapable.fragments;
 
-import com.snapable.api.models.Event;
-
-import ca.hashbrown.snapable.R;
-import ca.hashbrown.snapable.activities.EventPhotoList;
-import ca.hashbrown.snapable.provider.SnapableContract;
+import android.app.DialogFragment;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.DialogFragment;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -24,6 +19,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
+import ca.hashbrown.snapable.R;
+import ca.hashbrown.snapable.activities.EventPhotoList;
+import ca.hashbrown.snapable.provider.SnapableContract;
+import com.snapable.api.models.Event;
 
 public class EventAuthFragment extends DialogFragment implements OnEditorActionListener {
 
@@ -34,9 +33,9 @@ public class EventAuthFragment extends DialogFragment implements OnEditorActionL
 	private EditText email;
 	// data passed in from initializer
 	private Event event;
-	
+
 	public EventAuthFragment() {
-		// empty 
+		// empty
 	}
 
 	@Override
@@ -45,18 +44,18 @@ public class EventAuthFragment extends DialogFragment implements OnEditorActionL
 		Event event = args.getParcelable("event");
 		this.event = event;
 	}
-	
+
 	@Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_event_auth, container);
         pin = (EditText) view.findViewById(R.id.fragment_event_auth__pin);
         name = (EditText) view.findViewById(R.id.fragment_event_auth__name);
         email = (EditText) view.findViewById(R.id.fragment_event_auth__email);
-        
+
         // set the title
         getDialog().setTitle(R.string.strings__fragment_event_auth__title);
-        
-        if (this.event != null && this.event.getIsPublic() == true) {
+
+        if (this.event != null && this.event.is_public == true) {
         	// hide the pin stuff because the event is public
         	((LinearLayout)view).removeView(view.findViewById(R.id.fragment_event_auth__pin_group));
         	// Show soft keyboard automatically
@@ -70,16 +69,16 @@ public class EventAuthFragment extends DialogFragment implements OnEditorActionL
 
         return view;
     }
-	
+
 	public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
         if (EditorInfo.IME_ACTION_DONE == actionId) {
             try {
             	// store the event as data to be passed
 	    		Intent intent = new Intent(getActivity(), EventPhotoList.class);
 	    		intent.putExtra("event", this.event);
-	    		
+
 	    		// if the event is public login
-            	if (this.event.getIsPublic() == true && cachedPinMatchesEventPin(this.event) == false) {
+            	if (this.event.is_public == true && cachedPinMatchesEventPin(this.event) == false) {
             		// save the details in the local storage
             		ContentValues values = new ContentValues(3);
             		values.put(SnapableContract.EventCredentials._ID, this.event.getId());
@@ -94,9 +93,9 @@ public class EventAuthFragment extends DialogFragment implements OnEditorActionL
                 	this.dismiss();
             		startActivity(intent);
             		return true;
-            	} 
+            	}
             	// if the event is private and the pins match
-            	else if (this.event.getIsPublic() != true && this.event.getPin().equals(pin.getText().toString())) {
+            	else if (this.event.is_public != true && this.event.pin.equals(pin.getText().toString())) {
             		// save the details in the local storage
             		ContentValues values = new ContentValues(3);
             		values.put(SnapableContract.EventCredentials.PIN, pin.getText().toString());
@@ -120,7 +119,7 @@ public class EventAuthFragment extends DialogFragment implements OnEditorActionL
             		this.dismiss();
             		startActivity(intent);
             		return true;
-            	} 
+            	}
             	// the event is private and pins don't match
             	else {
             		pin.requestFocus();
@@ -135,19 +134,19 @@ public class EventAuthFragment extends DialogFragment implements OnEditorActionL
         }
         return false;
     }
-	
+
 	private boolean cachedPinMatchesEventPin(Event event) {
 		Uri requestUri = ContentUris.withAppendedId(SnapableContract.EventCredentials.CONTENT_URI, event.getId());
 		Cursor result = getActivity().getContentResolver().query(requestUri, null, null, null, null);
 
 		// we have a result
-		if (result.getCount() > 0 && event.getIsPublic()) {
+		if (result.getCount() > 0 && event.is_public) {
 			return true;
 		}
 		else if (result.getCount() > 0 && result.moveToFirst()) {
-			return result.getString(result.getColumnIndex(SnapableContract.EventCredentials.PIN)).equals(event.getPin());
+			return result.getString(result.getColumnIndex(SnapableContract.EventCredentials.PIN)).equals(event.is_public);
 		}
-		
+
 		// there was no result
 		return false;
 	}
