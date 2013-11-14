@@ -17,6 +17,7 @@ import android.view.View.OnClickListener;
 import android.widget.*;
 import ca.hashbrown.snapable.R;
 import ca.hashbrown.snapable.provider.SnapableContract;
+import com.crashlytics.android.Crashlytics;
 import com.snapable.api.SnapApi;
 import com.snapable.api.SnapClient;
 import com.snapable.api.SnapImage;
@@ -219,15 +220,15 @@ public class PhotoUpload extends BaseFragmentActivity implements OnClickListener
 	        	} else {
 	        		photoRes.postPhoto(tempImage, new TypedString(event.resource_uri), new TypedString(caption));
 				}
-	        //} catch (org.codegist.crest.CRestException e) {
-	        //	Log.e(TAG, "problem with the response?", e);
-                //Toast.makeText(getApplicationContext(), "There was a problem uploading the photo.", Toast.LENGTH_LONG).show();
 	        } catch(FileNotFoundException e) {
                 Log.e(TAG, "problem finding a file", e);
                 Toast.makeText(getApplicationContext(), "There was a problem uploading the photo.", Toast.LENGTH_LONG).show();
             } catch (IOException e) {
                 Log.e(TAG, "some IO exception", e);
                 Toast.makeText(getApplicationContext(), "There was a problem uploading the photo.", Toast.LENGTH_LONG).show();
+            } catch (OutOfMemoryError e) {
+                Crashlytics.logException(e);
+                Toast.makeText(getApplicationContext(), "This is embarrassing... we couldn't upload the photo. We saved a copy on your device.", Toast.LENGTH_LONG).show();
             } finally {
                 Log.d(TAG, "delete temp file");
                 File tmpFile = new File(photoPath + ".tmp");
