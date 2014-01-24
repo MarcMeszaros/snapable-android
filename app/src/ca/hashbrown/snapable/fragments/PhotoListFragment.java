@@ -14,21 +14,22 @@ import ca.hashbrown.snapable.R;
 import ca.hashbrown.snapable.activities.PhotoUpload;
 import ca.hashbrown.snapable.adapters.PhotoListAdapter;
 import ca.hashbrown.snapable.provider.SnapableContract;
-import com.manuelpeinado.refreshactionitem.ProgressIndicatorType;
-import com.manuelpeinado.refreshactionitem.RefreshActionItem;
+import uk.co.senab.actionbarpulltorefresh.library.ActionBarPullToRefresh;
+import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout;
+import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
+
 import com.snapable.api.models.Event;
 
-public class PhotoListFragment extends ListFragment implements LoaderCallbacks<Cursor>, RefreshActionItem.RefreshActionListener {
+public class PhotoListFragment extends ListFragment implements OnRefreshListener, LoaderCallbacks<Cursor> {
 
 	private static final String TAG = "PhotoListFragment";
 
 	private static final int PHOTOS = 0x01;
-
     public static final int GALLERY_ACTION = 0x02;
 
 	PhotoListAdapter photoAdapter;
 	Event event;
-    RefreshActionItem refreshActionItem;
+    private PullToRefreshLayout mPullToRefreshLayout;
 
     // never used, but we need it to compile
 	public PhotoListFragment() {
@@ -55,10 +56,25 @@ public class PhotoListFragment extends ListFragment implements LoaderCallbacks<C
 		getLoaderManager().initLoader(PHOTOS, null, this);
 	}
 
-	@Override
+    @Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		return inflater.inflate(R.layout.fragment_photo_list, null);
 	}
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        ViewGroup viewGroup = (ViewGroup) view;
+
+        // Now find the PullToRefreshLayout to setup
+        mPullToRefreshLayout = (PullToRefreshLayout) view.findViewById(R.id.fragment_photo_list);
+
+        // Now setup the PullToRefreshLayout
+        ActionBarPullToRefresh.from(getActivity())
+                .allChildrenArePullable() // Mark All Children as pullable
+                .listener(this) // Set the OnRefreshListener
+                .setup(mPullToRefreshLayout); // Finally commit the setup to our PullToRefreshLayout
+    }
 
 	@Override
 	public void onResume() {
@@ -73,12 +89,6 @@ public class PhotoListFragment extends ListFragment implements LoaderCallbacks<C
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.fragment_photo_list, menu);
-        MenuItem item = menu.findItem(R.id.menu__fragment_photo_list__refresh);
-        refreshActionItem = (RefreshActionItem) item.getActionView();
-        refreshActionItem.setMenuItem(item);
-        refreshActionItem.setProgressIndicatorType(ProgressIndicatorType.INDETERMINATE);
-        refreshActionItem.setMax(100);
-        refreshActionItem.setRefreshActionListener(this);
     }
 
     @Override
@@ -123,9 +133,7 @@ public class PhotoListFragment extends ListFragment implements LoaderCallbacks<C
 		switch (id) {
 		case PHOTOS:
 			if (this.event != null) {
-                if (refreshActionItem != null)
-                    refreshActionItem.showProgress(true);
-				String selection = "event=?";
+                String selection = "event=?";
 				String[] selectionArgs = {String.valueOf(event.getId())};
 				return new CursorLoader(getActivity(), SnapableContract.Photo.CONTENT_URI, null, selection, selectionArgs, null);
 			} else {
@@ -144,14 +152,12 @@ public class PhotoListFragment extends ListFragment implements LoaderCallbacks<C
 		switch (loader.getId()) {
             case PHOTOS:
                 photoAdapter.changeCursor(data);
-                if (refreshActionItem != null)
-                    refreshActionItem.showProgress(false);
                 break;
 
             default:
                 break;
 		}
-
+        mPullToRefreshLayout.setRefreshComplete();
 	}
 
 	public void onLoaderReset(Loader<Cursor> loader) {
@@ -175,7 +181,7 @@ public class PhotoListFragment extends ListFragment implements LoaderCallbacks<C
 	}
 
     @Override
-    public void onRefreshButtonClick(RefreshActionItem sender) {
+    public void onRefreshStarted(View view) {
         getLoaderManager().restartLoader(PHOTOS, null, this);
     }
 }
