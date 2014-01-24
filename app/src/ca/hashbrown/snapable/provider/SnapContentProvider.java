@@ -224,7 +224,7 @@ public class SnapContentProvider extends ContentProvider {
 				PhotoCursor photosCursor = new PhotoCursor();
 
 				// make the API call
-				Pager<Photo> photos = (selectionArgs.length == 1) ? photoRes.getPhotos(Long.valueOf(selectionArgs[0])) : photoRes.getPhotos();
+				Pager<Photo> photos = (selectionArgs.length == 1) ? photoRes.getPhotos(Long.valueOf(selectionArgs[0]), true) : photoRes.getPhotos();
 
 				// add the event objects to the resulting cursor
 				for (Photo photo : photos.objects) {

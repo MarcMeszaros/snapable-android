@@ -20,6 +20,13 @@ public interface PhotoResource {
     	@Query("event") long eventId
     );
 
+    @GET("/"+RESOURCE_NAME+"/")
+    @Headers("Accept: application/json")
+    Pager<Photo> getPhotos(
+        @Query("event") long eventId,
+        @Query("streamable") boolean streamable
+    );
+
     @GET("/"+RESOURCE_NAME+"/{id}/")
     @Headers("Accept: application/json")
     Photo getPhoto(
