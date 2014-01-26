@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="fragment_event_auth__info">Let the organizers and other guests know who took the photos.</string>
+
     <string name="fragment_event_auth__positive_button">Continue</string>
     <string name="fragment_event_auth__negative_button">Cancel</string>
 </resources>

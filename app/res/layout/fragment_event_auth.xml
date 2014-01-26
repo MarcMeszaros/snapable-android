@@ -40,7 +40,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="5dp"
-            android:text="@string/strings__fragment_event_auth__info" />
+            android:text="@string/fragment_event_auth__info" />
 
         <EditText
             android:id="@+id/fragment_event_auth__name"
