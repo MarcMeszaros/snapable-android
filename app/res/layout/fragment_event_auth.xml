@@ -17,13 +17,13 @@
 	        android:layout_width="fill_parent"
 	        android:layout_height="wrap_content"
 	        android:layout_marginBottom="5dp"
-	        android:text="@string/strings__fragment_event_auth__pin_label" />
+	        android:text="@string/fragment_event_auth__pin_label" />
 	
 	    <EditText
 	        android:id="@+id/fragment_event_auth__pin"
 	        android:layout_width="fill_parent"
 	        android:layout_height="wrap_content"
-	        android:hint="@string/strings__fragment_event_auth__pin"
+	        android:hint="@string/fragment_event_auth__pin"
 	        android:inputType="textPassword"
 	        android:maxLength="12" />
 
@@ -46,7 +46,7 @@
             android:id="@+id/fragment_event_auth__name"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/strings__fragment_event_auth__name"
+            android:hint="@string/fragment_event_auth__name"
             android:inputType="textPersonName"
             android:maxLength="50" />
 
@@ -54,7 +54,7 @@
             android:id="@+id/fragment_event_auth__email"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/strings__fragment_event_auth__email"
+            android:hint="@string/fragment_event_auth__email"
             android:inputType="textEmailAddress"
             android:maxLength="100" />
 

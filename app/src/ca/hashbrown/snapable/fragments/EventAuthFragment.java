@@ -16,11 +16,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager.LayoutParams;
 import android.view.inputmethod.EditorInfo;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
-import android.widget.Toast;
 import ca.hashbrown.snapable.R;
 import ca.hashbrown.snapable.activities.EventPhotoList;
 import ca.hashbrown.snapable.provider.SnapableContract;
@@ -29,6 +29,8 @@ import com.snapable.api.models.Event;
 public class EventAuthFragment extends DialogFragment implements OnEditorActionListener {
 
 	private static final String TAG = "EventAuthFragment";
+
+    private AlertDialog mDialog;
 
 	private EditText pin;
 	private EditText name;
@@ -72,27 +74,30 @@ public class EventAuthFragment extends DialogFragment implements OnEditorActionL
 
         // set the positive and negative buttons
         builder.setCancelable(true);
-        builder.setPositiveButton(R.string.fragment_event_auth__positive_button, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                loginUser();
-            }
-        });
-        builder.setNegativeButton(R.string.fragment_event_auth__negative_button, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
+        builder.setPositiveButton(R.string.fragment_event_auth__positive_button, null);
+        builder.setNegativeButton(android.R.string.cancel, null);
 
         // set the alert dialog view
         builder.setView(view);
-        Dialog dialog = builder.create();
-        dialog.getWindow().setSoftInputMode(LayoutParams.SOFT_INPUT_STATE_VISIBLE);
-        return dialog;
+        mDialog = builder.create();
+        mDialog.getWindow().setSoftInputMode(LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+
+        return mDialog;
     }
 
-	public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+    @Override
+    public void onResume() {
+        super.onResume();
+        final Button positiveButton = mDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+        positiveButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                loginUser();
+            }
+        });
+    }
+
+    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
         if (EditorInfo.IME_ACTION_DONE == actionId) {
             return loginUser();
         }
@@ -117,6 +122,8 @@ public class EventAuthFragment extends DialogFragment implements OnEditorActionL
 
     private boolean loginUser() {
         try {
+            pin.setError(null); // clear any errors
+
             // store the event as data to be passed
             Intent intent = new Intent(getActivity(), EventPhotoList.class);
             intent.putExtra("event", this.event);
@@ -167,12 +174,12 @@ public class EventAuthFragment extends DialogFragment implements OnEditorActionL
             // the event is private and pins don't match
             else {
                 pin.requestFocus();
-                Toast.makeText(getActivity(), getResources().getString(R.string.strings__fragment_event_auth__pin_invalid), Toast.LENGTH_LONG).show();
+                pin.setError(getString(R.string.fragment_event_auth__pin_invalid));
                 return false;
             }
         }
         catch (Exception e) {
-            Log.e(TAG, "something went terribly wrong while traying to compare pins", e);
+            Log.e(TAG, "something went terribly wrong while trying to compare pins", e);
             return false;
         }
     }

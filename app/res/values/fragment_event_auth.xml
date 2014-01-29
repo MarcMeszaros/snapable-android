@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="strings__fragment_event_auth__title">Before you get started…</string>
+
+    <string name="fragment_event_auth__pin_label">To gain access to this private event, please enter the event PIN.</string>
+    <string name="fragment_event_auth__pin">Event PIN</string>
+    <string name="fragment_event_auth__pin_invalid">The PIN is invalid.</string>
+
+    <string name="fragment_event_auth__name">Name (Optional)</string>
+    <string name="fragment_event_auth__email">Email (Optional)</string>
+
     <string name="fragment_event_auth__info">Let the organizers and other guests know who took the photos.</string>
 
     <string name="fragment_event_auth__positive_button">Continue</string>
