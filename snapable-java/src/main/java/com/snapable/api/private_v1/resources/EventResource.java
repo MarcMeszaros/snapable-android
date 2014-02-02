@@ -1,12 +1,9 @@
-package com.snapable.api.resources;
+package com.snapable.api.private_v1.resources;
 
 import com.snapable.api.SnapImage;
-import com.snapable.api.models.Event;
-import com.snapable.api.models.Pager;
-import retrofit.http.GET;
-import retrofit.http.Headers;
-import retrofit.http.Path;
-import retrofit.http.Query;
+import com.snapable.api.private_v1.objects.*;
+
+import retrofit.http.*;
 
 public interface EventResource {
 

@@ -1,6 +1,5 @@
 package com.snapable.api;
 
-import android.graphics.BitmapFactory;
 import retrofit.mime.TypedInput;
 import retrofit.mime.TypedOutput;
 
@@ -31,8 +30,8 @@ public class SnapImage implements TypedOutput, TypedInput {
         }
     }
 
-    public android.graphics.Bitmap getBitmap() {
-        return BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+    public byte[] getBytes() {
+        return bytes;
     }
 
     @Override

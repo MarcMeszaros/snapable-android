@@ -1,7 +1,7 @@
-package com.snapable.api.resources;
+package ca.hashbrown.snapable.api.resources;
 
-import com.snapable.api.models.Guest;
-import com.snapable.api.models.Pager;
+import ca.hashbrown.snapable.api.models.Guest;
+import ca.hashbrown.snapable.api.models.Pager;
 import retrofit.http.*;
 
 public interface GuestResource {

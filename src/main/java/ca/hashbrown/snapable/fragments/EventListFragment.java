@@ -25,7 +25,7 @@ import ca.hashbrown.snapable.activities.EventPhotoList;
 import ca.hashbrown.snapable.adapters.EventListAdapter;
 import ca.hashbrown.snapable.cursors.EventCursor;
 import ca.hashbrown.snapable.provider.SnapableContract;
-import com.snapable.api.models.Event;
+import ca.hashbrown.snapable.api.models.Event;
 
 public class EventListFragment extends ListFragment implements LoaderCallbacks<Cursor>, OnItemClickListener, LocationListener {
 

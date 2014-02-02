@@ -6,7 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import ca.hashbrown.snapable.R;
-import com.snapable.api.models.Event;
+import ca.hashbrown.snapable.api.models.Event;
 
 public class PhotoUploadFragment extends Fragment {
 

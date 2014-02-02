@@ -18,11 +18,11 @@ import android.widget.*;
 import ca.hashbrown.snapable.R;
 import ca.hashbrown.snapable.provider.SnapableContract;
 import com.crashlytics.android.Crashlytics;
-import com.snapable.api.SnapApi;
-import com.snapable.api.SnapClient;
-import com.snapable.api.SnapImage;
-import com.snapable.api.models.Event;
-import com.snapable.api.resources.PhotoResource;
+import ca.hashbrown.snapable.api.SnapApi;
+import ca.hashbrown.snapable.api.SnapClient;
+import ca.hashbrown.snapable.api.SnapImage;
+import ca.hashbrown.snapable.api.models.Event;
+import ca.hashbrown.snapable.api.resources.PhotoResource;
 import retrofit.mime.TypedString;
 
 import java.io.File;

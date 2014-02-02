@@ -1,6 +1,6 @@
 package ca.hashbrown.snapable.cursors;
 
-import com.snapable.api.models.Guest;
+import ca.hashbrown.snapable.api.models.Guest;
 
 import android.database.Cursor;
 import android.database.MatrixCursor;

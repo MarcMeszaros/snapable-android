@@ -18,7 +18,7 @@ import uk.co.senab.actionbarpulltorefresh.library.ActionBarPullToRefresh;
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout;
 import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 
-import com.snapable.api.models.Event;
+import ca.hashbrown.snapable.api.models.Event;
 
 public class PhotoListFragment extends ListFragment implements OnRefreshListener, LoaderCallbacks<Cursor> {
 

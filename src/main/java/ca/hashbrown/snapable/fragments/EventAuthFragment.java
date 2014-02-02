@@ -5,7 +5,6 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.ContentUris;
 import android.content.ContentValues;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -24,7 +23,7 @@ import android.widget.TextView.OnEditorActionListener;
 import ca.hashbrown.snapable.R;
 import ca.hashbrown.snapable.activities.EventPhotoList;
 import ca.hashbrown.snapable.provider.SnapableContract;
-import com.snapable.api.models.Event;
+import ca.hashbrown.snapable.api.models.Event;
 
 public class EventAuthFragment extends DialogFragment implements OnEditorActionListener {
 

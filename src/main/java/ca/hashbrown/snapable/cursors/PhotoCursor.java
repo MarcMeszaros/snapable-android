@@ -2,7 +2,7 @@ package ca.hashbrown.snapable.cursors;
 
 import android.database.Cursor;
 import android.database.MatrixCursor;
-import com.snapable.api.models.Photo;
+import ca.hashbrown.snapable.api.models.Photo;
 
 import java.util.Date;
 

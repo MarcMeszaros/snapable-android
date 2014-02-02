@@ -1,6 +1,6 @@
-package com.snapable.api.models;
+package ca.hashbrown.snapable.api.models;
 
-import com.snapable.api.ToStringBuilder;
+import ca.hashbrown.snapable.api.ToStringBuilder;
 
 public class Meta {
 

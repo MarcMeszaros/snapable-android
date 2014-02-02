@@ -10,7 +10,7 @@ import android.view.View.OnClickListener;
 import ca.hashbrown.snapable.R;
 import ca.hashbrown.snapable.fragments.PhotoListFragment;
 import ca.hashbrown.snapable.utils.SnapStorage;
-import com.snapable.api.models.Event;
+import ca.hashbrown.snapable.api.models.Event;
 
 import java.io.File;
 

@@ -10,9 +10,9 @@ import android.util.Log;
 import android.util.LruCache;
 import android.widget.ImageView;
 import ca.hashbrown.snapable.Snapable;
-import com.snapable.api.SnapClient;
-import com.snapable.api.resources.EventResource;
-import com.snapable.api.resources.PhotoResource;
+import ca.hashbrown.snapable.api.SnapClient;
+import ca.hashbrown.snapable.api.resources.EventResource;
+import ca.hashbrown.snapable.api.resources.PhotoResource;
 import retrofit.RetrofitError;
 
 import java.io.File;

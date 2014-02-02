@@ -1,8 +1,8 @@
-package com.snapable.api.resources;
+package com.snapable.api.private_v1.resources;
 
 import com.snapable.api.SnapImage;
-import com.snapable.api.models.Pager;
-import com.snapable.api.models.Photo;
+import com.snapable.api.private_v1.objects.*;
+
 import retrofit.http.*;
 import retrofit.mime.TypedString;
 

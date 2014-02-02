@@ -1,6 +1,5 @@
 package com.snapable.api;
 
-import ca.hashbrown.snapable.BuildConfig;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import retrofit.RestAdapter;
@@ -66,12 +65,7 @@ public class SnapClient implements Client {
         builder.setClient(this);
 
         // set client values based on build mode
-        if (BuildConfig.DEBUG) {
-            builder.setEndpoint("http://devapi.snapable.com/" + SnapApi.api_version + "/");
-        } else {
-            builder.setEndpoint("https://api.snapable.com/" + SnapApi.api_version + "/");
-            SnapApi.setApiKeySecret(live_api_key, live_api_secret);
-        }
+        builder.setEndpoint("http://devapi.snapable.com/" + SnapApi.api_version + "/");
 
         return builder.build();
     }

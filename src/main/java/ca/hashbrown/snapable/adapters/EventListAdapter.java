@@ -15,7 +15,7 @@ import ca.hashbrown.snapable.R;
 import ca.hashbrown.snapable.provider.SnapCache;
 import ca.hashbrown.snapable.provider.SnapCache.AsyncDrawable;
 import ca.hashbrown.snapable.provider.SnapCache.EventWorkerTask;
-import com.snapable.api.models.Event;
+import ca.hashbrown.snapable.api.models.Event;
 
 import java.util.TimeZone;
 

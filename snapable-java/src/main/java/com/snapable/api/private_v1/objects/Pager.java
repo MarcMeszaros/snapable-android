@@ -1,4 +1,4 @@
-package com.snapable.api.models;
+package com.snapable.api.private_v1.objects;
 
 import com.snapable.api.ToStringBuilder;
 

@@ -1,10 +1,10 @@
-package com.snapable.api.models;
+package ca.hashbrown.snapable.api.models;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.provider.BaseColumns;
 import com.google.gson.annotations.SerializedName;
-import com.snapable.api.ToStringBuilder;
+import ca.hashbrown.snapable.api.ToStringBuilder;
 
 import java.util.Date;
 

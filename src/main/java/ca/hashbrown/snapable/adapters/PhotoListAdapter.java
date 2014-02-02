@@ -14,7 +14,7 @@ import ca.hashbrown.snapable.R;
 import ca.hashbrown.snapable.provider.SnapCache;
 import ca.hashbrown.snapable.provider.SnapCache.AsyncDrawable;
 import ca.hashbrown.snapable.provider.SnapCache.PhotoWorkerTask;
-import com.snapable.api.models.Photo;
+import ca.hashbrown.snapable.api.models.Photo;
 
 public class PhotoListAdapter extends CursorAdapter {
 

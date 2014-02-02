@@ -2,7 +2,7 @@ package ca.hashbrown.snapable.cursors;
 
 import android.database.Cursor;
 import android.database.MatrixCursor;
-import com.snapable.api.models.Event;
+import ca.hashbrown.snapable.api.models.Event;
 
 import java.util.Date;
 

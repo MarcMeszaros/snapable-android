@@ -1,4 +1,4 @@
-package com.snapable.api;
+package ca.hashbrown.snapable.api;
 
 import retrofit.RequestInterceptor;
 
