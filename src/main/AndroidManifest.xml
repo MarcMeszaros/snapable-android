@@ -41,8 +41,8 @@
         </receiver>
 
         <provider
-            android:name=".provider.SnapContentProvider"
-            android:authorities=".provider"
+            android:name="ca.hashbrown.snapable.provider.SnapContentProvider"
+            android:authorities="ca.hashbrown.snapable.provider"
             android:exported="false" />
 
         <meta-data
