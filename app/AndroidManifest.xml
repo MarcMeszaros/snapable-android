@@ -17,16 +17,19 @@
         android:name="Snapable"
         android:allowBackup="false" >
 
-        <activity android:name=".activities.EventList" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-
+        <activity android:name=".activities.EventList" />
         <activity android:name=".activities.EventPhotoList" />
         <activity android:name=".activities.PhotoUpload" />
+
+        <!-- Activity Aliases -->
+        <activity-alias
+            android:name=".activities.MainActivity"
+            android:targetActivity=".activities.EventList">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
 
         <!-- Handles notification from Google Play on install -->
         <receiver
