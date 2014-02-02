@@ -11,12 +11,9 @@ import java.util.HashMap;
 import java.util.List;
 
 public class SnapClient implements Client {
-    Client wrapped = null;
-    SnapInterceptor interceptor = null;
-    SnapConverter converter = null;
-
-    private static final String live_api_key = "***REMOVED***";
-    private static final String live_api_secret = "***REMOVED***";
+    protected Client wrapped = null;
+    protected SnapInterceptor interceptor = null;
+    protected SnapConverter converter = null;
 
     public SnapClient() {
         try {

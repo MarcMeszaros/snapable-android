@@ -18,9 +18,10 @@ import android.widget.*;
 import ca.hashbrown.snapable.R;
 import ca.hashbrown.snapable.provider.SnapableContract;
 import com.crashlytics.android.Crashlytics;
-import ca.hashbrown.snapable.api.SnapApi;
+import com.snapable.api.SnapApi;
+import com.snapable.api.SnapImage;
+
 import ca.hashbrown.snapable.api.SnapClient;
-import ca.hashbrown.snapable.api.SnapImage;
 import ca.hashbrown.snapable.api.models.Event;
 import ca.hashbrown.snapable.api.resources.PhotoResource;
 import retrofit.mime.TypedString;
@@ -213,7 +214,7 @@ public class PhotoUpload extends BaseFragmentActivity implements OnClickListener
 	        	if (c.moveToFirst()) {
 	        		long guest_id = c.getLong(c.getColumnIndex(SnapableContract.EventCredentials.GUEST_ID));
                     if(guest_id > 0) {
-                        photoRes.postPhoto(tempImage, new TypedString(event.resource_uri), new TypedString("/"+SnapApi.api_version +"/guest/"+guest_id+"/"), new TypedString(caption));
+                        photoRes.postPhoto(tempImage, new TypedString(event.resource_uri), new TypedString("/"+ SnapApi.api_version +"/guest/"+guest_id+"/"), new TypedString(caption));
 	        		} else {
                         photoRes.postPhoto(tempImage, new TypedString(event.resource_uri), new TypedString(caption));
                     }

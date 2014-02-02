@@ -3,22 +3,10 @@ package ca.hashbrown.snapable.api.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.provider.BaseColumns;
-import com.google.gson.annotations.SerializedName;
-import ca.hashbrown.snapable.api.ToStringBuilder;
 
 import java.util.Date;
 
-public class Event implements Parcelable {
-    public Boolean enabled;
-    public Date end;
-    public Long photo_count;
-    public String pin;
-    @SerializedName("public")
-    public Boolean is_public;
-    public String resource_uri;
-    public Date start;
-    public String title;
-    public String url;
+public class Event extends com.snapable.api.private_v1.objects.Event implements Parcelable {
 
     // fields
     public static final String FIELD_ID = BaseColumns._ID;
@@ -45,26 +33,6 @@ public class Event implements Parcelable {
     	FIELD_TITLE,
     	FIELD_URL
     };
-
-    public String toString() {
-        return new ToStringBuilder(this)
-        	.append(FIELD_ENABLED, this.enabled)
-        	.append(FIELD_END, this.end)
-        	.append(FIELD_PHOTO_COUNT, this.photo_count)
-        	.append(FIELD_PIN, this.pin)
-        	.append(FIELD_PUBLIC, this.is_public)
-            .append(FIELD_RESOURCE_URI, this.resource_uri)
-            .append(FIELD_START, start)
-            .append(FIELD_TITLE, this.title)
-            .append(FIELD_URL, this.url)
-            .toString();
-    }
-
-    // virtual properties
-    public Long getId() {
-    	String[] resourceParts = this.resource_uri.split("/");
-    	return Long.valueOf(resourceParts[resourceParts.length-1]);
-    }
 
     // Android parcelable
     public int describeContents() {

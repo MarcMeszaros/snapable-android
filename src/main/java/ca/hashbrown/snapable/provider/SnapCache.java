@@ -2,6 +2,7 @@ package ca.hashbrown.snapable.provider;
 
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
@@ -9,6 +10,9 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.util.LruCache;
 import android.widget.ImageView;
+
+import com.snapable.api.SnapImage;
+
 import ca.hashbrown.snapable.Snapable;
 import ca.hashbrown.snapable.api.SnapClient;
 import ca.hashbrown.snapable.api.resources.EventResource;
@@ -136,8 +140,11 @@ public class SnapCache {
 			} else{
 				try {
                     SnapClient client = new SnapClient();
-                    bm = client.getRestAdapter().create(EventResource.class).getEventPhotoBinary(params[0], "150x150").getBitmap();
-					SnapCache.EventWorkerTask.addBitmapToCache(params[0] + "_150x150", bm);
+                    //bm = client.getRestAdapter().create(EventResource.class).getEventPhotoBinary(params[0], "150x150").getBitmap();
+                    SnapImage img = client.getRestAdapter().create(EventResource.class).getEventPhotoBinary(params[0], "150x150");
+                    byte[] bytes = img.getBytes();
+                    bm = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                    SnapCache.EventWorkerTask.addBitmapToCache(params[0] + "_150x150", bm);
 					return bm;
 				} catch (RetrofitError e) {
                     Log.e(TAG, "problem getting the photo from the API", e);
@@ -198,8 +205,10 @@ public class SnapCache {
 			} else{
 				try {
                     SnapClient client = new SnapClient();
-					bm = client.getRestAdapter().create(PhotoResource.class).getPhotoBinary(params[0], "480x480").getBitmap();
-					SnapCache.PhotoWorkerTask.addBitmapToCache(params[0] + "_480x480", bm);
+                    SnapImage img = client.getRestAdapter().create(PhotoResource.class).getPhotoBinary(params[0], "480x480");
+                    byte[] bytes = img.getBytes();
+					bm = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                    SnapCache.PhotoWorkerTask.addBitmapToCache(params[0] + "_480x480", bm);
 					return bm;
 				} catch (RetrofitError e) {
 					Log.e(TAG, "problem getting the photo from the API", e);

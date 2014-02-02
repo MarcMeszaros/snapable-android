@@ -1,7 +1,8 @@
 package ca.hashbrown.snapable.api.resources;
 
-import ca.hashbrown.snapable.api.SnapImage;
-import ca.hashbrown.snapable.api.models.Pager;
+import com.snapable.api.SnapImage;
+import com.snapable.api.private_v1.objects.Pager;
+
 import ca.hashbrown.snapable.api.models.Photo;
 import retrofit.http.*;
 import retrofit.mime.TypedString;

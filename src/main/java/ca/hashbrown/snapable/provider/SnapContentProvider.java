@@ -9,13 +9,15 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.provider.BaseColumns;
 import android.util.Log;
+
+import com.snapable.api.SnapApi;
+import com.snapable.api.private_v1.objects.Pager;
+
 import ca.hashbrown.snapable.cursors.EventCursor;
 import ca.hashbrown.snapable.cursors.PhotoCursor;
-import ca.hashbrown.snapable.api.SnapApi;
 import ca.hashbrown.snapable.api.SnapClient;
 import ca.hashbrown.snapable.api.models.Event;
 import ca.hashbrown.snapable.api.models.Guest;
-import ca.hashbrown.snapable.api.models.Pager;
 import ca.hashbrown.snapable.api.models.Photo;
 import ca.hashbrown.snapable.api.resources.EventResource;
 import ca.hashbrown.snapable.api.resources.GuestResource;

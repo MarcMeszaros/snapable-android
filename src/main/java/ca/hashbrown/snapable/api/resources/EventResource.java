@@ -1,12 +1,11 @@
 package ca.hashbrown.snapable.api.resources;
 
-import ca.hashbrown.snapable.api.SnapImage;
+import com.snapable.api.SnapImage;
+import com.snapable.api.private_v1.objects.Pager;
+
 import ca.hashbrown.snapable.api.models.Event;
-import ca.hashbrown.snapable.api.models.Pager;
-import retrofit.http.GET;
-import retrofit.http.Headers;
-import retrofit.http.Path;
-import retrofit.http.Query;
+
+import retrofit.http.*;
 
 public interface EventResource {
 

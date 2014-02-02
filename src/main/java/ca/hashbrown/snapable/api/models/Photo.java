@@ -1,19 +1,8 @@
 package ca.hashbrown.snapable.api.models;
 
 import android.provider.BaseColumns;
-import com.google.gson.annotations.SerializedName;
-import ca.hashbrown.snapable.api.ToStringBuilder;
 
-import java.util.Date;
-
-public class Photo {
-    public String author_name;
-    public String caption;
-    @SerializedName("event")
-    public String event_uri;
-    public String resource_uri;
-    public Boolean streamable;
-    public Date timestamp;
+public class Photo extends com.snapable.api.private_v1.objects.Photo {
 
     // fields
     public static final String FIELD_ID = BaseColumns._ID;
@@ -34,28 +23,6 @@ public class Photo {
     	FIELD_STREAMABLE,
     	FIELD_TIMESTAMP
     };
-
-    public String toString() {
-        return new ToStringBuilder(this)
-        	.append(FIELD_AUTHOR_NAME, this.author_name)
-        	.append(FIELD_CAPTION, this.caption)
-            .append(FIELD_EVENT_URI, this.event_uri)
-            .append(FIELD_RESOURCE_URI, this.resource_uri)
-            .append(FIELD_TIMESTAMP, this.timestamp)
-            .toString();
-    }
-
-
-    // virtual properties
-    public Long getId() {
-    	String[] resourceParts = this.resource_uri.split("/");
-    	return Long.valueOf(resourceParts[resourceParts.length-1]);
-    }
-
-    public Long getEventId() {
-    	String[] resourceParts = this.event_uri.split("/");
-    	return Long.valueOf(resourceParts[resourceParts.length-1]);
-    }
 
 }
 
