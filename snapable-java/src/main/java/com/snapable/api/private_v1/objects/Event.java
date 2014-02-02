@@ -1,7 +1,7 @@
 package com.snapable.api.private_v1.objects;
 
+import com.google.common.base.Objects;
 import com.google.gson.annotations.SerializedName;
-import com.snapable.api.ToStringBuilder;
 
 import java.util.Date;
 
@@ -18,16 +18,16 @@ public class Event {
     public String url;
 
     public String toString() {
-        return new ToStringBuilder(this)
-        	.append("enable", this.enabled)
-        	.append("end", this.end)
-        	.append("photo_count", this.photo_count)
-        	.append("pin", this.pin)
-        	.append("is_public", this.is_public)
-            .append("resource_uri", this.resource_uri)
-            .append("start", start)
-            .append("title", this.title)
-            .append("url", this.url)
+        return Objects.toStringHelper(this)
+        	.add("enable", this.enabled)
+        	.add("end", this.end)
+        	.add("photo_count", this.photo_count)
+        	.add("pin", this.pin)
+        	.add("is_public", this.is_public)
+            .add("resource_uri", this.resource_uri)
+            .add("start", start)
+            .add("title", this.title)
+            .add("url", this.url)
             .toString();
     }
 

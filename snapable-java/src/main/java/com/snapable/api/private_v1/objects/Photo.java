@@ -1,7 +1,7 @@
 package com.snapable.api.private_v1.objects;
 
+import com.google.common.base.Objects;
 import com.google.gson.annotations.SerializedName;
-import com.snapable.api.ToStringBuilder;
 
 import java.util.Date;
 
@@ -15,12 +15,12 @@ public class Photo {
     public Date timestamp;
 
     public String toString() {
-        return new ToStringBuilder(this)
-        	.append("author_name", this.author_name)
-        	.append("caption", this.caption)
-            .append("event_uri", this.event_uri)
-            .append("resource_uri", this.resource_uri)
-            .append("timestamp", this.timestamp)
+        return Objects.toStringHelper(this)
+        	.add("author_name", this.author_name)
+        	.add("caption", this.caption)
+            .add("event_uri", this.event_uri)
+            .add("resource_uri", this.resource_uri)
+            .add("timestamp", this.timestamp)
             .toString();
     }
 

@@ -1,8 +1,6 @@
 package ca.hashbrown.snapable.api.models;
 
 import android.provider.BaseColumns;
-import com.google.gson.annotations.SerializedName;
-import com.snapable.api.ToStringBuilder;
 
 public class Guest extends com.snapable.api.private_v1.objects.Guest {
 

@@ -1,7 +1,7 @@
 package com.snapable.api.private_v1.objects;
 
+import com.google.common.base.Objects;
 import com.google.gson.annotations.SerializedName;
-import com.snapable.api.ToStringBuilder;
 
 public class Guest {
     public String email;
@@ -11,11 +11,11 @@ public class Guest {
     public String resource_uri;
 
 	public String toString() {
-        return new ToStringBuilder(this)
-            .append("email", this.email)
-            .append("event_uri", this.event_uri)
-        	.append("name", this.name)
-        	.append("resource_uri", this.resource_uri)
+        return Objects.toStringHelper(this)
+            .add("email", this.email)
+            .add("event_uri", this.event_uri)
+        	.add("name", this.name)
+        	.add("resource_uri", this.resource_uri)
             .toString();
     }
 
