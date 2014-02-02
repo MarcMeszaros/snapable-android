@@ -67,9 +67,9 @@ public class SnapClient implements Client {
 
         // set client values based on build mode
         if (BuildConfig.DEBUG) {
-            builder.setServer("http://devapi.snapable.com/" + SnapApi.api_version + "/");
+            builder.setEndpoint("http://devapi.snapable.com/" + SnapApi.api_version + "/");
         } else {
-            builder.setServer("https://api.snapable.com/" + SnapApi.api_version + "/");
+            builder.setEndpoint("https://api.snapable.com/" + SnapApi.api_version + "/");
             SnapApi.setApiKeySecret(live_api_key, live_api_secret);
         }
 
