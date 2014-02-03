@@ -20,6 +20,7 @@ import ca.hashbrown.snapable.provider.SnapableContract;
 import com.crashlytics.android.Crashlytics;
 import com.snapable.api.SnapApi;
 import com.snapable.api.SnapImage;
+import com.snapable.api.private_v1.Client;
 
 import ca.hashbrown.snapable.api.SnapClient;
 import ca.hashbrown.snapable.api.models.Event;
@@ -143,15 +144,6 @@ public class PhotoUpload extends BaseFragmentActivity implements OnClickListener
 	    return BitmapFactory.decodeFile(path, options);
 	}
 
-    //@TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
-    protected int sizeOf(Bitmap data) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB_MR1) {
-            return data.getRowBytes() * data.getHeight();
-        } else {
-            return data.getByteCount();
-        }
-    }
-
 	private class PhotoUploadTask extends AsyncTask<Void, Void, Void> {
 
 		private Event event;
@@ -180,7 +172,7 @@ public class PhotoUpload extends BaseFragmentActivity implements OnClickListener
                 options.inPurgeable = true;
                 // original photo to upload
                 Bitmap photo = BitmapFactory.decodeFile(photoPath, options);
-                Log.d(TAG, "size of photo: " + sizeOf(photo));
+                Log.d(TAG, "size of photo: " + photo.getByteCount());
                 ExifInterface exif = new ExifInterface(photoPath);
                 int exifRotation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
 
@@ -207,14 +199,14 @@ public class PhotoUpload extends BaseFragmentActivity implements OnClickListener
                 Cursor c = getContentResolver().query(queryUri, null, null, null, null);
 
 	            // upload via the API
-                SnapClient client = new SnapClient();
-	            PhotoResource photoRes = client.getRestAdapter().create(PhotoResource.class);
+                Client client = SnapClient.getClient();
+                PhotoResource photoRes = client.getRestAdapter().create(PhotoResource.class);
 
 	        	// if we have a guest id, upload the photo with the id
 	        	if (c.moveToFirst()) {
 	        		long guest_id = c.getLong(c.getColumnIndex(SnapableContract.EventCredentials.GUEST_ID));
                     if(guest_id > 0) {
-                        photoRes.postPhoto(tempImage, new TypedString(event.resource_uri), new TypedString("/"+ SnapApi.api_version +"/guest/"+guest_id+"/"), new TypedString(caption));
+                        photoRes.postPhoto(tempImage, new TypedString(event.resource_uri), new TypedString("/"+ client.VERSION +"/guest/"+guest_id+"/"), new TypedString(caption));
 	        		} else {
                         photoRes.postPhoto(tempImage, new TypedString(event.resource_uri), new TypedString(caption));
                     }

@@ -8,6 +8,7 @@ import com.snapable.api.SnapApi;
 import com.snapable.api.SnapConverter;
 
 import retrofit.RequestInterceptor;
+import retrofit.RestAdapter;
 import retrofit.client.*;
 import retrofit.converter.Converter;
 
@@ -17,11 +18,24 @@ import java.util.List;
 
 public class Client extends BaseClient {
 
-    public static final String BASE_URL = "https://api.snapable.com/private_v1/";
-    public static final String BASE_URL_DEV = "http://devapi.snapable.com/private_v1/";
+    public static final String VERSION = "private_v1";
+    public static final String BASE_URL = "https://api.snapable.com/" + VERSION + "/";
+    public static final String BASE_URL_DEV = "http://devapi.snapable.com/" + VERSION + "/";
 
-    public Client() {
+    private final SnapApi snapApi;
+
+    public Client(String key, String secret) {
         super(BASE_URL);
+        snapApi = new SnapApi(VERSION, key, secret);
+    }
+
+    public Client(String baseUrl, String key, String secret) {
+        super(baseUrl);
+        snapApi = new SnapApi(VERSION, key, secret);
+    }
+
+    public RestAdapter getRestAdapter() {
+        return createRestAdapterBuilder().build();
     }
 
     @Override
@@ -44,7 +58,7 @@ public class Client extends BaseClient {
         String pattern = "https?:\\/\\/(\\w+\\.?)\\w+\\.\\w+([\\w\\/]+).*";
         String path = request.getUrl().replaceAll(pattern, "$2");
 
-        HashMap<String, String> vals = SnapApi.sign(request.getMethod(), path);
+        HashMap<String, String> vals = snapApi.sign(request.getMethod(), path);
         StringBuilder sb = new StringBuilder();
         sb.append(String.format("key=\"%s\"", vals.get("api_key")));
         sb.append(String.format(",signature=\"%s\"", vals.get("signature")));

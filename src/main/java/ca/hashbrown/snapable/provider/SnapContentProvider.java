@@ -10,7 +10,7 @@ import android.os.AsyncTask;
 import android.provider.BaseColumns;
 import android.util.Log;
 
-import com.snapable.api.SnapApi;
+import com.snapable.api.private_v1.Client;
 import com.snapable.api.private_v1.objects.Pager;
 
 import ca.hashbrown.snapable.cursors.EventCursor;
@@ -22,7 +22,6 @@ import ca.hashbrown.snapable.api.models.Photo;
 import ca.hashbrown.snapable.api.resources.EventResource;
 import ca.hashbrown.snapable.api.resources.GuestResource;
 import ca.hashbrown.snapable.api.resources.PhotoResource;
-import retrofit.RestAdapter;
 import retrofit.RetrofitError;
 
 import java.util.HashMap;
@@ -92,12 +91,12 @@ public class SnapContentProvider extends ContentProvider {
 	}
 
 	// class variable
-	private RestAdapter snapClient;
+	private Client snapClient;
 	private DBHelper dbHelper;
 
 	@Override
 	public boolean onCreate() {
-		snapClient = new SnapClient().getRestAdapter();
+		snapClient = SnapClient.getClient();
 		dbHelper = new DBHelper(getContext());
 
 		// return success or failure
@@ -170,8 +169,8 @@ public class SnapContentProvider extends ContentProvider {
 	public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
 		// create the empty results cursor
 		Cursor result = null;
-		EventResource eventRes = snapClient.create(EventResource.class);
-		PhotoResource photoRes = snapClient.create(PhotoResource.class);
+		EventResource eventRes = snapClient.getRestAdapter().create(EventResource.class);
+		PhotoResource photoRes = snapClient.getRestAdapter().create(PhotoResource.class);
 
 		switch (uriMatcher.match(uri)) {
 			// handle the case for all events
@@ -372,11 +371,11 @@ public class SnapContentProvider extends ContentProvider {
 		protected Void doInBackground(Void... params) {
 			// some values
 			String guest_email = values.getAsString(SnapableContract.EventCredentials.EMAIL);
-			String guest_event = "/" + SnapApi.api_version + "/event/" + values.getAsLong(SnapableContract.EventCredentials._ID) + "/";
+			String guest_event = "/" + snapClient.VERSION + "/event/" + values.getAsLong(SnapableContract.EventCredentials._ID) + "/";
 			String guest_name = values.getAsString(SnapableContract.EventCredentials.NAME);
 
 			// setup the API client
-			GuestResource guestResource = snapClient.create(GuestResource.class);
+			GuestResource guestResource = snapClient.getRestAdapter().create(GuestResource.class);
 			Pager<Guest> guests = guestResource.getGuests(guest_email, values.getAsLong(SnapableContract.EventCredentials._ID));
 
 			// if we have a guest update the result

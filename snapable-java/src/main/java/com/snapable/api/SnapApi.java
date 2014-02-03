@@ -15,13 +15,19 @@ import java.util.HashMap;
 public class SnapApi {
 
 	// API information
-	public static final String api_version = "private_v1";
-	private static String api_key = "key123"; // default: key123
-	private static String api_secret = "sec123"; // default: sec123
+	private final String api_version;
+	private final String api_key;
+	private final String api_secret;
 
 	// information used to generate signature
 	private static final String HMAC_SHA1_ALGORITHM = "HmacSHA1";
 	private static final SecureRandom rand = new SecureRandom();
+
+    public SnapApi(String version, String key, String secret) {
+        this.api_version = version;
+        this.api_key = key;
+        this.api_secret = secret;
+    }
 
 	/**
 	 * Generate a random nonce string.
@@ -61,7 +67,7 @@ public class SnapApi {
 	 * @return a HashMap containing the signature parts
 	 * @see SnapApi#sign(String, String, String, String)
 	 */
-	public static HashMap<String, String> sign(String verb, String path) {
+	public HashMap<String, String> sign(String verb, String path) {
 		return sign(verb, path, null, null);
 	}
 
@@ -75,17 +81,16 @@ public class SnapApi {
 	 * @param timestamp The timestamp string that should be used in the request.
 	 * @return a HashMap containing the signature parts
 	 */
-	public static HashMap<String, String> sign(String verb, String path, String nonce, String timestamp) {
+	public HashMap<String, String> sign(String verb, String path, String nonce, String timestamp) {
 		// build the string to sign
 		String snap_nonce = (nonce != null) ? nonce : SnapApi.getNonce(16);
 		String snap_timestamp = (timestamp != null) ? timestamp : SnapApi.getDate();
 		StringBuilder enc = new StringBuilder();
-		String raw_signature = SnapApi.api_key + verb.toUpperCase() + path + snap_nonce + snap_timestamp;
+		String raw_signature = api_key + verb.toUpperCase() + path + snap_nonce + snap_timestamp;
 		try {
 			// generate the HMAC signature
 			Mac mac = Mac.getInstance(HMAC_SHA1_ALGORITHM);
-			SecretKeySpec secret = new SecretKeySpec(
-					SnapApi.api_secret.getBytes(), HMAC_SHA1_ALGORITHM);
+			SecretKeySpec secret = new SecretKeySpec(api_secret.getBytes(), HMAC_SHA1_ALGORITHM);
 			mac.init(secret);
 			byte[] digest = mac.doFinal(raw_signature.getBytes());
 
@@ -101,21 +106,10 @@ public class SnapApi {
 		HashMap<String, String> resp = new HashMap<String, String>(3);
 		resp.put("nonce", snap_nonce);
 		resp.put("timestamp", snap_timestamp);
-		resp.put("api_key", SnapApi.api_key);
+		resp.put("api_key", api_key);
 		resp.put("signature", enc.toString());
 
 		return resp;
-	}
-
-	/**
-	 * Helper method to set the API key and secret.
-	 *
-	 * @param key the API key
-	 * @param secret the API secret
-	 */
-	public static void setApiKeySecret(String key, String secret) {
-		SnapApi.api_key = key;
-		SnapApi.api_secret = secret;
 	}
 
 }

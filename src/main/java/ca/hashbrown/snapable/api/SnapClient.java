@@ -1,29 +1,28 @@
 package ca.hashbrown.snapable.api;
 
-import com.snapable.api.SnapApi;
 import com.snapable.api.private_v1.Client;
 
 import ca.hashbrown.snapable.BuildConfig;
-
-import retrofit.RestAdapter;
 
 public class SnapClient extends Client {
 
     private static final String live_api_key = "***REMOVED***";
     private static final String live_api_secret = "***REMOVED***";
 
-    public RestAdapter getRestAdapter() {
-        // build the RestAdapter
-        RestAdapter.Builder builder = createRestAdapterBuilder();
+    /**
+     * Get the client to talk to the API.
+     *
+     * @deprecated Use {@link SnapClient#getClient()}
+     */
+    public SnapClient() {
+        super(Client.BASE_URL, live_api_key, live_api_secret);
+    }
 
-        // set client values based on build mode
+    public static Client getClient() {
         if (BuildConfig.DEBUG) {
-            builder.setEndpoint(Client.BASE_URL_DEV);
+            return new Client(Client.BASE_URL_DEV, "key123", "sec123");
         } else {
-            builder.setEndpoint(Client.BASE_URL);
-            SnapApi.setApiKeySecret(live_api_key, live_api_secret);
+            return new Client(Client.BASE_URL, live_api_key, live_api_secret);
         }
-
-        return builder.build();
     }
 }
