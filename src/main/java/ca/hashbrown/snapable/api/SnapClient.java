@@ -18,11 +18,28 @@ public class SnapClient extends Client {
         super(Client.BASE_URL, live_api_key, live_api_secret);
     }
 
-    public static Client getClient() {
+    /**
+     * Build a new instance of the SnapClient
+     *
+     * @param baseUrl the base API url
+     * @param key the API key
+     * @param secret the API secret
+     */
+    public SnapClient(String baseUrl, String key, String secret) {
+        super(baseUrl, key, secret);
+    }
+
+    /**
+     * Get an instance of {@link ca.hashbrown.snapable.api.SnapClient}. It will also take care
+     * of point to the dev API in debug builds and the production API for release builds.
+     *
+     * @return An instance of {@link ca.hashbrown.snapable.api.SnapClient}.
+     */
+    public static SnapClient getClient() {
         if (BuildConfig.DEBUG) {
-            return new Client(Client.BASE_URL_DEV, "key123", "sec123");
+            return new SnapClient(Client.BASE_URL_DEV, "key123", "sec123");
         } else {
-            return new Client(Client.BASE_URL, live_api_key, live_api_secret);
+            return new SnapClient(Client.BASE_URL, live_api_key, live_api_secret);
         }
     }
 }
