@@ -9,7 +9,7 @@
         android:id="@+id/activity_photo_list__fragment_photo_list"
         android:name="ca.hashbrown.snapable.fragments.PhotoListFragment"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         tools:layout="@layout/fragment_photo_list" />
