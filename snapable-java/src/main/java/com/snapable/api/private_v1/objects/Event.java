@@ -6,26 +6,28 @@ import com.google.gson.annotations.SerializedName;
 import java.util.Date;
 
 public class Event {
-    public Boolean enabled;
-    public Date end;
+    public Date end_at;
     public Long photo_count;
     public String pin;
-    @SerializedName("public")
+    public Boolean is_enabled;
     public Boolean is_public;
     public String resource_uri;
-    public Date start;
+    public Date start_at;
     public String title;
     public String url;
+    @Deprecated public Boolean enabled;
+    @Deprecated public Date end;
+    @Deprecated public Date start;
 
     public String toString() {
         return Objects.toStringHelper(this)
-        	.add("enable", this.enabled)
-        	.add("end", this.end)
+        	.add("end_at", this.end_at)
         	.add("photo_count", this.photo_count)
         	.add("pin", this.pin)
-        	.add("is_public", this.is_public)
+            .add("is_enable", this.is_enabled)
+            .add("is_public", this.is_public)
             .add("resource_uri", this.resource_uri)
-            .add("start", start)
+            .add("start_at", start_at)
             .add("title", this.title)
             .add("url", this.url)
             .toString();

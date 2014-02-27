@@ -8,19 +8,20 @@ import java.util.Date;
 public class Photo {
     public String author_name;
     public String caption;
+    public Date created_at;
     @SerializedName("event")
     public String event_uri;
     public String resource_uri;
     public Boolean streamable;
-    public Date timestamp;
+    @Deprecated public Date timestamp;
 
     public String toString() {
         return Objects.toStringHelper(this)
         	.add("author_name", this.author_name)
         	.add("caption", this.caption)
+            .add("created_at", this.created_at)
             .add("event_uri", this.event_uri)
             .add("resource_uri", this.resource_uri)
-            .add("timestamp", this.timestamp)
             .toString();
     }
 
