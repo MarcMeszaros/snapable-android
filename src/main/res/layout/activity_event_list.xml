@@ -5,13 +5,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#e3e8eb"
-    android:orientation="vertical" >
+    android:orientation="vertical">
 
     <fragment
         android:id="@+id/activity_event_list__fragment_event_list"
         android:name="ca.hashbrown.snapable.fragments.EventListFragment"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
         tools:layout="@layout/fragment_event_list" />

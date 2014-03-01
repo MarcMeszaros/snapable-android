@@ -2,8 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/fragment_event_list"
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:layout_margin="10dp"
     android:orientation="vertical" >
 
@@ -18,12 +18,13 @@
     <LinearLayout
         android:id="@+id/fragment_event_list__list_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
         <ListView
             android:id="@android:id/list"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:divider="@android:color/transparent"
             android:dividerHeight="12dp"
             android:scrollbars="none"
@@ -38,6 +39,7 @@
             android:padding="10dp"
             android:text="@string/strings__fragment_event_list__empty"
             android:textSize="20sp" />
+
     </LinearLayout>
 
 </LinearLayout>

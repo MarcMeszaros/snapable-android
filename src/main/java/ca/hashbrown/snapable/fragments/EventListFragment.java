@@ -38,8 +38,7 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 	private EventListAdapter eventAdapter;
 	private LocationManager locationManager;
 	private Handler msgHandler;
-	private boolean mLoading = false;
-    private Bundle lastLatLng;
+	private Bundle lastLatLng;
 
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
@@ -50,7 +49,7 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 		getListView().setOnItemClickListener(this);
 
 		eventAdapter = new EventListAdapter(getActivity(), null);
-		setListAdapter(eventAdapter);
+        setListAdapter(eventAdapter);
 
 		// initialize the loader
 		getLoaderManager().initLoader(LOADERS.EVENTS, null, this);
@@ -231,45 +230,77 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 		return false;
 	}
 
-	public void stopLoadingSpinner(boolean animate) {
-		try {
-            // get handles on things
-            ProgressBar pb = (ProgressBar) getView().findViewById(R.id.fragment_event_list__progressBar);
-            LinearLayout listContainer = (LinearLayout) getView().findViewById(R.id.fragment_event_list__list_container);
-
-            // fade in the list/fade out the spinner
-            if (animate && mLoading == true) {
-                pb.startAnimation(AnimationUtils.loadAnimation(getActivity(), android.R.anim.fade_out));
-                listContainer.startAnimation(AnimationUtils.loadAnimation(getActivity(), android.R.anim.fade_in));
-            }
-
-            // set the visibilities
-            pb.setVisibility(View.GONE);
-            listContainer.setVisibility(View.VISIBLE);
-            mLoading = false;
-        } catch(NullPointerException e) {
-            Log.e(TAG, "we couldn't find the progress bar", e);
-        }
-	}
-
-	public void startLoadingSpinner(boolean animate) {
+    @Override
+    public void setListShown(boolean shown) {
         try {
             // get handles on things
             ProgressBar pb = (ProgressBar) getView().findViewById(R.id.fragment_event_list__progressBar);
             LinearLayout listContainer = (LinearLayout) getView().findViewById(R.id.fragment_event_list__list_container);
 
-            // fade in the list/fade out the spinner
-            if (animate && mLoading == false) {
+            if (shown) {
+                // set animation
+                pb.startAnimation(AnimationUtils.loadAnimation(getActivity(), android.R.anim.fade_out));
+                listContainer.startAnimation(AnimationUtils.loadAnimation(getActivity(), android.R.anim.fade_in));
+                // set the visibilities
+                pb.setVisibility(View.GONE);
+                listContainer.setVisibility(View.VISIBLE);
+            } else {
+                // set animation
                 pb.startAnimation(AnimationUtils.loadAnimation(getActivity(), android.R.anim.fade_in));
                 listContainer.startAnimation(AnimationUtils.loadAnimation(getActivity(), android.R.anim.fade_out));
+                // set the visibilities
+                pb.setVisibility(View.VISIBLE);
+                listContainer.setVisibility(View.GONE);
             }
-
-            // set the visibilities
-            pb.setVisibility(View.VISIBLE);
-            listContainer.setVisibility(View.GONE);
-            mLoading = true;
-        } catch(NullPointerException e) {
+        } catch (NullPointerException e) {
             Log.e(TAG, "we couldn't find the progress bar", e);
+        }
+    }
+
+    @Override
+    public void setListShownNoAnimation(boolean shown) {
+        try {
+            // get handles on things
+            ProgressBar pb = (ProgressBar) getView().findViewById(R.id.fragment_event_list__progressBar);
+            LinearLayout listContainer = (LinearLayout) getView().findViewById(R.id.fragment_event_list__list_container);
+
+            if (shown) {
+                // set the visibilities
+                pb.setVisibility(View.GONE);
+                listContainer.setVisibility(View.VISIBLE);
+            } else {
+                // set the visibilities
+                pb.setVisibility(View.VISIBLE);
+                listContainer.setVisibility(View.GONE);
+            }
+        } catch (NullPointerException e) {
+            Log.e(TAG, "we couldn't find the progress bar", e);
+        }
+    }
+
+    /**
+     * Show the list and hide the loading spinner.
+     *
+     * @deprecated use {@link #setListShown(boolean)} or {@link #setListShownNoAnimation(boolean)}
+     */
+    public void stopLoadingSpinner(boolean animate) {
+        if (animate) {
+		    setListShown(true);
+        } else {
+            setListShownNoAnimation(true);
+        }
+	}
+
+    /**
+     * Hide the list and show the loading spinner.
+     *
+     * @deprecated use {@link #setListShown(boolean)} or {@link #setListShownNoAnimation(boolean)}
+     */
+    public void startLoadingSpinner(boolean animate) {
+        if (animate) {
+            setListShown(false);
+        } else {
+            setListShownNoAnimation(false);
         }
 	}
 
