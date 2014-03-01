@@ -10,12 +10,14 @@
         android:id="@+id/android:list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:paddingTop="12dp"
+        android:paddingLeft="12dp"
+        android:paddingRight="12dp"
+        android:paddingBottom="90dp"
         android:divider="@android:color/transparent"
         android:dividerHeight="15dp"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
         android:scrollbars="none"
-        tools:listitem="@layout/listview_row_eventphoto" >
-    </ListView>
+        android:clipToPadding="false"
+        tools:listitem="@layout/listview_row_eventphoto" />
 
 </uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout>

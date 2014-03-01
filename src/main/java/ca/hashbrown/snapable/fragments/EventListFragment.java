@@ -74,7 +74,7 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
         super.onPause();
         if (locationManager != null) {
             locationManager.removeUpdates(this); // stop GPS updates
-            stopLoadingSpinner(false);
+            setListShownNoAnimation(true);
         }
         if (msgHandler != null) {
             msgHandler.removeCallbacksAndMessages(null); // remove all messages in the handler
@@ -90,7 +90,7 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 				// get the query string if required
 				if (args != null && args.containsKey("q")) {
 					Log.d(TAG, "CursorLoader: q");
-					startLoadingSpinner(false);
+                    setListShownNoAnimation(false);
 					String selection = "q=?";
 					String[] selectionArgs = {args.getString("q")};
 					return new CursorLoader(getActivity(), SnapableContract.Event.CONTENT_URI, null, selection, selectionArgs, null);
@@ -101,7 +101,7 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 					return new CursorLoader(getActivity(), SnapableContract.Event.CONTENT_URI, null, selection, selectionArgs, null);
 				} else {
 					Log.d(TAG, "CursorLoader: getLatLng()");
-					startLoadingSpinner(false);
+                    setListShownNoAnimation(false);
 					if (lastLatLng == null) {
                         getLatLng();
                         return new Loader<Cursor>(getActivity());
@@ -125,12 +125,12 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 		switch (loader.getId()) {
 		case LOADERS.EVENTS:
 			eventAdapter.changeCursor(data);
-			stopLoadingSpinner(true);
+            setListShown(true);
 			break;
 
 		default:
 			eventAdapter.changeCursor(data);
-            stopLoadingSpinner(true);
+            setListShown(true);
 			break;
 		}
 	}
@@ -278,32 +278,6 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
         }
     }
 
-    /**
-     * Show the list and hide the loading spinner.
-     *
-     * @deprecated use {@link #setListShown(boolean)} or {@link #setListShownNoAnimation(boolean)}
-     */
-    public void stopLoadingSpinner(boolean animate) {
-        if (animate) {
-		    setListShown(true);
-        } else {
-            setListShownNoAnimation(true);
-        }
-	}
-
-    /**
-     * Hide the list and show the loading spinner.
-     *
-     * @deprecated use {@link #setListShown(boolean)} or {@link #setListShownNoAnimation(boolean)}
-     */
-    public void startLoadingSpinner(boolean animate) {
-        if (animate) {
-            setListShown(false);
-        } else {
-            setListShownNoAnimation(false);
-        }
-	}
-
 	private void getLatLng() {
 		Log.d(TAG, "getLatLng()");
 		// Retrieve a list of location providers that have fine accuracy, no monetary cost, etc
@@ -335,7 +309,7 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
     		public void run() {
     			Log.d(TAG, "kill the location updates");
 				locationManager.removeUpdates(locationListener);
-                fragmentReference.stopLoadingSpinner(true);
+                fragmentReference.setListShown(true);
 			}
 		}
     	msgHandler.postDelayed(new GpsTimeout(this, locationManager, this), 5000);

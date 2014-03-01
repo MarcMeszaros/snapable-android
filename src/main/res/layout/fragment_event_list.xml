@@ -25,9 +25,11 @@
             android:id="@android:id/list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:padding="12dp"
             android:divider="@android:color/transparent"
             android:dividerHeight="12dp"
             android:scrollbars="none"
+            android:clipToPadding="false"
             tools:listitem="@layout/listview_row_event" />
 
         <TextView
