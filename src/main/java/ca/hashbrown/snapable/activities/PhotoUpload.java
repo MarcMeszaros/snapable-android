@@ -150,6 +150,8 @@ public class PhotoUpload extends BaseFragmentActivity implements OnClickListener
 		private String caption;
 		private String photoPath;
 
+        private String errorMsg;
+
 		public PhotoUploadTask(Event event, String caption, String photoPath) {
 			this.event = event;
 			this.caption = caption;
@@ -170,6 +172,7 @@ public class PhotoUpload extends BaseFragmentActivity implements OnClickListener
             try {
                 BitmapFactory.Options options = new BitmapFactory.Options();
                 options.inPurgeable = true;
+                options.inTempStorage = new byte[32 * 1024]; // 32KB of temp decoding storage
                 // original photo to upload
                 Bitmap photo = BitmapFactory.decodeFile(photoPath, options);
                 Log.d(TAG, "size of photo: " + photo.getByteCount());
@@ -183,11 +186,13 @@ public class PhotoUpload extends BaseFragmentActivity implements OnClickListener
                 // make sure memory is released
                 photo.recycle();
                 photo = null;
+                Log.d(TAG, "Created temp file");
 
                 // re-apply the exif rotation
                 ExifInterface exifComp = new ExifInterface(photoPath + ".tmp");
                 exifComp.setAttribute(ExifInterface.TAG_ORIENTATION, String.valueOf(exifRotation));
                 exifComp.saveAttributes();
+                Log.d(TAG, "Re-applied exif data to temp file");
 
                 // decode temp file
                 File tempFile = new File(photoPath + ".tmp");
@@ -215,13 +220,14 @@ public class PhotoUpload extends BaseFragmentActivity implements OnClickListener
 				}
 	        } catch(FileNotFoundException e) {
                 Log.e(TAG, "problem finding a file", e);
-                Toast.makeText(getApplicationContext(), "There was a problem uploading the photo.", Toast.LENGTH_LONG).show();
+                errorMsg = "There was a problem uploading the photo.";
             } catch (IOException e) {
                 Log.e(TAG, "some IO exception", e);
-                Toast.makeText(getApplicationContext(), "There was a problem uploading the photo.", Toast.LENGTH_LONG).show();
+                errorMsg = "There was a problem uploading the photo.";
             } catch (OutOfMemoryError e) {
+                Log.e(TAG, "We ran out of memory!", e);
                 Crashlytics.logException(e);
-                Toast.makeText(getApplicationContext(), "This is embarrassing... we couldn't upload the photo. We saved a copy on your device.", Toast.LENGTH_LONG).show();
+                errorMsg = "This is embarrassing... we couldn't upload the photo. We saved a copy on your device.";
             } finally {
                 Log.d(TAG, "delete temp file");
                 File tmpFile = new File(photoPath + ".tmp");
@@ -235,6 +241,12 @@ public class PhotoUpload extends BaseFragmentActivity implements OnClickListener
 		@Override
 		protected void onPostExecute(Void result) {
 			super.onPostExecute(result);
+			// if there is an error set, display it to the user
+			if (errorMsg != null && errorMsg.length() > 0) {
+				Toast.makeText(getApplicationContext(), errorMsg, Toast.LENGTH_LONG).show();
+			}
+
+			// stop the progress bar
 			ProgressBar pb = (ProgressBar) findViewById(R.id.fragment_photo_upload__progressBar);
 			pb.setVisibility(View.INVISIBLE);
 			Log.d(TAG, "upload complete");
