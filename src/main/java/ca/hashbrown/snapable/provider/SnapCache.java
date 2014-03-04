@@ -1,5 +1,6 @@
 package ca.hashbrown.snapable.provider;
 
+import android.annotation.TargetApi;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -7,11 +8,11 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.util.Log;
 import android.util.LruCache;
 import android.widget.ImageView;
 
-import com.jakewharton.disklrucache.DiskLruCache;
 import com.snapable.api.SnapImage;
 
 import ca.hashbrown.snapable.Snapable;
@@ -20,6 +21,7 @@ import ca.hashbrown.snapable.api.resources.EventResource;
 import ca.hashbrown.snapable.api.resources.PhotoResource;
 import retrofit.RetrofitError;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.lang.ref.WeakReference;
 
@@ -31,7 +33,7 @@ public class SnapCache {
 	private static final String TAG = "SnapCache";
 
 	/**
-	 * A custom version of BitmapDrawable that wraps it with an AsuncTask to
+	 * A custom version of BitmapDrawable that wraps it with an AsyncTask to
 	 * load in the data.
 	 */
 	public static class AsyncDrawable extends BitmapDrawable {
@@ -164,7 +166,7 @@ public class SnapCache {
 	/**
 	 * The event photo caching and loading class.
 	 */
-	public static class EventWorkerTask extends BitmapWorkerTask {
+    public static class EventWorkerTask extends BitmapWorkerTask {
 
         // class specific static cached
         private static LruCache<String, Bitmap> memoryCache = null;
@@ -172,12 +174,17 @@ public class SnapCache {
         private static final int MCACHE_SIZE = 2 * 1024 * 1024; // 2MB
         private static final int DCACHE_SIZE = 4 * 1024 * 1024; // 4MB
 
+        @TargetApi(Build.VERSION_CODES.KITKAT)
         public static LruCache<String, Bitmap> getMemoryCache() {
             if (memoryCache == null) {
                 memoryCache = new LruCache<String, Bitmap>(MCACHE_SIZE) {
                     @Override
                     protected int sizeOf(String key, Bitmap value) {
-                        return value.getRowBytes() * value.getHeight();
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                            return value.getAllocationByteCount();
+                        } else {
+                            return value.getByteCount();
+                        }
                     }
                 };
             }
@@ -232,12 +239,17 @@ public class SnapCache {
         private static final int MCACHE_SIZE = 4 * 1024 * 1024; // 4MB
         private static final int DCACHE_SIZE = 32 * 1024 * 1024; // 32MB
 
+        @TargetApi(Build.VERSION_CODES.KITKAT)
         public static LruCache<String, Bitmap> getMemoryCache() {
             if (memoryCache == null) {
                 memoryCache = new LruCache<String, Bitmap>(MCACHE_SIZE) {
                     @Override
                     protected int sizeOf(String key, Bitmap value) {
-                        return value.getRowBytes() * value.getHeight();
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                            return value.getAllocationByteCount();
+                        } else {
+                            return value.getByteCount();
+                        }
                     }
                 };
             }
