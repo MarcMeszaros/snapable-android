@@ -52,7 +52,7 @@ public class EventListAdapter extends CursorAdapter {
 
 		// get the image, if there is one
 		final String imageKey = cursor.getLong(cursor.getColumnIndex(Event.FIELD_ID)) + "_480x480";
-		Bitmap bm = SnapCache.PhotoWorkerTask.getBitmapFromCache(imageKey);
+		Bitmap bm = new EventWorkerTask(null).getBitmapFromCache(imageKey);
 		if (bm != null) {
 			viewHolder.cover.setImageBitmap(bm);
 		} else if (SnapCache.EventWorkerTask.cancelPotentialWork(cursor.getLong(cursor.getColumnIndex(Event.FIELD_ID)), viewHolder.cover)) {

@@ -11,6 +11,7 @@ import android.util.Log;
 import android.util.LruCache;
 import android.widget.ImageView;
 
+import com.jakewharton.disklrucache.DiskLruCache;
 import com.snapable.api.SnapImage;
 
 import ca.hashbrown.snapable.Snapable;
@@ -53,6 +54,8 @@ public class SnapCache {
 
 		protected long data = 0;
 		protected final WeakReference<ImageView> imageView;
+        protected LruCache<String, Bitmap> mCache = null;
+        protected DiskLruImageCache dCache = null;
 
 		public BitmapWorkerTask(ImageView imageView) {
 			this.imageView = new WeakReference<ImageView>(imageView);
@@ -111,6 +114,51 @@ public class SnapCache {
 	        // No task associated with the ImageView, or an existing task was cancelled
 	        return true;
 	    }
+
+        // helpers
+        public Bitmap getPhoto(long id, String size) {
+            final String imageKey = String.valueOf(id) + "_" + size;
+            return getBitmapFromCache(imageKey);
+        }
+
+        public void addBitmapToCache(String key, Bitmap bitmap) {
+            if (getBitmapFromCache(key) == null && bitmap != null) {
+                if (mCache != null) { mCache.put(key, bitmap); }
+                if (dCache != null) { dCache.putBitmap(key, bitmap); }
+            }
+        }
+
+        @Deprecated
+        public Bitmap getBitmapFromCacheMemory(String key) {
+            return getBitmapFromCache(key, true);
+        }
+
+        public Bitmap getBitmapFromCache(String key) {
+            return getBitmapFromCache(key, false);
+        }
+
+        public Bitmap getBitmapFromCache(String key, boolean hitMemoryOnly) {
+            // make sure the caches exist
+            if (mCache == null && dCache == null) {
+                return null;
+            }
+
+            // try to get the bitmap from memory first
+            Bitmap result = null;
+            if (mCache != null) {
+                result = mCache.get(key); // try and get from memory
+            }
+
+            // if we aren't only checking memory, try to get it from disk
+            if (!hitMemoryOnly && result == null && dCache != null) {
+                result = dCache.getBitmap(key); // try and get from disk
+                if (result != null) {
+                    mCache.put(key, result); // add to memory if found on disk
+                }
+            }
+
+            return result;
+        }
 	}
 
 	/**
@@ -118,59 +166,57 @@ public class SnapCache {
 	 */
 	public static class EventWorkerTask extends BitmapWorkerTask {
 
-		// 2MB of memory bitmap cache
-		private static LruCache<String, Bitmap> mCache = new LruCache<String, Bitmap>(2 * 1024 * 1024) {
-			@Override
-			protected int sizeOf(String key, Bitmap value) {
-				return value.getRowBytes() * value.getHeight();
-			}
-		};
+        // class specific static cached
+        private static LruCache<String, Bitmap> memoryCache = null;
+        private static DiskLruImageCache diskCache = null;
+        private static final int MCACHE_SIZE = 2 * 1024 * 1024; // 2MB
+        private static final int DCACHE_SIZE = 4 * 1024 * 1024; // 4MB
+
+        public static LruCache<String, Bitmap> getMemoryCache() {
+            if (memoryCache == null) {
+                memoryCache = new LruCache<String, Bitmap>(MCACHE_SIZE) {
+                    @Override
+                    protected int sizeOf(String key, Bitmap value) {
+                        return value.getRowBytes() * value.getHeight();
+                    }
+                };
+            }
+            return memoryCache;
+        }
+
+        public static DiskLruImageCache getDiskCache() {
+            if (diskCache == null) {
+                diskCache = new DiskLruImageCache(new File(Snapable.getContext().getExternalCacheDir(), "cache_event"), Snapable.getVersionCode(), 1, (DCACHE_SIZE));
+            }
+            return diskCache;
+        }
 
 		public EventWorkerTask(ImageView imageView) {
 			super(imageView);
+            mCache = getMemoryCache();
+            dCache = getDiskCache();
 		}
 
 		@Override
 		protected Bitmap doInBackground(Long... params) {
 			this.data = params[0];
 			final String imageKey = params[0] + "_150x150";
-			Bitmap bm = SnapCache.EventWorkerTask.getBitmapFromCache(imageKey);
+			Bitmap bm = getBitmapFromCache(imageKey);
 			if (bm != null) {
 				return bm;
 			} else{
 				try {
                     SnapClient client = SnapClient.getClient();
-                    //bm = client.getRestAdapter().create(EventResource.class).getEventPhotoBinary(params[0], "150x150").getBitmap();
                     SnapImage img = client.getRestAdapter().create(EventResource.class).getEventPhotoBinary(params[0], "150x150");
-                    byte[] bytes = img.getBytes();
+                    final byte[] bytes = img.getBytes();
                     bm = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                    SnapCache.EventWorkerTask.addBitmapToCache(params[0] + "_150x150", bm);
+                    addBitmapToCache(params[0] + "_150x150", bm);
 					return bm;
 				} catch (RetrofitError e) {
                     Log.e(TAG, "problem getting the photo from the API", e);
                     return null;
 				}
 			}
-		}
-
-		public static Bitmap getPhoto(long id) {
-			return getPhoto(id, "150x150");
-		}
-
-		public static Bitmap getPhoto(long id, String size) {
-			Log.i(TAG, "inside event getPhoto");
-			final String imageKey = String.valueOf(id) + "_" + size;
-			return getBitmapFromCache(imageKey);
-		}
-
-		public static void addBitmapToCache(String key, Bitmap bitmap) {
-			if (getBitmapFromCache(key) == null && bitmap != null) {
-				mCache.put(key, bitmap);
-			}
-		}
-
-		public static Bitmap getBitmapFromCache(String key) {
-            return mCache.get(key);
 		}
 
 	}
@@ -180,73 +226,57 @@ public class SnapCache {
 	 */
 	public static class PhotoWorkerTask extends BitmapWorkerTask {
 
-		// 4MB of bitmap cache
-		private static LruCache<String, Bitmap> mCache = new LruCache<String, Bitmap>(4 * 1024 * 1024) {
-			@Override
-			protected int sizeOf(String key, Bitmap value) {
-				return value.getRowBytes() * value.getHeight();
-			}
-		};
+        // class specific static cached
+        private static LruCache<String, Bitmap> memoryCache = null;
+        private static DiskLruImageCache diskCache = null;
+        private static final int MCACHE_SIZE = 4 * 1024 * 1024; // 4MB
+        private static final int DCACHE_SIZE = 32 * 1024 * 1024; // 32MB
 
-        // 32MB disk cache
-        private static DiskLruImageCache dCache = new DiskLruImageCache(new File(Snapable.getContext().getExternalCacheDir(), "cache_photo"), Snapable.getVersionCode(), 1, (32 * 1024 *1024));;
+        public static LruCache<String, Bitmap> getMemoryCache() {
+            if (memoryCache == null) {
+                memoryCache = new LruCache<String, Bitmap>(MCACHE_SIZE) {
+                    @Override
+                    protected int sizeOf(String key, Bitmap value) {
+                        return value.getRowBytes() * value.getHeight();
+                    }
+                };
+            }
+            return memoryCache;
+        }
+
+        public static DiskLruImageCache getDiskCache() {
+            if (diskCache == null) {
+                diskCache = new DiskLruImageCache(new File(Snapable.getContext().getExternalCacheDir(), "cache_photo"), Snapable.getVersionCode(), 1, (DCACHE_SIZE));
+            }
+            return diskCache;
+        }
 
         public PhotoWorkerTask(ImageView imageView) {
 			super(imageView);
-		}
+            mCache = getMemoryCache();
+            dCache = getDiskCache();
+        }
 
 		@Override
 		protected Bitmap doInBackground(Long... params) {
 			this.data = params[0];
 			final String imageKey = params[0] + "_480x480";
-			Bitmap bm = SnapCache.PhotoWorkerTask.getBitmapFromCache(imageKey);
+			Bitmap bm = getBitmapFromCache(imageKey);
 			if (bm != null) {
 				return bm;
 			} else{
 				try {
                     SnapClient client = SnapClient.getClient();
                     SnapImage img = client.getRestAdapter().create(PhotoResource.class).getPhotoBinary(params[0], "480x480");
-                    byte[] bytes = img.getBytes();
+                    final byte[] bytes = img.getBytes();
 					bm = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                    SnapCache.PhotoWorkerTask.addBitmapToCache(params[0] + "_480x480", bm);
+                    addBitmapToCache(params[0] + "_480x480", bm);
 					return bm;
 				} catch (RetrofitError e) {
 					Log.e(TAG, "problem getting the photo from the API", e);
                     return null;
 				}
 			}
-		}
-
-		public static Bitmap getPhoto(long id) {
-			return getPhoto(id, "150x150");
-		}
-
-		public static Bitmap getPhoto(long id, String size) {
-			Log.i(TAG, "inside photo getPhoto");
-			final String imageKey = String.valueOf(id) + "_" + size;
-			return getBitmapFromCache(imageKey);
-		}
-
-		public static void addBitmapToCache(String key, Bitmap bitmap) {
-			if (getBitmapFromCache(key) == null && bitmap != null) {
-				mCache.put(key, bitmap);
-                dCache.putBitmap(key, bitmap);
-			}
-		}
-
-        public static Bitmap getBitmapFromCacheMemory(String key) {
-            return mCache.get(key); // try and get from memory
-        }
-
-		public static Bitmap getBitmapFromCache(String key) {
-			Bitmap result = mCache.get(key); // try and get from memory
-            if (result == null) {
-                result = dCache.getBitmap(key); // try and get from disk
-                if (result != null) {
-                    mCache.put(key, result); // add to memory if found on disk
-                }
-            }
-            return result;
 		}
 
 	}
