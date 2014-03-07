@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="20dp"
     android:background="@drawable/listview_row_square_background"
-    android:padding="10dp" >
+    android:padding="10dp"
+    android:gravity="center_horizontal"
+    android:orientation="vertical">
 
     <ImageView
         android:id="@+id/listview_row_eventphoto_photo"
         android:layout_width="300dp"
         android:layout_height="300dp"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
         android:layout_margin="2dp"
         android:scaleType="fitCenter"
         android:src="@drawable/photo_blank" />
@@ -20,8 +20,6 @@
         android:id="@+id/listview_row_eventphoto_caption"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/listview_row_eventphoto_photo"
-        android:layout_centerHorizontal="true"
         android:layout_margin="2dp"
         android:gravity="center_horizontal" />
 
@@ -29,10 +27,8 @@
         android:id="@+id/listview_row_eventphoto_author_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/listview_row_eventphoto_caption"
-        android:layout_centerHorizontal="true"
         android:layout_margin="2dp"
         android:textColor="@android:color/darker_gray"
         android:textStyle="italic" />
 
-</RelativeLayout>
+</LinearLayout>
