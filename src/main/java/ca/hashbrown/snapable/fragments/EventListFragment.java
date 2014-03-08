@@ -13,6 +13,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
@@ -20,6 +22,8 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.SearchView;
+
 import ca.hashbrown.snapable.R;
 import ca.hashbrown.snapable.activities.EventPhotoList;
 import ca.hashbrown.snapable.adapters.EventListAdapter;
@@ -27,7 +31,7 @@ import ca.hashbrown.snapable.cursors.EventCursor;
 import ca.hashbrown.snapable.provider.SnapableContract;
 import ca.hashbrown.snapable.api.models.Event;
 
-public class EventListFragment extends ListFragment implements LoaderCallbacks<Cursor>, OnItemClickListener, LocationListener {
+public class EventListFragment extends ListFragment implements SearchView.OnQueryTextListener, LoaderCallbacks<Cursor>, OnItemClickListener, LocationListener {
 
 	private static final String TAG = "EventListFragment";
 
@@ -55,7 +59,13 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 		getLoaderManager().initLoader(LOADERS.EVENTS, null, this);
 	}
 
-	@Override
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+
+    @Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		return inflater.inflate(R.layout.fragment_event_list, container, false);
 	}
@@ -81,7 +91,38 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
         }
     }
 
-	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.fragment_event_list, menu);
+        SearchView searchView = (SearchView) menu.findItem(R.id.menu__fragment_event_list__search).getActionView();
+        searchView.setQueryHint("Event Title or URL");
+        searchView.setOnQueryTextListener(this);
+    }
+
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        Log.d(TAG, "search: " + query);
+        // build the search param
+        Bundle args = new Bundle(1);
+        args.putString("q", query);
+
+        // get the fragment, and init the new search loader (using the search param)
+        getLoaderManager().restartLoader(LOADERS.EVENTS, args, this);
+        return true;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String newText) {
+        Log.d(TAG, "new query: " + newText.isEmpty() + " " + newText);
+        if (newText.isEmpty()) {
+            return false;
+        } else {
+            return false;
+        }
+    }
+
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 		// This is called when a new Loader needs to be created.
 		// First, pick the base URI to use depending on whether we are
 		// currently filtering.
