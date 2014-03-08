@@ -2,11 +2,15 @@ package ca.hashbrown.snapable.activities;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+
+import ca.hashbrown.snapable.BuildConfig;
 import ca.hashbrown.snapable.R;
 import ca.hashbrown.snapable.fragments.PhotoListFragment;
 import ca.hashbrown.snapable.utils.SnapStorage;
@@ -94,21 +98,30 @@ public class EventPhotoList extends BaseFragmentActivity implements OnClickListe
         }
     }
 
+    /**
+     * Use the new API 16+ way of handling parent activities.
+     *
+     * @see <a href="http://developer.android.com/guide/topics/manifest/activity-element.html#parent">Android Developers</a>
+     */
     @Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case android.R.id.home:
-			// This is called when the Home (Up) button is pressed in the Action Bar.
-			// http://developer.android.com/training/implementing-navigation/ancestral.html
-            Intent parentActivityIntent = new Intent(this, EventList.class);
-            parentActivityIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(parentActivityIntent);
-			finish();
-			return true;
+        if (BuildConfig.VERSION_CODE >= Build.VERSION_CODES.JELLY_BEAN) {
+            return super.onOptionsItemSelected(item);
+        } else {
+            switch (item.getItemId()) {
+                case android.R.id.home:
+                    // This is called when the Home (Up) button is pressed in the Action Bar.
+                    // http://developer.android.com/training/implementing-navigation/ancestral.html
+                    Intent parentActivityIntent = new Intent(this, EventList.class);
+                    parentActivityIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(parentActivityIntent);
+                    finish();
+                    return true;
 
-		default:
-			return false;
-		}
+                default:
+                    return false;
+            }
+        }
 	}
 
 }

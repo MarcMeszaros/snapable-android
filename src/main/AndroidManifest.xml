@@ -18,7 +18,11 @@
         android:allowBackup="false" >
 
         <activity android:name=".activities.EventList" />
-        <activity android:name=".activities.EventPhotoList" />
+
+        <activity
+            android:name=".activities.EventPhotoList"
+            android:parentActivityName=".activities.EventList" />
+
         <activity android:name=".activities.PhotoUpload" />
 
         <!-- Activity Aliases -->
