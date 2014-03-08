@@ -35,15 +35,6 @@
             </intent-filter>
         </activity-alias>
 
-        <!-- Handles notification from Google Play on install -->
-        <receiver
-            android:name="com.google.analytics.tracking.android.AnalyticsReceiver"
-            android:exported="true" >
-            <intent-filter>
-                <action android:name="com.android.vending.INSTALL_REFERRER" />
-            </intent-filter>
-        </receiver>
-
         <provider
             android:name="ca.hashbrown.snapable.provider.SnapContentProvider"
             android:authorities="ca.hashbrown.snapable.provider"

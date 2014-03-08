@@ -3,8 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_photo_list"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#e3e8eb">
+    android:layout_height="match_parent">
 
     <fragment
         android:id="@+id/activity_photo_list__fragment_photo_list"

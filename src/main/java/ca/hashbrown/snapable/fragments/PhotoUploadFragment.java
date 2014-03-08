@@ -12,13 +12,7 @@ public class PhotoUploadFragment extends Fragment {
 
 	private static final String TAG = "PhotoUploadFragment";
 
-	Event event;
-
 	public PhotoUploadFragment() {
-	}
-
-	public PhotoUploadFragment(Event event) {
-		this.event = event;
 	}
 
 	@Override

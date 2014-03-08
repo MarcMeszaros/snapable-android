@@ -10,6 +10,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 
+import com.google.analytics.tracking.android.EasyTracker;
+import com.google.analytics.tracking.android.Fields;
+import com.google.analytics.tracking.android.MapBuilder;
+import com.google.analytics.tracking.android.Tracker;
+
 import ca.hashbrown.snapable.BuildConfig;
 import ca.hashbrown.snapable.R;
 import ca.hashbrown.snapable.fragments.PhotoListFragment;
@@ -65,6 +70,18 @@ public class EventPhotoList extends BaseFragmentActivity implements OnClickListe
     public void onClick(View v) {
 		switch (v.getId()) {
 		case R.id.activity_photo_list__photo_button:
+            // fake the camera view
+            // May return null if EasyTracker has not yet been initialized with a property ID.
+            Tracker easyTracker = EasyTracker.getInstance(this);
+
+            // This screen name value will remain set on the tracker and sent with
+            // hits until it is set to a new value or to null.
+            easyTracker.set(Fields.SCREEN_NAME, "Camera");
+            easyTracker.send(MapBuilder
+                            .createAppView()
+                            .build()
+            );
+
             Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
             this.imageUri = SnapStorage.getOutputMediaFileUri(SnapStorage.MEDIA_TYPE_IMAGE);
             takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, this.imageUri);
