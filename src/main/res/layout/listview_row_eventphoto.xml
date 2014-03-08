@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="20dp"
-    android:background="@drawable/listview_row_square_background"
+    android:background="@drawable/background__polaroid_rectangle"
     android:padding="10dp"
     android:gravity="center_horizontal"
     android:orientation="vertical">

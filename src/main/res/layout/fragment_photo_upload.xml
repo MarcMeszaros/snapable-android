@@ -13,7 +13,8 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_margin="10dp"
-        android:padding="5dp"
+        android:padding="10dp"
+        android:background="@drawable/background__polaroid_rectangle"
         android:scaleType="centerCrop"
         android:src="@drawable/photo_blank" />
 
