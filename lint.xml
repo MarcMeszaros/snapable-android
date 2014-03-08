@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<lint>
+    <!-- Disable unused resources warnings for generated files -->
+    <issue id="UnusedResources" severity="warning">
+        <ignore path="src/main/res/values/com_crashlytics_export_strings.xml" />
+    </issue>
+</lint>

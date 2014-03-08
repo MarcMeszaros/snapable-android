@@ -73,7 +73,9 @@ public class EventAuthFragment extends DialogFragment implements OnEditorActionL
 
         // set the positive and negative buttons
         builder.setCancelable(true);
-        builder.setPositiveButton(R.string.fragment_event_auth__positive_button, null);
+        // TODO figure out how to display the title without having the soft keyboard hide the buttons
+        //builder.setTitle(R.string.fragment_event_auth__title);
+        builder.setPositiveButton(android.R.string.ok, null);
         builder.setNegativeButton(android.R.string.cancel, null);
 
         // set the alert dialog view

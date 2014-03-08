@@ -4,6 +4,7 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import android.annotation.SuppressLint;
 import android.net.Uri;
 import android.os.Environment;
 import android.util.Log;
@@ -20,6 +21,7 @@ public class SnapStorage {
 	}
 
 	/** Create a File for saving an image or video */
+	@SuppressLint("SimpleDateFormat")
 	public static File getOutputMediaFile(int type) {
 	    // To be safe, you should check that the SDCard is mounted
 	    // using Environment.getExternalStorageState() before doing this.
