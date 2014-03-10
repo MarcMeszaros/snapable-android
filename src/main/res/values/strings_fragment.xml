@@ -7,4 +7,9 @@
     <string name="fragment_photo_upload__caption_hint">Caption (Optional)</string>
     <string name="fragment_photo_upload__button_done">Upload</string>
 
+    <!-- photo list -->
+    <string name="fragment_photo_list__empty_omg">OMG!</string>
+    <string name="fragment_photo_list__empty_no_photos">No one\'s shared\n a photo yet!</string>
+    <string name="fragment_photo_list__empty_be_first">Quick,\n be first!</string>
+
 </resources>

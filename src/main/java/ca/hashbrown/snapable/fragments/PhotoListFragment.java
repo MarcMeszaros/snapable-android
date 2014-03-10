@@ -1,6 +1,5 @@
 package ca.hashbrown.snapable.fragments;
 
-import android.app.ListFragment;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.CursorLoader;
 import android.content.Intent;
@@ -10,6 +9,7 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.*;
+
 import ca.hashbrown.snapable.R;
 import ca.hashbrown.snapable.activities.PhotoUpload;
 import ca.hashbrown.snapable.adapters.PhotoListAdapter;
@@ -20,7 +20,7 @@ import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 
 import ca.hashbrown.snapable.api.models.Event;
 
-public class PhotoListFragment extends ListFragment implements OnRefreshListener, LoaderCallbacks<Cursor> {
+public class PhotoListFragment extends SnapListFragment implements OnRefreshListener, LoaderCallbacks<Cursor> {
 
 	private static final String TAG = "PhotoListFragment";
 
@@ -49,8 +49,9 @@ public class PhotoListFragment extends ListFragment implements OnRefreshListener
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 
+        setListShownNoAnimation(false);
 		photoAdapter = new PhotoListAdapter(getActivity(), null);
-		setListAdapter(photoAdapter);
+        setListAdapter(photoAdapter);
 
 		// Prepare the loader. (Re-connect with an existing one, or start a new one.)
 		getLoaderManager().initLoader(PHOTOS, null, this);
@@ -64,15 +65,20 @@ public class PhotoListFragment extends ListFragment implements OnRefreshListener
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        // This is the View which is created by ListFragment
         ViewGroup viewGroup = (ViewGroup) view;
 
-        // Now find the PullToRefreshLayout to setup
-        mPullToRefreshLayout = (PullToRefreshLayout) view.findViewById(R.id.fragment_photo_list);
+        // We need to create a PullToRefreshLayout manually
+        mPullToRefreshLayout = new PullToRefreshLayout(viewGroup.getContext());
 
         // Now setup the PullToRefreshLayout
         ActionBarPullToRefresh.from(getActivity())
-                .allChildrenArePullable() // Mark All Children as pullable
-                .listener(this) // Set the OnRefreshListener
+                .insertLayoutInto(viewGroup) // We need to insert the PullToRefreshLayout into the Fragment's ViewGroup
+                // We need to mark the ListView and it's Empty View as pullable
+                // because they are not direct children of the ViewGroup
+                .theseChildrenArePullable(getListView(), getListView().getEmptyView())
+                .listener(this)
                 .setup(mPullToRefreshLayout); // Finally commit the setup to our PullToRefreshLayout
     }
 
@@ -127,7 +133,7 @@ public class PhotoListFragment extends ListFragment implements OnRefreshListener
 
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         Log.d(TAG, "onCreateLoader");
-		// This is called when a new Loader needs to be created.
+        // This is called when a new Loader needs to be created.
 		// First, pick the base URI to use depending on whether we are
 		// currently filtering.
 		switch (id) {
@@ -151,13 +157,14 @@ public class PhotoListFragment extends ListFragment implements OnRefreshListener
 		// old cursor once we return.)
 		switch (loader.getId()) {
             case PHOTOS:
-                photoAdapter.changeCursor(data);
+                photoAdapter.swapCursor(data);
                 break;
 
             default:
                 break;
 		}
         mPullToRefreshLayout.setRefreshComplete();
+        setListShown(true);
 	}
 
 	public void onLoaderReset(Loader<Cursor> loader) {
@@ -167,7 +174,7 @@ public class PhotoListFragment extends ListFragment implements OnRefreshListener
 		// longer using it.
 		switch (loader.getId()) {
             case PHOTOS:
-                photoAdapter.changeCursor(null);
+                photoAdapter.swapCursor(null);
                 break;
 
             default:
@@ -184,4 +191,5 @@ public class PhotoListFragment extends ListFragment implements OnRefreshListener
     public void onRefreshStarted(View view) {
         getLoaderManager().restartLoader(PHOTOS, null, this);
     }
+
 }
