@@ -1,6 +1,5 @@
 package ca.hashbrown.snapable.fragments;
 
-import android.app.ListFragment;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.*;
 import android.database.Cursor;
@@ -17,11 +16,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.SearchView;
 
 import ca.hashbrown.snapable.R;
@@ -31,7 +27,7 @@ import ca.hashbrown.snapable.cursors.EventCursor;
 import ca.hashbrown.snapable.provider.SnapableContract;
 import ca.hashbrown.snapable.api.models.Event;
 
-public class EventListFragment extends ListFragment implements SearchView.OnQueryTextListener, LoaderCallbacks<Cursor>, OnItemClickListener, LocationListener {
+public class EventListFragment extends SnapListFragment implements SearchView.OnQueryTextListener, LoaderCallbacks<Cursor>, OnItemClickListener, LocationListener {
 
 	private static final String TAG = "EventListFragment";
 
@@ -303,54 +299,6 @@ public class EventListFragment extends ListFragment implements SearchView.OnQuer
 		// there was no result
 		return false;
 	}
-
-    @Override
-    public void setListShown(boolean shown) {
-        try {
-            // get handles on things
-            ProgressBar pb = (ProgressBar) getView().findViewById(R.id.fragment_event_list__progressBar);
-            LinearLayout listContainer = (LinearLayout) getView().findViewById(R.id.fragment_event_list__list_container);
-
-            if (shown) {
-                // set animation
-                pb.startAnimation(AnimationUtils.loadAnimation(getActivity(), android.R.anim.fade_out));
-                listContainer.startAnimation(AnimationUtils.loadAnimation(getActivity(), android.R.anim.fade_in));
-                // set the visibilities
-                pb.setVisibility(View.GONE);
-                listContainer.setVisibility(View.VISIBLE);
-            } else {
-                // set animation
-                pb.startAnimation(AnimationUtils.loadAnimation(getActivity(), android.R.anim.fade_in));
-                listContainer.startAnimation(AnimationUtils.loadAnimation(getActivity(), android.R.anim.fade_out));
-                // set the visibilities
-                pb.setVisibility(View.VISIBLE);
-                listContainer.setVisibility(View.GONE);
-            }
-        } catch (NullPointerException e) {
-            Log.e(TAG, "we couldn't find the progress bar", e);
-        }
-    }
-
-    @Override
-    public void setListShownNoAnimation(boolean shown) {
-        try {
-            // get handles on things
-            ProgressBar pb = (ProgressBar) getView().findViewById(R.id.fragment_event_list__progressBar);
-            LinearLayout listContainer = (LinearLayout) getView().findViewById(R.id.fragment_event_list__list_container);
-
-            if (shown) {
-                // set the visibilities
-                pb.setVisibility(View.GONE);
-                listContainer.setVisibility(View.VISIBLE);
-            } else {
-                // set the visibilities
-                pb.setVisibility(View.VISIBLE);
-                listContainer.setVisibility(View.GONE);
-            }
-        } catch (NullPointerException e) {
-            Log.e(TAG, "we couldn't find the progress bar", e);
-        }
-    }
 
 	private void getLatLng() {
 		Log.d(TAG, "getLatLng()");
