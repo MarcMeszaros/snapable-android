@@ -125,7 +125,7 @@ public class EventPhotoList extends BaseFragmentActivity implements OnClickListe
      */
     @Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-        if (BuildConfig.VERSION_CODE >= Build.VERSION_CODES.JELLY_BEAN) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             return super.onOptionsItemSelected(item);
         } else {
             switch (item.getItemId()) {
