@@ -2,11 +2,20 @@ package ca.hashbrown.snapable.activities;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+
+import com.google.analytics.tracking.android.EasyTracker;
+import com.google.analytics.tracking.android.Fields;
+import com.google.analytics.tracking.android.MapBuilder;
+import com.google.analytics.tracking.android.Tracker;
+
+import ca.hashbrown.snapable.BuildConfig;
 import ca.hashbrown.snapable.R;
 import ca.hashbrown.snapable.fragments.PhotoListFragment;
 import ca.hashbrown.snapable.utils.SnapStorage;
@@ -28,16 +37,18 @@ public class EventPhotoList extends BaseFragmentActivity implements OnClickListe
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_photo_list);
 
-        if (savedInstanceState != null && savedInstanceState.getString("imageUri") != null) {
+        // try and save/resume the activity
+        if (savedInstanceState != null) {
+            this.event = savedInstanceState.getParcelable("event");
             imageUri = Uri.parse(savedInstanceState.getString("imageUri"));
+        } else {
+            // get the extra bundle data for the fragment
+            Bundle bundle = getIntent().getExtras();
+            event = bundle.getParcelable("event");
         }
 
         // add click listener
 		findViewById(R.id.activity_photo_list__photo_button).setOnClickListener(this);
-
-		// get the extra bundle data for the fragment
-		Bundle bundle = getIntent().getExtras();
-		event = bundle.getParcelable("event");
 
 		// Create the list fragment and add it as our sole content.
 		PhotoListFragment photoListFragment = (PhotoListFragment) getFragmentManager().findFragmentById(R.id.activity_photo_list__fragment_photo_list);
@@ -53,6 +64,7 @@ public class EventPhotoList extends BaseFragmentActivity implements OnClickListe
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        outState.putParcelable("event", this.event);
         if (imageUri != null) {
             outState.putString("imageUri", imageUri.getPath());
         }
@@ -61,6 +73,18 @@ public class EventPhotoList extends BaseFragmentActivity implements OnClickListe
     public void onClick(View v) {
 		switch (v.getId()) {
 		case R.id.activity_photo_list__photo_button:
+            // fake the camera view
+            // May return null if EasyTracker has not yet been initialized with a property ID.
+            Tracker easyTracker = EasyTracker.getInstance(this);
+
+            // This screen name value will remain set on the tracker and sent with
+            // hits until it is set to a new value or to null.
+            easyTracker.set(Fields.SCREEN_NAME, "Camera");
+            easyTracker.send(MapBuilder
+                            .createAppView()
+                            .build()
+            );
+
             Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
             this.imageUri = SnapStorage.getOutputMediaFileUri(SnapStorage.MEDIA_TYPE_IMAGE);
             takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, this.imageUri);
@@ -94,21 +118,30 @@ public class EventPhotoList extends BaseFragmentActivity implements OnClickListe
         }
     }
 
+    /**
+     * Use the new API 16+ way of handling parent activities.
+     *
+     * @see <a href="http://developer.android.com/guide/topics/manifest/activity-element.html#parent">Android Developers</a>
+     */
     @Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case android.R.id.home:
-			// This is called when the Home (Up) button is pressed in the Action Bar.
-			// http://developer.android.com/training/implementing-navigation/ancestral.html
-            Intent parentActivityIntent = new Intent(this, EventList.class);
-            parentActivityIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(parentActivityIntent);
-			finish();
-			return true;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            return super.onOptionsItemSelected(item);
+        } else {
+            switch (item.getItemId()) {
+                case android.R.id.home:
+                    // This is called when the Home (Up) button is pressed in the Action Bar.
+                    // http://developer.android.com/training/implementing-navigation/ancestral.html
+                    Intent parentActivityIntent = new Intent(this, EventList.class);
+                    parentActivityIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(parentActivityIntent);
+                    finish();
+                    return true;
 
-		default:
-			return false;
-		}
+                default:
+                    return false;
+            }
+        }
 	}
 
 }

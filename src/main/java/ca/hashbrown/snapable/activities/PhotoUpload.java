@@ -2,6 +2,7 @@ package ca.hashbrown.snapable.activities;
 
 import android.content.ContentUris;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -12,6 +13,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.*;
@@ -46,14 +48,22 @@ public class PhotoUpload extends BaseFragmentActivity implements OnClickListener
 
         findViewById(R.id.fragment_photo_upload__button_done).setOnClickListener(this);
 
-    	// get the extra bundle data
-    	Bundle bundle = getIntent().getExtras();
-    	event = bundle.getParcelable("event");
-		imagePath = bundle.getString("imagePath");
+        // get the bundle from the saved state or try and get it from the intent
+        Bundle bundle = null;
+        if (savedInstanceState != null) {
+            bundle.getBundle("bundle");
+        } else {
+            bundle = getIntent().getExtras();
+        }
+        event = bundle.getParcelable("event");
+        imagePath = bundle.getString("imagePath");
 
         // create a scaled bitmap
+        Resources r = getResources();
+        int dpSize = 275;
+        int pxSize = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dpSize, r.getDisplayMetrics());
 		ImageView photo = (ImageView) findViewById(R.id.fragment_photo_upload__image);
-    	Bitmap bmScaled = PhotoUpload.decodeSampledBitmapFromPath(bundle.getString("imagePath"), 300, 300);
+    	Bitmap bmScaled = PhotoUpload.decodeSampledBitmapFromPath(bundle.getString("imagePath"), pxSize, pxSize);
 
         try {
             // get exif data
@@ -91,7 +101,18 @@ public class PhotoUpload extends BaseFragmentActivity implements OnClickListener
     	getActionBar().setTitle(event.title);
     }
 
-	public void onClick(View v) {
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        // create the save bundle
+        Bundle save = new Bundle();
+        save.putParcelable("event", this.event);
+        save.putString("imagePath", this.imagePath);
+        // and the bundle data to the saved state
+        outState.putBundle("bundle", save);
+    }
+
+    public void onClick(View v) {
 		switch (v.getId()) {
 		case R.id.fragment_photo_upload__button_done:
 			// get the image caption
@@ -164,7 +185,7 @@ public class PhotoUpload extends BaseFragmentActivity implements OnClickListener
 			ProgressBar pb = (ProgressBar) findViewById(R.id.fragment_photo_upload__progressBar);
 			Button butt = (Button) findViewById(R.id.fragment_photo_upload__button_done);
 			pb.setVisibility(View.VISIBLE);
-			butt.setVisibility(View.INVISIBLE);
+			butt.setVisibility(View.GONE);
 		}
 
 		@Override
@@ -248,7 +269,7 @@ public class PhotoUpload extends BaseFragmentActivity implements OnClickListener
 
 			// stop the progress bar
 			ProgressBar pb = (ProgressBar) findViewById(R.id.fragment_photo_upload__progressBar);
-			pb.setVisibility(View.INVISIBLE);
+			pb.setVisibility(View.GONE);
 			Log.d(TAG, "upload complete");
 
             // Go back to the photo list when we are done uploading.

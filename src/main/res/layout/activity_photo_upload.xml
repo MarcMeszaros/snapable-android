@@ -3,15 +3,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_photo_upload"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent">
 
     <fragment
         android:id="@+id/activity_photo_upload__fragment_photo_upload"
         android:name="ca.hashbrown.snapable.fragments.PhotoUploadFragment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
         tools:layout="@layout/fragment_photo_upload" />
 
 </ScrollView>

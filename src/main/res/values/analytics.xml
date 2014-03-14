@@ -11,7 +11,7 @@
     <bool name="ga_reportUncaughtExceptions">true</bool>
 
     <!-- The screen names that will appear in your reporting -->
-    <string name="ca.hashbrown.snapable.activities.CameraActivity">Camera</string>
+    <!--<string name="ca.hashbrown.snapable.activities.CameraActivity">Camera</string>-->
     <string name="ca.hashbrown.snapable.activities.EventList">EventList</string>
     <string name="ca.hashbrown.snapable.activities.EventPhotoList">EventPhotoList</string>
     <string name="ca.hashbrown.snapable.activities.PhotoUpload">PhotoUpload</string>

@@ -1,6 +1,5 @@
 package ca.hashbrown.snapable.fragments;
 
-import android.app.ListFragment;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.*;
 import android.database.Cursor;
@@ -13,13 +12,14 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
+import android.widget.SearchView;
+
 import ca.hashbrown.snapable.R;
 import ca.hashbrown.snapable.activities.EventPhotoList;
 import ca.hashbrown.snapable.adapters.EventListAdapter;
@@ -27,7 +27,7 @@ import ca.hashbrown.snapable.cursors.EventCursor;
 import ca.hashbrown.snapable.provider.SnapableContract;
 import ca.hashbrown.snapable.api.models.Event;
 
-public class EventListFragment extends ListFragment implements LoaderCallbacks<Cursor>, OnItemClickListener, LocationListener {
+public class EventListFragment extends SnapListFragment implements SearchView.OnQueryTextListener, LoaderCallbacks<Cursor>, OnItemClickListener, LocationListener {
 
 	private static final String TAG = "EventListFragment";
 
@@ -40,22 +40,45 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 	private Handler msgHandler;
 	private Bundle lastLatLng;
 
+    private SearchView mSearchView = null;
+    private String mSearchQuery = "";
+
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 
-		// initialize/setup some basic stuff
-		msgHandler = new Handler();
-		getListView().setOnItemClickListener(this);
+        // initialize/setup some basic stuff
+        msgHandler = new Handler();
+        getListView().setOnItemClickListener(this);
 
 		eventAdapter = new EventListAdapter(getActivity(), null);
         setListAdapter(eventAdapter);
 
+        // try and restore the saved state
+        if (savedInstanceState != null) {
+            mSearchQuery = savedInstanceState.getString("searchQuery", "");
+        }
+
 		// initialize the loader
-		getLoaderManager().initLoader(LOADERS.EVENTS, null, this);
+        Bundle args = new Bundle(1);
+        if (mSearchQuery.length() > 0) {
+            args.putString("q", mSearchQuery);
+        }
+		getLoaderManager().initLoader(LOADERS.EVENTS, args, this);
 	}
 
-	@Override
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+
+        // try and restore the saved state
+        if (savedInstanceState != null) {
+            mSearchQuery = savedInstanceState.getString("searchQuery", "");
+        }
+    }
+
+    @Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		return inflater.inflate(R.layout.fragment_event_list, container, false);
 	}
@@ -65,7 +88,11 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
         super.onResume();
         if (locationManager != null && msgHandler != null) {
             // restart the loader
-            getLoaderManager().initLoader(LOADERS.EVENTS, null, this);
+            Bundle args = new Bundle(1);
+            if (mSearchQuery.length() > 0) {
+                args.putString("q", mSearchQuery);
+            }
+            getLoaderManager().initLoader(LOADERS.EVENTS, args, this);
         }
     }
 
@@ -81,7 +108,50 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
         }
     }
 
-	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("searchQuery", mSearchQuery);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.fragment_event_list, menu);
+        mSearchView = (SearchView) menu.findItem(R.id.menu__fragment_event_list__search).getActionView();
+        mSearchView.setQueryHint("Event Title or URL");
+        mSearchView.setOnQueryTextListener(this);
+    }
+
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        Log.d(TAG, "search: " + query);
+        // build the search param
+        mSearchQuery = query;
+        Bundle args = new Bundle(1);
+        args.putString("q", mSearchQuery);
+
+        // get the fragment, and init the new search loader (using the search param)
+        getLoaderManager().restartLoader(LOADERS.EVENTS, args, this);
+
+        // clear focus
+        if (mSearchView != null) {
+            mSearchView.clearFocus();
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String newText) {
+        Log.d(TAG, "new query: " + newText.isEmpty() + " " + newText);
+        if (newText.isEmpty()) {
+            return false;
+        } else {
+            return false;
+        }
+    }
+
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 		// This is called when a new Loader needs to be created.
 		// First, pick the base URI to use depending on whether we are
 		// currently filtering.
@@ -229,54 +299,6 @@ public class EventListFragment extends ListFragment implements LoaderCallbacks<C
 		// there was no result
 		return false;
 	}
-
-    @Override
-    public void setListShown(boolean shown) {
-        try {
-            // get handles on things
-            ProgressBar pb = (ProgressBar) getView().findViewById(R.id.fragment_event_list__progressBar);
-            LinearLayout listContainer = (LinearLayout) getView().findViewById(R.id.fragment_event_list__list_container);
-
-            if (shown) {
-                // set animation
-                pb.startAnimation(AnimationUtils.loadAnimation(getActivity(), android.R.anim.fade_out));
-                listContainer.startAnimation(AnimationUtils.loadAnimation(getActivity(), android.R.anim.fade_in));
-                // set the visibilities
-                pb.setVisibility(View.GONE);
-                listContainer.setVisibility(View.VISIBLE);
-            } else {
-                // set animation
-                pb.startAnimation(AnimationUtils.loadAnimation(getActivity(), android.R.anim.fade_in));
-                listContainer.startAnimation(AnimationUtils.loadAnimation(getActivity(), android.R.anim.fade_out));
-                // set the visibilities
-                pb.setVisibility(View.VISIBLE);
-                listContainer.setVisibility(View.GONE);
-            }
-        } catch (NullPointerException e) {
-            Log.e(TAG, "we couldn't find the progress bar", e);
-        }
-    }
-
-    @Override
-    public void setListShownNoAnimation(boolean shown) {
-        try {
-            // get handles on things
-            ProgressBar pb = (ProgressBar) getView().findViewById(R.id.fragment_event_list__progressBar);
-            LinearLayout listContainer = (LinearLayout) getView().findViewById(R.id.fragment_event_list__list_container);
-
-            if (shown) {
-                // set the visibilities
-                pb.setVisibility(View.GONE);
-                listContainer.setVisibility(View.VISIBLE);
-            } else {
-                // set the visibilities
-                pb.setVisibility(View.VISIBLE);
-                listContainer.setVisibility(View.GONE);
-            }
-        } catch (NullPointerException e) {
-            Log.e(TAG, "we couldn't find the progress bar", e);
-        }
-    }
 
 	private void getLatLng() {
 		Log.d(TAG, "getLatLng()");

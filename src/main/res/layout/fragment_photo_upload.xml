@@ -1,57 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/fragment_photo_upload"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical" >
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:focusable="true"
+    android:focusableInTouchMode="true">
 
     <ImageView
         android:id="@+id/fragment_photo_upload__image"
-        android:layout_width="300dp"
-        android:layout_height="300dp"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
+        android:layout_width="275dp"
+        android:layout_height="275dp"
         android:layout_margin="10dp"
-        android:padding="5dp"
+        android:padding="10dp"
+        android:background="@drawable/background__polaroid_rectangle"
         android:scaleType="centerCrop"
+        android:cropToPadding="true"
         android:src="@drawable/photo_blank" />
 
     <EditText
         android:id="@+id/fragment_photo_upload__caption"
-        android:layout_width="match_parent"
+        android:layout_width="275dp"
         android:layout_height="wrap_content"
-        android:layout_below="@id/fragment_photo_upload__image"
-        android:layout_centerHorizontal="true"
-        android:layout_margin="10dp"
+        android:layout_margin="8dp"
         android:ems="10"
-        android:hint="@string/fragment_photo_upload__caption_hint" >
-
-        <requestFocus />
-    </EditText>
+        android:hint="@string/fragment_photo_upload__caption_hint"
+        android:imeOptions="actionDone" />
 
     <ProgressBar
         android:id="@+id/fragment_photo_upload__progressBar"
         style="?android:attr/progressBarStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/fragment_photo_upload__caption"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="15dp"
+        android:layout_marginTop="4dp"
         android:indeterminate="true"
-        android:padding="5dp"
-        android:visibility="invisible" />
+        android:visibility="gone" />
 
     <Button
         android:id="@+id/fragment_photo_upload__button_done"
         android:layout_width="wrap_content"
-        android:minWidth="144dp"
         android:layout_height="wrap_content"
-        android:layout_below="@id/fragment_photo_upload__caption"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="15dp"
+        android:layout_marginTop="4dp"
+        android:minWidth="100dp"
         android:text="@string/fragment_photo_upload__button_done"
         android:background="@drawable/button__green"
         android:textColor="@android:color/white"/>
 
-</RelativeLayout>
+</LinearLayout>
