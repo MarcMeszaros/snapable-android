@@ -45,26 +45,41 @@ public class EventListFragment extends ListFragment implements SearchView.OnQuer
 	private Bundle lastLatLng;
 
     private SearchView mSearchView = null;
+    private String mSearchQuery = "";
 
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 
-		// initialize/setup some basic stuff
-		msgHandler = new Handler();
-		getListView().setOnItemClickListener(this);
+        // initialize/setup some basic stuff
+        msgHandler = new Handler();
+        getListView().setOnItemClickListener(this);
 
 		eventAdapter = new EventListAdapter(getActivity(), null);
         setListAdapter(eventAdapter);
 
+        // try and restore the saved state
+        if (savedInstanceState != null) {
+            mSearchQuery = savedInstanceState.getString("searchQuery", "");
+        }
+
 		// initialize the loader
-		getLoaderManager().initLoader(LOADERS.EVENTS, null, this);
+        Bundle args = new Bundle(1);
+        if (mSearchQuery.length() > 0) {
+            args.putString("q", mSearchQuery);
+        }
+		getLoaderManager().initLoader(LOADERS.EVENTS, args, this);
 	}
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+
+        // try and restore the saved state
+        if (savedInstanceState != null) {
+            mSearchQuery = savedInstanceState.getString("searchQuery", "");
+        }
     }
 
     @Override
@@ -77,7 +92,11 @@ public class EventListFragment extends ListFragment implements SearchView.OnQuer
         super.onResume();
         if (locationManager != null && msgHandler != null) {
             // restart the loader
-            getLoaderManager().initLoader(LOADERS.EVENTS, null, this);
+            Bundle args = new Bundle(1);
+            if (mSearchQuery.length() > 0) {
+                args.putString("q", mSearchQuery);
+            }
+            getLoaderManager().initLoader(LOADERS.EVENTS, args, this);
         }
     }
 
@@ -94,6 +113,12 @@ public class EventListFragment extends ListFragment implements SearchView.OnQuer
     }
 
     @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("searchQuery", mSearchQuery);
+    }
+
+    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.fragment_event_list, menu);
@@ -106,8 +131,9 @@ public class EventListFragment extends ListFragment implements SearchView.OnQuer
     public boolean onQueryTextSubmit(String query) {
         Log.d(TAG, "search: " + query);
         // build the search param
+        mSearchQuery = query;
         Bundle args = new Bundle(1);
-        args.putString("q", query);
+        args.putString("q", mSearchQuery);
 
         // get the fragment, and init the new search loader (using the search param)
         getLoaderManager().restartLoader(LOADERS.EVENTS, args, this);
