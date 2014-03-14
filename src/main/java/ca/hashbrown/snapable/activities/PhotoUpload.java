@@ -51,7 +51,7 @@ public class PhotoUpload extends BaseFragmentActivity implements OnClickListener
         // get the bundle from the saved state or try and get it from the intent
         Bundle bundle = null;
         if (savedInstanceState != null) {
-            bundle.getBundle("bundle");
+            bundle = savedInstanceState.getBundle("bundle");
         } else {
             bundle = getIntent().getExtras();
         }
