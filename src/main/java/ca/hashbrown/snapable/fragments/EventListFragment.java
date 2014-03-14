@@ -44,6 +44,8 @@ public class EventListFragment extends ListFragment implements SearchView.OnQuer
 	private Handler msgHandler;
 	private Bundle lastLatLng;
 
+    private SearchView mSearchView = null;
+
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
@@ -95,9 +97,9 @@ public class EventListFragment extends ListFragment implements SearchView.OnQuer
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.fragment_event_list, menu);
-        SearchView searchView = (SearchView) menu.findItem(R.id.menu__fragment_event_list__search).getActionView();
-        searchView.setQueryHint("Event Title or URL");
-        searchView.setOnQueryTextListener(this);
+        mSearchView = (SearchView) menu.findItem(R.id.menu__fragment_event_list__search).getActionView();
+        mSearchView.setQueryHint("Event Title or URL");
+        mSearchView.setOnQueryTextListener(this);
     }
 
     @Override
@@ -109,6 +111,11 @@ public class EventListFragment extends ListFragment implements SearchView.OnQuer
 
         // get the fragment, and init the new search loader (using the search param)
         getLoaderManager().restartLoader(LOADERS.EVENTS, args, this);
+
+        // clear focus
+        if (mSearchView != null) {
+            mSearchView.clearFocus();
+        }
         return true;
     }
 
