@@ -48,10 +48,15 @@ public class PhotoUpload extends BaseFragmentActivity implements OnClickListener
 
         findViewById(R.id.fragment_photo_upload__button_done).setOnClickListener(this);
 
-    	// get the extra bundle data
-    	Bundle bundle = getIntent().getExtras();
-    	event = bundle.getParcelable("event");
-		imagePath = bundle.getString("imagePath");
+        // get the bundle from the saved state or try and get it from the intent
+        Bundle bundle = null;
+        if (savedInstanceState != null) {
+            bundle.getBundle("bundle");
+        } else {
+            bundle = getIntent().getExtras();
+        }
+        event = bundle.getParcelable("event");
+        imagePath = bundle.getString("imagePath");
 
         // create a scaled bitmap
         Resources r = getResources();
@@ -96,7 +101,18 @@ public class PhotoUpload extends BaseFragmentActivity implements OnClickListener
     	getActionBar().setTitle(event.title);
     }
 
-	public void onClick(View v) {
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        // create the save bundle
+        Bundle save = new Bundle();
+        save.putParcelable("event", this.event);
+        save.putString("imagePath", this.imagePath);
+        // and the bundle data to the saved state
+        outState.putBundle("bundle", save);
+    }
+
+    public void onClick(View v) {
 		switch (v.getId()) {
 		case R.id.fragment_photo_upload__button_done:
 			// get the image caption

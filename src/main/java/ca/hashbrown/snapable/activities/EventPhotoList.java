@@ -37,16 +37,18 @@ public class EventPhotoList extends BaseFragmentActivity implements OnClickListe
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_photo_list);
 
-        if (savedInstanceState != null && savedInstanceState.getString("imageUri") != null) {
+        // try and save/resume the activity
+        if (savedInstanceState != null) {
+            this.event = savedInstanceState.getParcelable("event");
             imageUri = Uri.parse(savedInstanceState.getString("imageUri"));
+        } else {
+            // get the extra bundle data for the fragment
+            Bundle bundle = getIntent().getExtras();
+            event = bundle.getParcelable("event");
         }
 
         // add click listener
 		findViewById(R.id.activity_photo_list__photo_button).setOnClickListener(this);
-
-		// get the extra bundle data for the fragment
-		Bundle bundle = getIntent().getExtras();
-		event = bundle.getParcelable("event");
 
 		// Create the list fragment and add it as our sole content.
 		PhotoListFragment photoListFragment = (PhotoListFragment) getFragmentManager().findFragmentById(R.id.activity_photo_list__fragment_photo_list);
@@ -62,6 +64,7 @@ public class EventPhotoList extends BaseFragmentActivity implements OnClickListe
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        outState.putParcelable("event", this.event);
         if (imageUri != null) {
             outState.putString("imageUri", imageUri.getPath());
         }
