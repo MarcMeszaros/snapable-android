@@ -12,8 +12,8 @@
 
     <item
         android:id="@+id/menu__fragment_photo_list__upload"
-        android:icon="@android:drawable/ic_menu_gallery"
+        android:icon="@drawable/ic_menu_gallery_upload"
         android:showAsAction="always"
-        android:title="Gallery" />
+        android:title="Upload from Gallery" />
 
 </menu>
