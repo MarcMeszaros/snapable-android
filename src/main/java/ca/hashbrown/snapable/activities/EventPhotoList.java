@@ -40,7 +40,7 @@ public class EventPhotoList extends BaseFragmentActivity implements OnClickListe
         // try and save/resume the activity
         if (savedInstanceState != null) {
             this.event = savedInstanceState.getParcelable("event");
-            imageUri = Uri.parse(savedInstanceState.getString("imageUri"));
+            this.imageUri = savedInstanceState.getParcelable("imageUri");
         } else {
             // get the extra bundle data for the fragment
             Bundle bundle = getIntent().getExtras();
@@ -65,9 +65,7 @@ public class EventPhotoList extends BaseFragmentActivity implements OnClickListe
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putParcelable("event", this.event);
-        if (imageUri != null) {
-            outState.putString("imageUri", imageUri.getPath());
-        }
+        outState.putParcelable("imageUri", this.imageUri);
     }
 
     public void onClick(View v) {
