@@ -2,16 +2,16 @@ package com.snapable.api.private_v1.objects;
 
 import com.google.common.base.Objects;
 import com.google.gson.annotations.SerializedName;
+import com.snapable.api.BaseObject;
 
 import java.util.Date;
 
-public class Event {
+public class Event extends BaseObject {
     public Date end_at;
     public Long photo_count;
     public String pin;
     public Boolean is_enabled;
     public Boolean is_public;
-    public String resource_uri;
     public Date start_at;
     public String title;
     public String url;
@@ -21,12 +21,12 @@ public class Event {
 
     public String toString() {
         return Objects.toStringHelper(this)
+            .add("pk", this.getPk())
         	.add("end_at", this.end_at)
         	.add("photo_count", this.photo_count)
         	.add("pin", this.pin)
             .add("is_enable", this.is_enabled)
             .add("is_public", this.is_public)
-            .add("resource_uri", this.resource_uri)
             .add("start_at", start_at)
             .add("title", this.title)
             .add("url", this.url)
@@ -34,9 +34,9 @@ public class Event {
     }
 
     // virtual properties
+    @Deprecated
     public Long getId() {
-    	String[] resourceParts = this.resource_uri.split("/");
-    	return Long.valueOf(resourceParts[resourceParts.length-1]);
+    	return getPk();
     }
 
 }
