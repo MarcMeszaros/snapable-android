@@ -35,6 +35,12 @@
             </intent-filter>
         </activity-alias>
 
+        <!-- Services -->
+        <service
+            android:name=".api.robospice.SnapSpiceService"
+            android:exported="false" />
+
+        <!-- Content Providers -->
         <provider
             android:name="ca.hashbrown.snapable.provider.SnapContentProvider"
             android:authorities="ca.hashbrown.snapable.provider"

@@ -1,11 +1,8 @@
 package ca.hashbrown.snapable.activities;
 
 import android.os.Bundle;
-import android.util.Log;
-import android.view.Menu;
-import android.widget.SearchView;
+
 import ca.hashbrown.snapable.R;
-import ca.hashbrown.snapable.fragments.EventListFragment;
 
 public class EventList extends BaseFragmentActivity {
 
