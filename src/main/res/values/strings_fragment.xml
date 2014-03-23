@@ -2,7 +2,7 @@
 <resources>
 
     <!-- event list -->
-    <string name="fragment_event_list__empty">Unable to find any events nearby. Try searching for the event.</string>
+    <string name="fragment_event_list__empty">Sorry, we couldn\'t find a nearby event. Try using the search field.</string>
 
     <!-- photo upload -->
     <string name="fragment_photo_upload__caption_hint">Caption (Optional)</string>
