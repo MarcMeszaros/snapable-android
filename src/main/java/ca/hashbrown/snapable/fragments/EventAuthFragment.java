@@ -25,7 +25,7 @@ import ca.hashbrown.snapable.activities.EventPhotoList;
 import ca.hashbrown.snapable.provider.SnapableContract;
 import ca.hashbrown.snapable.api.models.Event;
 
-public class EventAuthFragment extends DialogFragment implements OnEditorActionListener {
+public class EventAuthFragment extends SnapDialogFragment implements OnEditorActionListener {
 
 	private static final String TAG = "EventAuthFragment";
 

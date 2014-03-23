@@ -4,17 +4,34 @@ import android.app.ListFragment;
 import android.view.View;
 import android.view.animation.AnimationUtils;
 
+import com.octo.android.robospice.SpiceManager;
+
 import ca.hashbrown.snapable.R;
+import ca.hashbrown.snapable.api.robospice.SnapSpiceService;
 
 /**
  * The source code is almost identical to the function found in AOSP (Android Open Source Project).
  * The only difference is that the {@link #setListShown(boolean, boolean)} function uses custom ids
- * when l
+ * when loading.
  *
  * @see <a href="https://android.googlesource.com/platform/frameworks/base/+/master/core/java/android/app/ListFragment.java">Android Source File</a>
  * @see <a href="https://android.googlesource.com/platform/frameworks/base/+/master/core/res/res/layout/list_content.xml">Android Layout File<a/>
  */
-public class SnapListFragment extends ListFragment {
+public abstract class SnapListFragment extends ListFragment {
+
+    protected SpiceManager apiRequestManager = new SpiceManager(SnapSpiceService.class);
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        apiRequestManager.start(getActivity());
+    }
+
+    @Override
+    public void onStop() {
+        apiRequestManager.shouldStop();
+        super.onStop();
+    }
 
     /**
      * Control whether the list is being displayed.  You can make it not

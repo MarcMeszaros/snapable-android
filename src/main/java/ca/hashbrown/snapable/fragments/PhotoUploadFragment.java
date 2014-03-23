@@ -12,7 +12,7 @@ import android.widget.EditText;
 import ca.hashbrown.snapable.R;
 import ca.hashbrown.snapable.api.models.Event;
 
-public class PhotoUploadFragment extends Fragment {
+public class PhotoUploadFragment extends SnapFragment {
 
 	private static final String TAG = "PhotoUploadFragment";
 
