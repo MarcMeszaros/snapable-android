@@ -1,12 +1,12 @@
 package com.snapable.api.private_v1.objects;
 
 import com.google.common.base.Objects;
-import com.google.gson.annotations.SerializedName;
-import com.snapable.api.BaseObject;
+import com.snapable.api.private_v1.BaseObject;
 
 import java.util.Date;
 
 public class Event extends BaseObject {
+
     public Date end_at;
     public Long photo_count;
     public String pin;

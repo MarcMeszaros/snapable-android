@@ -2,7 +2,7 @@ package com.snapable.api.private_v1.objects;
 
 import com.google.common.base.Objects;
 import com.google.gson.annotations.SerializedName;
-import com.snapable.api.BaseObject;
+import com.snapable.api.private_v1.BaseObject;
 
 public class Guest extends BaseObject {
     public String email;

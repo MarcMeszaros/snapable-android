@@ -1,6 +1,6 @@
 package com.snapable.api;
 
-public class BaseObject {
+public abstract class BaseObject {
 
     public String resource_uri;
 
@@ -14,6 +14,15 @@ public class BaseObject {
     }
 
     /**
+     * Set the primary key of the object.
+     *
+     * @param pk the primary key to set
+     */
+    public void setPk(Long pk) {
+        resource_uri = getResourceUriFromLong(pk);
+    }
+
+    /**
      * Get the primary key of the object based on the resource uri string.
      *
      * @param resource_uri the resource uri string to parse
@@ -23,5 +32,7 @@ public class BaseObject {
         String[] resourceParts = resource_uri.split("/");
         return Long.valueOf(resourceParts[resourceParts.length-1]);
     }
+
+    public abstract String getResourceUriFromLong(Long pk);
 
 }
