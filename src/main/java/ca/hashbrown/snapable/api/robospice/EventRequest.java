@@ -1,26 +1,16 @@
 package ca.hashbrown.snapable.api.robospice;
 
-import com.octo.android.robospice.request.retrofit.RetrofitSpiceRequest;
+import com.snapable.api.private_v1.objects.Event;
+import com.snapable.api.private_v1.objects.Pager;
+import com.snapable.api.private_v1.resources.EventResource;
 
-import ca.hashbrown.snapable.api.models.Event;
-import ca.hashbrown.snapable.api.resources.EventResource;
 import retrofit.RetrofitError;
 
 public class EventRequest {
 
-    // for some reason, RetrofitError's getMessage() (which Robospice uses) returns nothing meaningful when an HTTP-level error happens, so in order for logs to be useful a hack like this is useful.
-    public static Exception MakeReadableException(RetrofitError err) {
-        if(err.getResponse() != null) {
-            return new Exception(String.format("Status code: %d, reason: %s", err.getResponse().getStatus(), err.getBody()), err);
-        } else {
-            return err;
-        }
-    }
-
-    public static class GetEvent extends RetrofitSpiceRequest<Event, EventResource> {
+    public static class GetEvent extends SnapRequest<Event, EventResource> {
 
         long pk;
-
         public GetEvent(long pk) {
             super(Event.class, EventResource.class);
             this.pk = pk;
@@ -31,8 +21,67 @@ public class EventRequest {
             try {
                 return getService().getEvent(this.pk);
             } catch (RetrofitError e) {
-                throw e;
-                //throw MakeReadableException(e);
+                throw MakeReadableException(e);
+            }
+        }
+    }
+
+    public static class GetEvents extends SnapRequest<Pager, EventResource> {
+
+        public GetEvents() {
+            super(Pager.class, EventResource.class);
+        }
+
+        @Override
+        public Pager loadDataFromNetwork() throws Exception {
+            try {
+                return getService().getEvents();
+            } catch (RetrofitError e) {
+                throw MakeReadableException(e);
+            }
+        }
+    }
+
+    public static class GetEventsLatLng extends SnapRequest<Pager, EventResource> {
+
+        float lat = 0;
+        float lng = 0;
+        public GetEventsLatLng(float lat, float lng) {
+            super(Pager.class, EventResource.class);
+            this.lat = lat;
+            this.lng = lng;
+        }
+
+        public GetEventsLatLng(double lat, double lng) {
+            super(Pager.class, EventResource.class);
+            this.lat = Double.valueOf(lat).floatValue();
+            this.lng = Double.valueOf(lng).floatValue();
+        }
+
+        @Override
+        public Pager loadDataFromNetwork() throws Exception {
+            try {
+                return getService().getEvents(lat, lng);
+            } catch (RetrofitError e) {
+                throw MakeReadableException(e);
+            }
+        }
+    }
+
+    public static class GetEventsQuery extends SnapRequest<Pager, EventResource> {
+
+        String query = "";
+        public GetEventsQuery(String query) {
+            super(Pager.class, EventResource.class);
+            this.query = query;
+        }
+
+        @Override
+        public Pager loadDataFromNetwork() throws Exception {
+            try {
+                return getService().getEvents(query);
+            } catch (RetrofitError e) {
+                throw MakeReadableException(e);
             }
         }
     }
