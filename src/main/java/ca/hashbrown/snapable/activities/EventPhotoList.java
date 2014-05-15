@@ -23,7 +23,7 @@ import ca.hashbrown.snapable.api.models.Event;
 
 import java.io.File;
 
-public class EventPhotoList extends BaseFragmentActivity implements OnClickListener {
+public class EventPhotoList extends BaseActivity implements OnClickListener {
 
 	private static final String TAG = "EventPhotoList";
 

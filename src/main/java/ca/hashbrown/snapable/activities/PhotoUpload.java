@@ -34,7 +34,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-public class PhotoUpload extends BaseFragmentActivity implements OnClickListener {
+public class PhotoUpload extends BaseActivity implements OnClickListener {
 
 	private static final String TAG = "PhotoUpload";
 

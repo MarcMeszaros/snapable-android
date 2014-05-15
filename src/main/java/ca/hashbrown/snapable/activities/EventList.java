@@ -4,7 +4,7 @@ import android.os.Bundle;
 
 import ca.hashbrown.snapable.R;
 
-public class EventList extends BaseFragmentActivity {
+public class EventList extends BaseActivity {
 
 	private static final String TAG = "EventList";
 
