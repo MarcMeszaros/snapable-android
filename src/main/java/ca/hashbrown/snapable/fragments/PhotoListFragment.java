@@ -136,33 +136,21 @@ public class PhotoListFragment extends SnapListFragment implements OnRefreshList
         // This is called when a new Loader needs to be created.
 		// First, pick the base URI to use depending on whether we are
 		// currently filtering.
-		switch (id) {
-		case PHOTOS:
-			if (this.event != null) {
-                String selection = "event=?";
-				String[] selectionArgs = {String.valueOf(event.getId())};
-				return new CursorLoader(getActivity(), SnapableContract.Photo.CONTENT_URI, null, selection, selectionArgs, null);
-			} else {
-				return null;
-			}
-
-		default:
-			return null;
-		}
+        if (this.event != null) {
+            String selection = "event=?";
+            String[] selectionArgs = {String.valueOf(event.getId())};
+            return new CursorLoader(getActivity(), SnapableContract.Photo.CONTENT_URI, null, selection, selectionArgs, null);
+        } else {
+            return null;
+        }
 	}
 
 	public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         Log.d(TAG, "onLoadFinished");
 		// Swap the new cursor in. (The framework will take care of closing the
 		// old cursor once we return.)
-		switch (loader.getId()) {
-            case PHOTOS:
-                photoAdapter.swapCursor(data);
-                break;
+        photoAdapter.swapCursor(data);
 
-            default:
-                break;
-		}
         mPullToRefreshLayout.setRefreshComplete();
         setListShown(true);
 	}
@@ -172,14 +160,7 @@ public class PhotoListFragment extends SnapListFragment implements OnRefreshList
         // This is called when the last Cursor provided to onLoadFinished()
 		// above is about to be closed. We need to make sure we are no
 		// longer using it.
-		switch (loader.getId()) {
-            case PHOTOS:
-                photoAdapter.swapCursor(null);
-                break;
-
-            default:
-                break;
-		}
+        photoAdapter.swapCursor(null);
 	}
 
 	public void setEvent(Event event) {

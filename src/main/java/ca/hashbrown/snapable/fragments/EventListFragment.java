@@ -155,69 +155,46 @@ public class EventListFragment extends SnapListFragment implements SearchView.On
 		// This is called when a new Loader needs to be created.
 		// First, pick the base URI to use depending on whether we are
 		// currently filtering.
-		switch (id) {
-			case LOADERS.EVENTS: {
-				// get the query string if required
-				if (args != null && args.containsKey("q")) {
-					Log.d(TAG, "CursorLoader: q");
-                    setListShownNoAnimation(false);
-					String selection = "q=?";
-					String[] selectionArgs = {args.getString("q")};
-					return new CursorLoader(getActivity(), SnapableContract.Event.CONTENT_URI, null, selection, selectionArgs, null);
-				} else if (args != null && args.containsKey("lat") && args.containsKey("lng")) {
-					Log.d(TAG, "CursorLoader: lat|lng");
-					String selection = "lat=? lng=?";
-					String[] selectionArgs = {args.getString("lat"), args.getString("lng")};
-					return new CursorLoader(getActivity(), SnapableContract.Event.CONTENT_URI, null, selection, selectionArgs, null);
-				} else {
-					Log.d(TAG, "CursorLoader: getLatLng()");
-                    setListShownNoAnimation(false);
-					if (lastLatLng == null) {
-                        getLatLng();
-                        return new Loader<Cursor>(getActivity());
-                    } else {
-                        Log.d(TAG, "CursorLoader: lat|lng");
-                        String selection = "lat=? lng=?";
-                        String[] selectionArgs = {lastLatLng.getString("lat"), lastLatLng.getString("lng")};
-                        return new CursorLoader(getActivity(), SnapableContract.Event.CONTENT_URI, null, selection, selectionArgs, null);
-                    }
-                }
-			}
-			default: {
-				return null;
-			}
-		}
+
+        // get the query string if required
+        if (args != null && args.containsKey("q")) {
+            Log.d(TAG, "CursorLoader: q");
+            setListShownNoAnimation(false);
+            String selection = "q=?";
+            String[] selectionArgs = {args.getString("q")};
+            return new CursorLoader(getActivity(), SnapableContract.Event.CONTENT_URI, null, selection, selectionArgs, null);
+        } else if (args != null && args.containsKey("lat") && args.containsKey("lng")) {
+            Log.d(TAG, "CursorLoader: lat|lng");
+            String selection = "lat=? lng=?";
+            String[] selectionArgs = {args.getString("lat"), args.getString("lng")};
+            return new CursorLoader(getActivity(), SnapableContract.Event.CONTENT_URI, null, selection, selectionArgs, null);
+        } else {
+            Log.d(TAG, "CursorLoader: getLatLng()");
+            setListShownNoAnimation(false);
+            if (lastLatLng == null) {
+                getLatLng();
+                return new Loader<Cursor>(getActivity());
+            } else {
+                Log.d(TAG, "CursorLoader: lat|lng");
+                String selection = "lat=? lng=?";
+                String[] selectionArgs = {lastLatLng.getString("lat"), lastLatLng.getString("lng")};
+                return new CursorLoader(getActivity(), SnapableContract.Event.CONTENT_URI, null, selection, selectionArgs, null);
+            }
+        }
 	}
 
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
 		// Swap the new cursor in. (The framework will take care of closing the
 		// old cursor once we return.)
-		switch (loader.getId()) {
-		case LOADERS.EVENTS:
-			eventAdapter.changeCursor(data);
-            setListShown(true);
-			break;
-
-		default:
-			eventAdapter.changeCursor(data);
-            setListShown(true);
-			break;
-		}
+        eventAdapter.changeCursor(data);
+        setListShown(true);
 	}
 
 	public void onLoaderReset(Loader<Cursor> loader) {
 		// This is called when the last Cursor provided to onLoadFinished()
 		// above is about to be closed. We need to make sure we are no
 		// longer using it.
-		switch (loader.getId()) {
-		case LOADERS.EVENTS:
-			eventAdapter.changeCursor(null);
-			break;
-
-		default:
-			eventAdapter.changeCursor(null);
-			break;
-		}
+        eventAdapter.changeCursor(null);
 	}
 
 	// click
