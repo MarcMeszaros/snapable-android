@@ -1,5 +1,6 @@
 package ca.hashbrown.snapable.fragments;
 
+import android.app.ListFragment;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.*;
 import android.database.Cursor;
@@ -10,14 +11,17 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ListView;
 import android.widget.SearchView;
 
 import ca.hashbrown.snapable.R;
@@ -27,16 +31,17 @@ import ca.hashbrown.snapable.cursors.EventCursor;
 import ca.hashbrown.snapable.provider.SnapableContract;
 import ca.hashbrown.snapable.api.models.Event;
 
-public class EventListFragment extends SnapListFragment implements SearchView.OnQueryTextListener, LoaderCallbacks<Cursor>, OnItemClickListener, LocationListener {
+public class EventListFragment extends SnapListFragment implements SearchView.OnQueryTextListener, LoaderCallbacks<Cursor>, OnItemClickListener, LocationListener, SwipeRefreshLayout.OnRefreshListener {
 
 	private static final String TAG = "EventListFragment";
 
-	public static final class LOADERS {
+    public static final class LOADERS {
 		public static final int EVENTS = 0x01;
 	}
 
 	private EventListAdapter eventAdapter;
 	private LocationManager locationManager;
+    private SwipeRefreshLayout swipeLayout;
 	private Handler msgHandler;
 	private Bundle lastLatLng;
 
@@ -84,6 +89,38 @@ public class EventListFragment extends SnapListFragment implements SearchView.On
 	}
 
     @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        // make the list go into "loading"
+        setListShownNoAnimation(false);
+
+        // setup pull to refresh
+        swipeLayout = (SwipeRefreshLayout) view.findViewById(R.id.fragment_event_list);
+        swipeLayout.setOnRefreshListener(this);
+        swipeLayout.setColorScheme(android.R.color.holo_blue_dark,
+                android.R.color.holo_green_dark,
+                android.R.color.holo_orange_dark,
+                android.R.color.holo_red_dark);
+
+        ListView list = (ListView) view.findViewById(android.R.id.list);
+        list.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+
+            }
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                if (firstVisibleItem == 0)
+                    swipeLayout.setEnabled(true);
+                else
+                    swipeLayout.setEnabled(false);
+            }
+        });
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
         if (locationManager != null && msgHandler != null) {
@@ -101,7 +138,7 @@ public class EventListFragment extends SnapListFragment implements SearchView.On
         super.onPause();
         if (locationManager != null) {
             locationManager.removeUpdates(this); // stop GPS updates
-            setListShownNoAnimation(true);
+            setListShownNoAnimation(false);
         }
         if (msgHandler != null) {
             msgHandler.removeCallbacksAndMessages(null); // remove all messages in the handler
@@ -144,6 +181,7 @@ public class EventListFragment extends SnapListFragment implements SearchView.On
     @Override
     public boolean onQueryTextChange(String newText) {
         Log.d(TAG, "new query: " + newText.isEmpty() + " " + newText);
+        mSearchQuery = newText;
         if (newText.isEmpty()) {
             return false;
         } else {
@@ -156,10 +194,12 @@ public class EventListFragment extends SnapListFragment implements SearchView.On
 		// First, pick the base URI to use depending on whether we are
 		// currently filtering.
 
+        // start the refresh animation
+        setRefreshing(true);
+
         // get the query string if required
         if (args != null && args.containsKey("q")) {
             Log.d(TAG, "CursorLoader: q");
-            setListShownNoAnimation(false);
             String selection = "q=?";
             String[] selectionArgs = {args.getString("q")};
             return new CursorLoader(getActivity(), SnapableContract.Event.CONTENT_URI, null, selection, selectionArgs, null);
@@ -170,7 +210,6 @@ public class EventListFragment extends SnapListFragment implements SearchView.On
             return new CursorLoader(getActivity(), SnapableContract.Event.CONTENT_URI, null, selection, selectionArgs, null);
         } else {
             Log.d(TAG, "CursorLoader: getLatLng()");
-            setListShownNoAnimation(false);
             if (lastLatLng == null) {
                 getLatLng();
                 return new Loader<Cursor>(getActivity());
@@ -187,7 +226,7 @@ public class EventListFragment extends SnapListFragment implements SearchView.On
 		// Swap the new cursor in. (The framework will take care of closing the
 		// old cursor once we return.)
         eventAdapter.changeCursor(data);
-        setListShown(true);
+        setRefreshing(false);
 	}
 
 	public void onLoaderReset(Loader<Cursor> loader) {
@@ -313,5 +352,24 @@ public class EventListFragment extends SnapListFragment implements SearchView.On
 		}
     	msgHandler.postDelayed(new GpsTimeout(this, locationManager, this), 5000);
 	}
+
+    private void setRefreshing(boolean refreshing) {
+        if (swipeLayout != null) {
+            swipeLayout.setRefreshing(refreshing);
+        }
+        if (refreshing == false) {
+            setListShown(true);
+        }
+    }
+
+    @Override
+    public void onRefresh() {
+        Bundle args = new Bundle();
+        if (mSearchQuery.length() > 0) {
+            args.putString("q", mSearchQuery);
+        }
+
+        getLoaderManager().restartLoader(LOADERS.EVENTS, args, this);
+    }
 
 }
