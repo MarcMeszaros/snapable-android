@@ -1,85 +1,92 @@
 <?xml version="1.0" encoding="utf-8"?>
-<uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout
+<android.support.v4.widget.SwipeRefreshLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/fragment_photo_list"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout android:id="@id/progressContainer"
-        android:orientation="vertical"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="visible"
-        android:gravity="center">
+        android:orientation="vertical">
 
-        <ProgressBar style="?android:attr/progressBarStyleLarge"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-
-    </LinearLayout>
-
-    <FrameLayout android:id="@id/listContainer"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <ListView
-            android:id="@android:id/list"
+        <LinearLayout android:id="@id/progressContainer"
+            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:drawSelectorOnTop="false"
-            android:paddingTop="12dp"
-            android:paddingLeft="12dp"
-            android:paddingRight="12dp"
-            android:paddingBottom="90dp"
-            android:divider="@android:color/transparent"
-            android:dividerHeight="15dp"
-            android:scrollbars="none"
-            android:clipToPadding="false"
-            tools:listitem="@layout/listview_row_eventphoto"
-            tools:visibility="gone"/>
+            android:visibility="visible"
+            android:gravity="center">
 
-        <LinearLayout
-            android:id="@android:id/empty"
-            android:layout_width="195dp"
-            android:layout_height="222dp"
-            android:padding="30dp"
-            android:layout_gravity="center"
-            android:gravity="center_horizontal"
-            android:orientation="vertical"
-            android:background="@drawable/teardrop"
-            tools:visibility="gone">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="4dp"
-                android:gravity="center"
-                android:text="@string/fragment_photo_list__empty_omg"
-                android:textSize="40dp"
-                android:textColor="@android:color/white"
-                android:textStyle="bold"/>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="4dp"
-                android:gravity="center"
-                android:text="@string/fragment_photo_list__empty_no_photos"
-                android:textColor="@android:color/white"/>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="4dp"
-                android:gravity="center"
-                android:text="@string/fragment_photo_list__empty_be_first"
-                android:textSize="20sp"
-                android:textColor="@android:color/white"
-                android:textStyle="bold"/>
+            <ProgressBar style="?android:attr/progressBarStyleLarge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
 
         </LinearLayout>
 
-    </FrameLayout>
+        <FrameLayout android:id="@id/listContainer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-</uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout>
+            <ListView
+                android:id="@android:id/list"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:drawSelectorOnTop="false"
+                android:paddingTop="12dp"
+                android:paddingLeft="12dp"
+                android:paddingRight="12dp"
+                android:paddingBottom="90dp"
+                android:divider="@android:color/transparent"
+                android:dividerHeight="15dp"
+                android:scrollbars="none"
+                android:clipToPadding="false"
+                tools:listitem="@layout/listview_row_eventphoto"
+                tools:visibility="gone"/>
+
+            <LinearLayout
+                android:id="@android:id/empty"
+                android:layout_width="195dp"
+                android:layout_height="222dp"
+                android:padding="30dp"
+                android:layout_gravity="center"
+                android:gravity="center_horizontal"
+                android:orientation="vertical"
+                android:background="@drawable/teardrop"
+                tools:visibility="gone">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="4dp"
+                    android:gravity="center"
+                    android:text="@string/fragment_photo_list__empty_omg"
+                    android:textSize="40dp"
+                    android:textColor="@android:color/white"
+                    android:textStyle="bold"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="4dp"
+                    android:gravity="center"
+                    android:text="@string/fragment_photo_list__empty_no_photos"
+                    android:textColor="@android:color/white"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="4dp"
+                    android:gravity="center"
+                    android:text="@string/fragment_photo_list__empty_be_first"
+                    android:textSize="20sp"
+                    android:textColor="@android:color/white"
+                    android:textStyle="bold"/>
+
+            </LinearLayout>
+
+        </FrameLayout>
+
+    </LinearLayout>
+
+</android.support.v4.widget.SwipeRefreshLayout>

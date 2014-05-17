@@ -7,20 +7,20 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.*;
+import android.widget.AbsListView;
+import android.widget.ListView;
 
 import ca.hashbrown.snapable.R;
 import ca.hashbrown.snapable.activities.PhotoUpload;
 import ca.hashbrown.snapable.adapters.PhotoListAdapter;
 import ca.hashbrown.snapable.provider.SnapableContract;
-import uk.co.senab.actionbarpulltorefresh.library.ActionBarPullToRefresh;
-import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout;
-import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 
 import ca.hashbrown.snapable.api.models.Event;
 
-public class PhotoListFragment extends SnapListFragment implements OnRefreshListener, LoaderCallbacks<Cursor> {
+public class PhotoListFragment extends SnapListFragment implements SwipeRefreshLayout.OnRefreshListener, LoaderCallbacks<Cursor> {
 
 	private static final String TAG = "PhotoListFragment";
 
@@ -29,7 +29,7 @@ public class PhotoListFragment extends SnapListFragment implements OnRefreshList
 
 	PhotoListAdapter photoAdapter;
 	Event event;
-    private PullToRefreshLayout mPullToRefreshLayout;
+    private SwipeRefreshLayout swipeLayout;
 
     // never used, but we need it to compile
 	public PhotoListFragment() {
@@ -66,20 +66,32 @@ public class PhotoListFragment extends SnapListFragment implements OnRefreshList
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // This is the View which is created by ListFragment
-        ViewGroup viewGroup = (ViewGroup) view;
+        // make the list go into "loading"
+        setListShownNoAnimation(false);
 
-        // We need to create a PullToRefreshLayout manually
-        mPullToRefreshLayout = new PullToRefreshLayout(viewGroup.getContext());
+        // setup pull to refresh
+        swipeLayout = (SwipeRefreshLayout) view.findViewById(R.id.fragment_photo_list);
+        swipeLayout.setOnRefreshListener(this);
+        swipeLayout.setColorScheme(android.R.color.holo_blue_dark,
+                android.R.color.holo_green_dark,
+                android.R.color.holo_orange_dark,
+                android.R.color.holo_red_dark);
 
-        // Now setup the PullToRefreshLayout
-        ActionBarPullToRefresh.from(getActivity())
-                .insertLayoutInto(viewGroup) // We need to insert the PullToRefreshLayout into the Fragment's ViewGroup
-                // We need to mark the ListView and it's Empty View as pullable
-                // because they are not direct children of the ViewGroup
-                .theseChildrenArePullable(getListView(), getListView().getEmptyView())
-                .listener(this)
-                .setup(mPullToRefreshLayout); // Finally commit the setup to our PullToRefreshLayout
+        ListView list = (ListView) view.findViewById(android.R.id.list);
+        list.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+
+            }
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                if (firstVisibleItem == 0)
+                    swipeLayout.setEnabled(true);
+                else
+                    swipeLayout.setEnabled(false);
+            }
+        });
     }
 
 	@Override
@@ -150,9 +162,7 @@ public class PhotoListFragment extends SnapListFragment implements OnRefreshList
 		// Swap the new cursor in. (The framework will take care of closing the
 		// old cursor once we return.)
         photoAdapter.swapCursor(data);
-
-        mPullToRefreshLayout.setRefreshComplete();
-        setListShown(true);
+        setRefreshing(false);
 	}
 
 	public void onLoaderReset(Loader<Cursor> loader) {
@@ -168,8 +178,17 @@ public class PhotoListFragment extends SnapListFragment implements OnRefreshList
 		this.getLoaderManager().initLoader(PHOTOS, null, this);
 	}
 
+    private void setRefreshing(boolean refreshing) {
+        if (swipeLayout != null) {
+            swipeLayout.setRefreshing(refreshing);
+        }
+        if (refreshing == false) {
+            setListShown(true);
+        }
+    }
+
     @Override
-    public void onRefreshStarted(View view) {
+    public void onRefresh() {
         getLoaderManager().restartLoader(PHOTOS, null, this);
     }
 
