@@ -1,5 +1,6 @@
 package ca.hashbrown.snapable.activities;
 
+import android.app.ActivityManager;
 import android.content.ContentUris;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -40,6 +41,7 @@ public class PhotoUpload extends BaseActivity implements OnClickListener {
 
 	private Event event;
 	private String imagePath;
+    private Bitmap bmScaled;
 
 	@Override
     public void onCreate(Bundle savedInstanceState) {
@@ -58,12 +60,22 @@ public class PhotoUpload extends BaseActivity implements OnClickListener {
         event = bundle.getParcelable("event");
         imagePath = bundle.getString("imagePath");
 
+    	// set the action bar title
+    	getActionBar().setTitle(event.title);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        // quick memory usage sanity check
+        Log.d(TAG, String.format("Free: %,d B | Total: %,d B | Max: %,d B", Runtime.getRuntime().freeMemory(), Runtime.getRuntime().totalMemory(), Runtime.getRuntime().maxMemory()));
+
         // create a scaled bitmap
         Resources r = getResources();
         int dpSize = 275;
         int pxSize = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dpSize, r.getDisplayMetrics());
-		ImageView photo = (ImageView) findViewById(R.id.fragment_photo_upload__image);
-    	Bitmap bmScaled = PhotoUpload.decodeSampledBitmapFromPath(bundle.getString("imagePath"), pxSize, pxSize);
+        ImageView photo = (ImageView) findViewById(R.id.fragment_photo_upload__image);
+        bmScaled = PhotoUpload.decodeSampledBitmapFromPath(imagePath, pxSize, pxSize);
 
         try {
             // get exif data
@@ -95,10 +107,7 @@ public class PhotoUpload extends BaseActivity implements OnClickListener {
             // TODO log here
         }
         // set the scaled image in the image view
-    	photo.setImageBitmap(bmScaled);
-
-    	// set the action bar title
-    	getActionBar().setTitle(event.title);
+        photo.setImageBitmap(bmScaled);
     }
 
     @Override
@@ -110,6 +119,14 @@ public class PhotoUpload extends BaseActivity implements OnClickListener {
         save.putString("imagePath", this.imagePath);
         // and the bundle data to the saved state
         outState.putBundle("bundle", save);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        bmScaled.recycle();
+        bmScaled = null;
+        System.gc();
     }
 
     public void onClick(View v) {
@@ -196,7 +213,7 @@ public class PhotoUpload extends BaseActivity implements OnClickListener {
                 options.inTempStorage = new byte[32 * 1024]; // 32KB of temp decoding storage
                 // original photo to upload
                 Bitmap photo = BitmapFactory.decodeFile(photoPath, options);
-                Log.d(TAG, "size of photo: " + photo.getByteCount());
+                Crashlytics.log(Log.DEBUG, TAG, "ByteCount of photo: " + photo.getByteCount());
                 ExifInterface exif = new ExifInterface(photoPath);
                 int exifRotation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
 
@@ -207,6 +224,7 @@ public class PhotoUpload extends BaseActivity implements OnClickListener {
                 // make sure memory is released
                 photo.recycle();
                 photo = null;
+                System.gc();
                 Log.d(TAG, "Created temp file");
 
                 // re-apply the exif rotation
@@ -247,6 +265,7 @@ public class PhotoUpload extends BaseActivity implements OnClickListener {
                 errorMsg = "There was a problem uploading the photo.";
             } catch (OutOfMemoryError e) {
                 Log.e(TAG, "We ran out of memory!", e);
+                Crashlytics.log(String.format("Free: %,d B | Total: %,d B | Max: %,d B", Runtime.getRuntime().freeMemory(), Runtime.getRuntime().totalMemory(), Runtime.getRuntime().maxMemory()));
                 Crashlytics.logException(e);
                 errorMsg = "This is embarrassing... we couldn't upload the photo. We saved a copy on your device.";
             } finally {
