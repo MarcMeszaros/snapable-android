@@ -2,4 +2,6 @@
 <resources>
     <string name="app_name">Snapable</string>
     <string name="loading">Loading\u2026</string>
+
+    <string name="api__unreachable">Unable to connect to Snapable.</string>
 </resources>

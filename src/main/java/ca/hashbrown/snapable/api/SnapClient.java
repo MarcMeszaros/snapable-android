@@ -1,8 +1,11 @@
 package ca.hashbrown.snapable.api;
 
+import android.content.Context;
+
 import com.snapable.api.private_v1.Client;
 
 import ca.hashbrown.snapable.BuildConfig;
+import ca.hashbrown.snapable.utils.Network;
 
 public class SnapClient extends Client {
 
@@ -55,5 +58,16 @@ public class SnapClient extends Client {
         }
         return instance;
 
+    }
+
+    /**
+     * Determine if we can reach the API.
+     *
+     * @param context an Android context
+     * @return a boolean representing if the Snapable API is reachable
+     */
+    public boolean isReachable(Context context) {
+        Network netInfo = new Network(context);
+        return (netInfo.isConnected() && netInfo.canConnectToUrl(instance.getBaseUrl(), 2000));
     }
 }

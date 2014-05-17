@@ -1,6 +1,5 @@
 package ca.hashbrown.snapable.activities;
 
-import android.app.ActivityManager;
 import android.content.ContentUris;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -11,7 +10,6 @@ import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.TypedValue;
@@ -21,7 +19,6 @@ import android.widget.*;
 import ca.hashbrown.snapable.R;
 import ca.hashbrown.snapable.provider.SnapableContract;
 import com.crashlytics.android.Crashlytics;
-import com.snapable.api.SnapApi;
 import com.snapable.api.SnapImage;
 import com.snapable.api.private_v1.Client;
 
@@ -135,9 +132,13 @@ public class PhotoUpload extends BaseActivity implements OnClickListener {
 			// get the image caption
 			EditText caption = (EditText) findViewById(R.id.fragment_photo_upload__caption);
 
-			// get the image data ready for uploading via the API
-	        PhotoUploadTask uploadTask = new PhotoUploadTask(event, caption.getText().toString(), imagePath);
-	        uploadTask.execute();
+            if (SnapClient.getInstance().isReachable(this)) {
+                // get the image data ready for uploading via the API
+                PhotoUploadTask uploadTask = new PhotoUploadTask(event, caption.getText().toString(), imagePath);
+                uploadTask.execute();
+            } else {
+                Toast.makeText(this, getString(R.string.api__unreachable), Toast.LENGTH_LONG).show();
+            }
 			break;
 
 		default:
