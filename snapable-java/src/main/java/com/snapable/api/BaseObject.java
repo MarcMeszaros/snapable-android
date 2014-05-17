@@ -10,7 +10,11 @@ public abstract class BaseObject {
      * @return the resource primary key
      */
     public Long getPk() {
-        return getPkFromResourceUri(this.resource_uri);
+        if (this.resource_uri != null) {
+            return getPkFromResourceUri(this.resource_uri);
+        } else {
+            return Long.valueOf(0);
+        }
     }
 
     /**
