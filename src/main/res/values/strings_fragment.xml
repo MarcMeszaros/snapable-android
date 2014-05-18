@@ -3,10 +3,12 @@
 
     <!-- event list -->
     <string name="fragment_event_list__empty">Sorry, we couldn\'t find a nearby event. Try using the search field.</string>
+    <string name="fragment_event_list__search">Search</string>
 
     <!-- photo upload -->
     <string name="fragment_photo_upload__caption_hint">Caption (Optional)</string>
     <string name="fragment_photo_upload__button_done">Upload</string>
+    <string name="fragment_photo_upload__upload_gallery">Upload from Gallery</string>
 
     <!-- photo list -->
     <string name="fragment_photo_list__empty_omg">OMG!</string>

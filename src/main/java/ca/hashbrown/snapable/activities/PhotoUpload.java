@@ -268,7 +268,7 @@ public class PhotoUpload extends BaseActivity implements OnClickListener {
                 Log.e(TAG, "We ran out of memory!", e);
                 Crashlytics.log(String.format("Free: %,d B | Total: %,d B | Max: %,d B", Runtime.getRuntime().freeMemory(), Runtime.getRuntime().totalMemory(), Runtime.getRuntime().maxMemory()));
                 Crashlytics.logException(e);
-                errorMsg = "This is embarrassing... we couldn't upload the photo. We saved a copy on your device.";
+                errorMsg = getString(R.string.api__unable_to_upload);
             } finally {
                 Log.d(TAG, "delete temp file");
                 File tmpFile = new File(photoPath + ".tmp");

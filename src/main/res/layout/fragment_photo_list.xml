@@ -61,7 +61,7 @@
                     android:layout_margin="4dp"
                     android:gravity="center"
                     android:text="@string/fragment_photo_list__empty_omg"
-                    android:textSize="40dp"
+                    android:textSize="40sp"
                     android:textColor="@android:color/white"
                     android:textStyle="bold"/>
 
