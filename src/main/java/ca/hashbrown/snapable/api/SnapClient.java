@@ -4,7 +4,11 @@ import android.content.Context;
 
 import com.snapable.api.private_v1.Client;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 import ca.hashbrown.snapable.BuildConfig;
+import ca.hashbrown.snapable.Snapable;
 import ca.hashbrown.snapable.utils.Network;
 
 public class SnapClient extends Client {
@@ -63,11 +67,11 @@ public class SnapClient extends Client {
     /**
      * Determine if we can reach the API.
      *
-     * @param context an Android context
      * @return a boolean representing if the Snapable API is reachable
      */
-    public boolean isReachable(Context context) {
-        Network netInfo = new Network(context);
-        return (netInfo.isConnected() && netInfo.canConnectToUrl(instance.getBaseUrl(), 2000));
+    public boolean isReachable() {
+        Network netInfo = new Network(Snapable.getContext());
+        return (netInfo.isConnected());
     }
+
 }

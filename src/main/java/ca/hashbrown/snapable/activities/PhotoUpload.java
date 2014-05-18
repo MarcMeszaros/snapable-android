@@ -132,7 +132,7 @@ public class PhotoUpload extends BaseActivity implements OnClickListener {
 			// get the image caption
 			EditText caption = (EditText) findViewById(R.id.fragment_photo_upload__caption);
 
-            if (SnapClient.getInstance().isReachable(this)) {
+            if (SnapClient.getInstance().isReachable()) {
                 // get the image data ready for uploading via the API
                 PhotoUploadTask uploadTask = new PhotoUploadTask(event, caption.getText().toString(), imagePath);
                 uploadTask.execute();
