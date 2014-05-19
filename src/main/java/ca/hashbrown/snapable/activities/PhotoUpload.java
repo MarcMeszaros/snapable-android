@@ -6,7 +6,6 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -25,6 +24,7 @@ import com.snapable.api.private_v1.Client;
 import ca.hashbrown.snapable.api.SnapClient;
 import ca.hashbrown.snapable.api.models.Event;
 import ca.hashbrown.snapable.api.resources.PhotoResource;
+import ca.hashbrown.snapable.utils.SnapBitmapFactory;
 import retrofit.mime.TypedString;
 
 import java.io.File;
@@ -72,37 +72,8 @@ public class PhotoUpload extends BaseActivity implements OnClickListener {
         int dpSize = 275;
         int pxSize = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dpSize, r.getDisplayMetrics());
         ImageView photo = (ImageView) findViewById(R.id.fragment_photo_upload__image);
-        bmScaled = PhotoUpload.decodeSampledBitmapFromPath(imagePath, pxSize, pxSize);
+        bmScaled = SnapBitmapFactory.decodeSampledBitmapFromPath(imagePath, pxSize, pxSize);
 
-        try {
-            // get exif data
-            ExifInterface exif = new ExifInterface(imagePath);
-            int exifRotation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
-
-            // rotate bitmap
-            switch (exifRotation) {
-                case ExifInterface.ORIENTATION_ROTATE_90: {
-                    Matrix matrix = new Matrix();
-                    matrix.postRotate(90);
-                    bmScaled = Bitmap.createBitmap(bmScaled, 0, 0, bmScaled.getWidth(), bmScaled.getHeight(), matrix, true);
-                    break;
-                }
-                case ExifInterface.ORIENTATION_ROTATE_180:{
-                    Matrix matrix = new Matrix();
-                    matrix.postRotate(180);
-                    bmScaled = Bitmap.createBitmap(bmScaled, 0, 0, bmScaled.getWidth(), bmScaled.getHeight(), matrix, true);
-                    break;
-                }
-                case ExifInterface.ORIENTATION_ROTATE_270: {
-                    Matrix matrix = new Matrix();
-                    matrix.postRotate(270);
-                    bmScaled = Bitmap.createBitmap(bmScaled, 0, 0, bmScaled.getWidth(), bmScaled.getHeight(), matrix, true);
-                    break;
-                }
-            }
-        } catch (IOException e) {
-            // TODO log here
-        }
         // set the scaled image in the image view
         photo.setImageBitmap(bmScaled);
     }
@@ -147,42 +118,6 @@ public class PhotoUpload extends BaseActivity implements OnClickListener {
 
 	}
 
-	public static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
-	    // Raw height and width of image
-	    final int height = options.outHeight;
-	    final int width = options.outWidth;
-	    int inSampleSize = 1;
-
-	    if (height > reqHeight || width > reqWidth) {
-
-	        // Calculate ratios of height and width to requested height and width
-	        final int heightRatio = Math.round((float) height / (float) reqHeight);
-	        final int widthRatio = Math.round((float) width / (float) reqWidth);
-
-	        // Choose the smallest ratio as inSampleSize value, this will guarantee
-	        // a final image with both dimensions larger than or equal to the
-	        // requested height and width.
-	        inSampleSize = heightRatio < widthRatio ? heightRatio : widthRatio;
-	    }
-
-	    return inSampleSize;
-	}
-
-	public static Bitmap decodeSampledBitmapFromPath(String path, int reqWidth, int reqHeight) {
-
-	    // First decode with inJustDecodeBounds=true to check dimensions
-	    final BitmapFactory.Options options = new BitmapFactory.Options();
-	    options.inJustDecodeBounds = true;
-	    BitmapFactory.decodeFile(path, options);
-
-	    // Calculate inSampleSize
-	    options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
-
-	    // Decode bitmap with inSampleSize set
-	    options.inJustDecodeBounds = false;
-	    return BitmapFactory.decodeFile(path, options);
-	}
-
 	private class PhotoUploadTask extends AsyncTask<Void, Void, Void> {
 
 		private Event event;
@@ -209,11 +144,11 @@ public class PhotoUpload extends BaseActivity implements OnClickListener {
 		@Override
 		protected Void doInBackground(Void... params) {
             try {
-                BitmapFactory.Options options = new BitmapFactory.Options();
+                SnapBitmapFactory.Options options = new SnapBitmapFactory.Options();
                 options.inPurgeable = true;
                 options.inTempStorage = new byte[32 * 1024]; // 32KB of temp decoding storage
                 // original photo to upload
-                Bitmap photo = BitmapFactory.decodeFile(photoPath, options);
+                Bitmap photo = SnapBitmapFactory.decodeFile(photoPath, options);
                 Crashlytics.log(Log.DEBUG, TAG, "ByteCount of photo: " + photo.getByteCount());
                 ExifInterface exif = new ExifInterface(photoPath);
                 int exifRotation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
@@ -237,14 +172,13 @@ public class PhotoUpload extends BaseActivity implements OnClickListener {
                 // decode temp file
                 File tempFile = new File(photoPath + ".tmp");
                 SnapImage tempImage = new SnapImage(tempFile);
-                //FileInputStream inStream = new FileInputStream(tempFile);
 
                 // get local cached event info
-                Uri queryUri = ContentUris.withAppendedId(SnapableContract.EventCredentials.CONTENT_URI, event.getId());
+                Uri queryUri = ContentUris.withAppendedId(SnapableContract.EventCredentials.CONTENT_URI, event.getPk());
                 Cursor c = getContentResolver().query(queryUri, null, null, null, null);
 
 	            // upload via the API
-                Client client = SnapClient.getClient();
+                Client client = SnapClient.getInstance();
                 PhotoResource photoRes = client.getRestAdapter().create(PhotoResource.class);
 
 	        	// if we have a guest id, upload the photo with the id
@@ -260,6 +194,7 @@ public class PhotoUpload extends BaseActivity implements OnClickListener {
 				}
 	        } catch(FileNotFoundException e) {
                 Log.e(TAG, "problem finding a file", e);
+                Crashlytics.logException(e);
                 errorMsg = "There was a problem uploading the photo.";
             } catch (IOException e) {
                 Log.e(TAG, "some IO exception", e);
