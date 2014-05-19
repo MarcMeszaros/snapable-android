@@ -1,21 +1,3 @@
-## ignore automatically generated files
-target/
-out/
-
-app/bin/
-app/gen/
-app/build/
-app/out/
-app/target/
-
-test/bin/
-test/gen/
-test/build/
-test/out/
-test/target/
-
-*gen-external-apklibs/
-
 ## build ##
 .gradle/
 build/
@@ -40,8 +22,8 @@ test/proguard.cfg
 *.crashlytics_data
 
 ## ignore keystores related files
-*.keystore
-*.properties
+/*.keystore
+/*.properties
 
 ## ignore temp files from various editors
 .DS_Store
