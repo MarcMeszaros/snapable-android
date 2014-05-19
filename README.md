@@ -5,7 +5,6 @@ This project uses Gradle for most build tasks.
 1. Make sure to uninstall/reinstall the Android SDK (SDK folder/file layouts have changed and setup is based on SDK r22+)
 2. Install the Android 4.0.3 (API 15) and Android Support Package from the SDK tools
 3. Proceed with any of the setup instructions below
-4. Make sure your system has Gradle 1.10+ installed.
 
 Note: Make sure the "Google Repository" and "Android Repository" to be installed via the SDK manager.
 
@@ -30,3 +29,6 @@ Below are some basic Gradle commands to do some common tasks. (Assumes you are i
 
     # release build, no unit tests
     ./gradlew assembleRelease
+
+    # run the unit tests
+    ./gradlew test
