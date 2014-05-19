@@ -21,6 +21,9 @@ public class Snapable extends Application {
 		super.onCreate();
         instance = this;
 
+        // print the version
+        Log.i(TAG, String.format("+++ BUILD VERSION: %s(%d) +++", getVersionName(), getVersionCode()));
+
 		// if we are in release mode
 		if(!BuildConfig.DEBUG) {
 			Log.i(TAG, "Starting in release mode.");
@@ -38,7 +41,7 @@ public class Snapable extends Application {
     /**
      * Get the application context.
      *
-     * @return the application context
+     * @return the application {@link android.content.Context}
      */
     public static Context getContext() {
         return instance;
