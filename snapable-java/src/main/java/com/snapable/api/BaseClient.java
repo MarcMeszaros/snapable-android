@@ -19,9 +19,6 @@ public abstract class BaseClient implements Client {
     private Client wrapped;
     private String baseUrl;
 
-    public BaseClient() {
-    }
-
     public BaseClient(String baseUrl) {
         this.baseUrl = baseUrl;
 
