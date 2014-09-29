@@ -19,28 +19,22 @@ import java.util.List;
 public class Client extends BaseClient {
 
     public static final String VERSION = "private_v1";
-    public static final String BASE_URL = "https://api.snapable.com/" + VERSION + "/";
-    public static final String BASE_URL_DEV = "http://devapi.snapable.com/" + VERSION + "/";
+    private static final String BASE_URL = "https://api.snapable.com/" + VERSION + "/";
+    private static final String BASE_URL_DEV = "http://devapi.snapable.com/" + VERSION + "/";
 
     private final SnapApi snapApi;
 
     public Client(String key, String secret) {
-        super(BASE_URL);
-        snapApi = new SnapApi(VERSION, key, secret);
+        this(key, secret, false);
     }
 
-    public Client(String baseUrl, String key, String secret) {
-        super(baseUrl);
+    public Client(String key, String secret, boolean useDevApi) {
+        super(!useDevApi ? BASE_URL : BASE_URL_DEV);
         snapApi = new SnapApi(VERSION, key, secret);
     }
 
     public RestAdapter getRestAdapter() {
         return createRestAdapterBuilder().build();
-    }
-
-    @Override
-    public RequestInterceptor getInterceptor() {
-        return new Interceptor();
     }
 
     @Override
@@ -78,17 +72,6 @@ public class Client extends BaseClient {
         // return the signed request
         Request signedRequest = new Request(request.getMethod(), request.getUrl(), headerList, request.getBody());
         return signedRequest;
-    }
-
-    //
-    private class Interceptor extends BaseInterceptor {
-
-        @Override
-        public void intercept(RequestFacade requestFacade) {
-            //requestFacade.addHeader("User-Agent", "Snapable/1.0");
-            //requestFacade.addHeader("Accept", "application/json");
-        }
-
     }
 
 }

@@ -2,7 +2,7 @@ package com.snapable.api.private_v1.objects;
 
 import com.google.gson.annotations.SerializedName;
 import com.snapable.api.private_v1.BaseObject;
-import com.snapable.utils.ToStringHelper;
+import com.snapable.util.ToStringHelper;
 
 import java.util.Date;
 

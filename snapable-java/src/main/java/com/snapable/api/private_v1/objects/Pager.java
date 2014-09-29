@@ -1,6 +1,6 @@
 package com.snapable.api.private_v1.objects;
 
-import com.snapable.utils.ToStringHelper;
+import com.snapable.util.ToStringHelper;
 
 import java.util.List;
 
