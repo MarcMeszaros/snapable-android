@@ -13,20 +13,8 @@ import ca.hashbrown.snapable.utils.Network;
 
 public class SnapClient extends Client {
 
-    private static final String live_api_key = "***REMOVED***";
-    private static final String live_api_secret = "***REMOVED***";
-
     private static SnapClient instance = null;
     private static Object instanceMutex = new Object();
-
-    /**
-     * Get the client to talk to the API.
-     *
-     * @deprecated Use {@link SnapClient#getClient()}
-     */
-    public SnapClient() {
-        super(Client.BASE_URL, live_api_key, live_api_secret);
-    }
 
     /**
      * Build a new instance of the SnapClient
@@ -53,11 +41,8 @@ public class SnapClient extends Client {
     public static SnapClient getInstance() {
         if (instance == null) {
             synchronized (instanceMutex) {
-                if (BuildConfig.DEBUG) {
-                    instance = new SnapClient(Client.BASE_URL_DEV, "key123", "sec123");
-                } else {
-                    instance = new SnapClient(Client.BASE_URL, live_api_key, live_api_secret);
-                }
+                String baseUrl = (!BuildConfig.DEBUG) ? Client.BASE_URL : Client.BASE_URL_DEV;
+                instance = new SnapClient(baseUrl, BuildConfig.API_KEY, BuildConfig.API_SECRET);
             }
         }
         return instance;
