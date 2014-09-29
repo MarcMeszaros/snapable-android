@@ -1,19 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <style name="Theme.Styled" parent="android:Theme.Holo.Light.DarkActionBar">
-        <item name="android:windowBackground">@color/window_background</item>
-        <item name="android:windowContentOverlay">@null</item>
+    <!-- ActionBar -->
+    <style name="Snapable.Widget.ActionBar" parent="@android:style/Widget.Holo.Light.ActionBar.Solid.Inverse">
+        <item name="android:background">@color/action_bar_background</item>
     </style>
 
-    <style name="Theme.Styled.NoActionBar" parent="Theme.Styled">
-        <item name="android:windowActionBar">false</item>
-        <item name="android:windowNoTitle">true</item>
-    </style>
-
-
-    <!-- Custom stuff -->
-    <style name="Widget.ImageButton.RoundedCorners" parent="@android:style/Widget.ImageButton">
+    <!-- Buttons -->
+    <style name="Snapable.Widget.ImageButton.RoundedCorners" parent="@android:style/Widget.ImageButton">
         <item name="android:background">@drawable/widget_imagebutton_background</item>
     </style>
+
 </resources>
