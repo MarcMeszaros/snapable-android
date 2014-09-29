@@ -30,6 +30,7 @@ import ca.hashbrown.snapable.adapters.EventListAdapter;
 import ca.hashbrown.snapable.cursors.EventCursor;
 import ca.hashbrown.snapable.provider.SnapableContract;
 import ca.hashbrown.snapable.api.models.Event;
+import ca.hashbrown.snapable.ui.widgets.ScrollableSwipeRefreshLayout;
 
 public class EventListFragment extends SnapListFragment implements SearchView.OnQueryTextListener, LoaderCallbacks<Cursor>, OnItemClickListener, LocationListener, SwipeRefreshLayout.OnRefreshListener {
 
@@ -96,12 +97,8 @@ public class EventListFragment extends SnapListFragment implements SearchView.On
         setListShownNoAnimation(false);
 
         // setup pull to refresh
-        swipeLayout = (SwipeRefreshLayout) view.findViewById(R.id.fragment_event_list);
+        swipeLayout = (ScrollableSwipeRefreshLayout) view.findViewById(R.id.fragment_event_list);
         swipeLayout.setOnRefreshListener(this);
-        swipeLayout.setColorScheme(android.R.color.holo_blue_dark,
-                android.R.color.holo_green_dark,
-                android.R.color.holo_orange_dark,
-                android.R.color.holo_red_dark);
 
         ListView list = (ListView) view.findViewById(android.R.id.list);
         list.setOnScrollListener(new AbsListView.OnScrollListener() {

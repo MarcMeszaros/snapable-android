@@ -96,7 +96,7 @@ public class SnapContentProvider extends ContentProvider {
 
 	@Override
 	public boolean onCreate() {
-		snapClient = SnapClient.getClient();
+		snapClient = SnapClient.getInstance();
 		dbHelper = new DBHelper(getContext());
 
 		// return success or failure

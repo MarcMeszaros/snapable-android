@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="window_background">#e3e8eb</color>
+
+    <color name="progress_color_1">#123040</color>
+    <color name="progress_color_2">#245f7f</color>
+    <color name="progress_color_3">#368fbf</color>
+    <color name="progress_color_4">#70b3d7</color>
 </resources>

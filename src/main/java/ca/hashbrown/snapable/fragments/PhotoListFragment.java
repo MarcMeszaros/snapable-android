@@ -19,6 +19,7 @@ import ca.hashbrown.snapable.adapters.PhotoListAdapter;
 import ca.hashbrown.snapable.provider.SnapableContract;
 
 import ca.hashbrown.snapable.api.models.Event;
+import ca.hashbrown.snapable.ui.widgets.ScrollableSwipeRefreshLayout;
 
 public class PhotoListFragment extends SnapListFragment implements SwipeRefreshLayout.OnRefreshListener, LoaderCallbacks<Cursor> {
 
@@ -70,12 +71,8 @@ public class PhotoListFragment extends SnapListFragment implements SwipeRefreshL
         setListShownNoAnimation(false);
 
         // setup pull to refresh
-        swipeLayout = (SwipeRefreshLayout) view.findViewById(R.id.fragment_photo_list);
+        swipeLayout = (ScrollableSwipeRefreshLayout) view.findViewById(R.id.fragment_photo_list);
         swipeLayout.setOnRefreshListener(this);
-        swipeLayout.setColorScheme(android.R.color.holo_blue_dark,
-                android.R.color.holo_green_dark,
-                android.R.color.holo_orange_dark,
-                android.R.color.holo_red_dark);
 
         ListView list = (ListView) view.findViewById(android.R.id.list);
         list.setOnScrollListener(new AbsListView.OnScrollListener() {

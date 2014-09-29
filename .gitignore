@@ -20,6 +20,7 @@ test/proguard.cfg
 ## ignore thirdparty stuff
 # crashlytics
 *.crashlytics_data
+crashlytics-build.properties
 
 ## ignore keystores related files
 /*.keystore

@@ -1,11 +1,7 @@
 package ca.hashbrown.snapable.api;
 
-import android.content.Context;
 
 import com.snapable.api.private_v1.Client;
-
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 
 import ca.hashbrown.snapable.BuildConfig;
 import ca.hashbrown.snapable.Snapable;
@@ -25,11 +21,6 @@ public class SnapClient extends Client {
      */
     public SnapClient(String baseUrl, String key, String secret) {
         super(baseUrl, key, secret);
-    }
-
-    @Deprecated
-    public static SnapClient getClient() {
-        return getInstance();
     }
 
     /**
