@@ -5,8 +5,7 @@
     android:id="@+id/fragment_event_list"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_margin="10dp"
-    android:orientation="vertical" >
+    android:layout_margin="10dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -18,7 +17,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:visibility="visible"
-            android:gravity="center">
+            android:gravity="center"
+            tools:visibility="gone">
 
             <ProgressBar style="?android:attr/progressBarStyleLarge"
                 android:layout_width="wrap_content"
@@ -26,15 +26,16 @@
 
         </LinearLayout>
 
-        <FrameLayout android:id="@id/listContainer"
+        <LinearLayout
+            android:id="@id/listContainer"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
             <ListView
                 android:id="@android:id/list"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:padding="12dp"
                 android:divider="@android:color/transparent"
                 android:dividerHeight="12dp"
                 android:scrollbars="none"
@@ -52,7 +53,7 @@
                 android:textSize="18sp"
                 tools:visibility="gone" />
 
-        </FrameLayout>
+        </LinearLayout>
 
     </LinearLayout>
 
