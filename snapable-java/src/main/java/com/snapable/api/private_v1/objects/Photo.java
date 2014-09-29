@@ -1,8 +1,8 @@
 package com.snapable.api.private_v1.objects;
 
-import com.google.common.base.Objects;
 import com.google.gson.annotations.SerializedName;
 import com.snapable.api.private_v1.BaseObject;
+import com.snapable.utils.ToStringHelper;
 
 import java.util.Date;
 
@@ -16,7 +16,7 @@ public class Photo extends BaseObject {
     @Deprecated public Date timestamp;
 
     public String toString() {
-        return Objects.toStringHelper(this)
+        return ToStringHelper.getInstance(this)
             .add("pk", this.getPk())
         	.add("author_name", this.author_name)
         	.add("caption", this.caption)

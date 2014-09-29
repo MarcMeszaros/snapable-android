@@ -1,6 +1,6 @@
 package com.snapable.api.private_v1.objects;
 
-import com.google.common.base.Objects;
+import com.snapable.utils.ToStringHelper;
 
 import java.util.List;
 
@@ -10,7 +10,7 @@ public class Pager<E> {
     public List<E> objects;
 
     public String toString() {
-        return Objects.toStringHelper(this)
+        return ToStringHelper.getInstance(this)
                 .add("meta", meta)
                 .add("objects", objects)
                 .toString();

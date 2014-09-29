@@ -1,6 +1,6 @@
 package com.snapable.api.private_v1.objects;
 
-import com.google.common.base.Objects;
+import com.snapable.utils.ToStringHelper;
 
 public class Meta {
 
@@ -11,7 +11,7 @@ public class Meta {
     public long total_count;
 
     public String toString() {
-        return Objects.toStringHelper(this)
+        return ToStringHelper.getInstance(this)
                 .add("limit", limit)
                 .add("offset", offset)
                 .add("total_count", total_count)

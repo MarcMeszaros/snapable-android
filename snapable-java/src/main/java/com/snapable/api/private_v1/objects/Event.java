@@ -1,7 +1,7 @@
 package com.snapable.api.private_v1.objects;
 
-import com.google.common.base.Objects;
 import com.snapable.api.private_v1.BaseObject;
+import com.snapable.utils.ToStringHelper;
 
 import java.util.Date;
 
@@ -20,7 +20,7 @@ public class Event extends BaseObject {
     @Deprecated public Date start;
 
     public String toString() {
-        return Objects.toStringHelper(this)
+        return ToStringHelper.getInstance(this)
             .add("pk", this.getPk())
         	.add("end_at", this.end_at)
         	.add("photo_count", this.photo_count)
