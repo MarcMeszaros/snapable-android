@@ -11,12 +11,12 @@
     <item android:drawable="@drawable/btn_default_normal_disable"/>
 	-->
 	
-	<item android:drawable="@drawable/btn_camera" android:state_enabled="true" android:state_window_focused="false"/>
-    <item android:drawable="@drawable/btn_camera" android:state_enabled="false" android:state_window_focused="false"/>
+	<item android:drawable="@drawable/btn_camera_enabled" android:state_enabled="true" android:state_window_focused="false"/>
+    <item android:drawable="@drawable/btn_camera_enabled" android:state_enabled="false" android:state_window_focused="false"/>
     <item android:drawable="@drawable/btn_camera_pressed" android:state_pressed="true"/>
     <item android:drawable="@drawable/btn_camera_pressed" android:state_enabled="true" android:state_focused="true"/>
-    <item android:drawable="@drawable/btn_camera" android:state_enabled="true"/>
-    <item android:drawable="@drawable/btn_camera" android:state_focused="true"/>
-    <item android:drawable="@drawable/btn_camera"/>
+    <item android:drawable="@drawable/btn_camera_enabled" android:state_enabled="true"/>
+    <item android:drawable="@drawable/btn_camera_enabled" android:state_focused="true"/>
+    <item android:drawable="@drawable/btn_camera_enabled"/>
 
 </selector>
