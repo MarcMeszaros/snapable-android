@@ -16,11 +16,27 @@
 -dontwarn javax.annotation.**
 -dontwarn sun.misc.**
 
+# disklrucache
+-keep class com.jakewharton.disklrucache.** { *; }
+-keep interface com.jakewharton.disklrucache.** { *; }
+
 # retrofit
 -dontwarn rx.**
--dontwarn com.squareup.okhttp.**
-
+-dontwarn retrofit.appengine.**
+-dontwarn java.nio.**
+-keep class com.squareup.okhttp.** { *; }
+-keep interface com.squareup.okhttp.** { *; }
 -keep class retrofit.** { *; }
+-keep interface retrofit.** { *; }
+
+# robospice
+-keep class com.octo.android.robospice.** { *; }
+-keep interface com.octo.android.robospice.** { *; }
 
 # pulltorefresh
 -dontwarn android.view.View
+
+# butterknife
+-dontwarn butterknife.internal.**
+-keep class **$$ViewInjector { *; }
+-keepnames class * { @butterknife.InjectView *; }
