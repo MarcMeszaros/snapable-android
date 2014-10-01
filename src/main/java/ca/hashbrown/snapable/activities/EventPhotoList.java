@@ -5,17 +5,16 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
 
 import com.google.analytics.tracking.android.EasyTracker;
 import com.google.analytics.tracking.android.Fields;
 import com.google.analytics.tracking.android.MapBuilder;
 import com.google.analytics.tracking.android.Tracker;
 
-import ca.hashbrown.snapable.BuildConfig;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 import ca.hashbrown.snapable.R;
 import ca.hashbrown.snapable.fragments.PhotoListFragment;
 import ca.hashbrown.snapable.utils.SnapStorage;
@@ -23,7 +22,7 @@ import ca.hashbrown.snapable.api.models.Event;
 
 import java.io.File;
 
-public class EventPhotoList extends BaseActivity implements OnClickListener {
+public class EventPhotoList extends BaseActivity {
 
 	private static final String TAG = "EventPhotoList";
 
@@ -36,6 +35,7 @@ public class EventPhotoList extends BaseActivity implements OnClickListener {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_photo_list);
+        ButterKnife.inject(this);
 
         // try and save/resume the activity
         if (savedInstanceState != null) {
@@ -47,9 +47,6 @@ public class EventPhotoList extends BaseActivity implements OnClickListener {
             event = bundle.getParcelable("event");
         }
 
-        // add click listener
-		findViewById(R.id.activity_photo_list__photo_button).setOnClickListener(this);
-
 		// Create the list fragment and add it as our sole content.
 		PhotoListFragment photoListFragment = (PhotoListFragment) getFragmentManager().findFragmentById(R.id.activity_photo_list__fragment_photo_list);
 		if (photoListFragment != null) {
@@ -57,8 +54,10 @@ public class EventPhotoList extends BaseActivity implements OnClickListener {
 		}
 
 		// make the action bar button home button go back
-		getActionBar().setDisplayHomeAsUpEnabled(true);
-		getActionBar().setTitle(event.title);
+        if (getActionBar() != null) {
+            getActionBar().setDisplayHomeAsUpEnabled(true);
+            getActionBar().setTitle(event.title);
+        }
 	}
 
     @Override
@@ -68,31 +67,24 @@ public class EventPhotoList extends BaseActivity implements OnClickListener {
         outState.putParcelable("imageUri", this.imageUri);
     }
 
-    public void onClick(View v) {
-		switch (v.getId()) {
-		case R.id.activity_photo_list__photo_button:
-            // fake the camera view
-            // May return null if EasyTracker has not yet been initialized with a property ID.
-            Tracker easyTracker = EasyTracker.getInstance(this);
+    @OnClick(R.id.activity_photo_list__photo_button)
+    public void onClickPhoto(View v) {
+        // fake the camera view
+        // May return null if EasyTracker has not yet been initialized with a property ID.
+        Tracker easyTracker = EasyTracker.getInstance(this);
 
-            // This screen name value will remain set on the tracker and sent with
-            // hits until it is set to a new value or to null.
-            easyTracker.set(Fields.SCREEN_NAME, "Camera");
-            easyTracker.send(MapBuilder
-                            .createAppView()
-                            .build()
-            );
+        // This screen name value will remain set on the tracker and sent with
+        // hits until it is set to a new value or to null.
+        easyTracker.set(Fields.SCREEN_NAME, "Camera");
+        easyTracker.send(MapBuilder
+                        .createAppView()
+                        .build()
+        );
 
-            Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-            this.imageUri = SnapStorage.getOutputMediaFileUri(SnapStorage.MEDIA_TYPE_IMAGE);
-            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, this.imageUri);
-            startActivityForResult(takePictureIntent, PHOTO_ACTION);
-            break;
-
-		default:
-			break;
-		}
-
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        this.imageUri = SnapStorage.getOutputMediaFileUri(SnapStorage.MEDIA_TYPE_IMAGE);
+        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, this.imageUri);
+        startActivityForResult(takePictureIntent, PHOTO_ACTION);
 	}
 
     @Override

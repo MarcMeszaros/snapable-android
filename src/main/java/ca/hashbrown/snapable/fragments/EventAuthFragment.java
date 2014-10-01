@@ -9,10 +9,12 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager.LayoutParams;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
@@ -20,6 +22,8 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
+
+import butterknife.ButterKnife;
 import ca.hashbrown.snapable.R;
 import ca.hashbrown.snapable.activities.EventPhotoList;
 import ca.hashbrown.snapable.provider.SnapableContract;
@@ -48,6 +52,14 @@ public class EventAuthFragment extends SnapDialogFragment implements OnEditorAct
 		this.event = event;
 	}
 
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = super.onCreateView(inflater, container, savedInstanceState);
+        ButterKnife.inject(this, view);
+        return view;
+    }
+
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         // setup the dialog builder
@@ -56,9 +68,9 @@ public class EventAuthFragment extends SnapDialogFragment implements OnEditorAct
         View view = inflater.inflate(R.layout.fragment_event_auth, null);
 
         // setup the layout
-        pin = (EditText) view.findViewById(R.id.fragment_event_auth__pin);
-        name = (EditText) view.findViewById(R.id.fragment_event_auth__name);
-        email = (EditText) view.findViewById(R.id.fragment_event_auth__email);
+        pin = ButterKnife.findById(view, R.id.fragment_event_auth__pin);
+        name = ButterKnife.findById(view, R.id.fragment_event_auth__name);
+        email = ButterKnife.findById(view, R.id.fragment_event_auth__email);
 
         if (this.event != null && this.event.is_public == true) {
             // hide the pin stuff because the event is public

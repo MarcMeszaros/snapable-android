@@ -15,6 +15,9 @@ import android.util.TypedValue;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.*;
+
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 import ca.hashbrown.snapable.R;
 import ca.hashbrown.snapable.provider.SnapableContract;
 import com.crashlytics.android.Crashlytics;
@@ -32,7 +35,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-public class PhotoUpload extends BaseActivity implements OnClickListener {
+public class PhotoUpload extends BaseActivity {
 
 	private static final String TAG = "PhotoUpload";
 
@@ -44,8 +47,7 @@ public class PhotoUpload extends BaseActivity implements OnClickListener {
     public void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
     	setContentView(R.layout.activity_photo_upload);
-
-        findViewById(R.id.fragment_photo_upload__button_done).setOnClickListener(this);
+        ButterKnife.inject(this);
 
         // get the bundle from the saved state or try and get it from the intent
         Bundle bundle = null;
@@ -58,7 +60,8 @@ public class PhotoUpload extends BaseActivity implements OnClickListener {
         imagePath = bundle.getString("imagePath");
 
     	// set the action bar title
-    	getActionBar().setTitle(event.title);
+        if (getActionBar() != null)
+    	    getActionBar().setTitle(event.title);
     }
 
     @Override
@@ -97,25 +100,18 @@ public class PhotoUpload extends BaseActivity implements OnClickListener {
         System.gc();
     }
 
-    public void onClick(View v) {
-		switch (v.getId()) {
-		case R.id.fragment_photo_upload__button_done:
-			// get the image caption
-			EditText caption = (EditText) findViewById(R.id.fragment_photo_upload__caption);
+    @OnClick(R.id.fragment_photo_upload__button_done)
+    public void onClickUploadButton(View v) {
+        // get the image caption
+        EditText caption = (EditText) findViewById(R.id.fragment_photo_upload__caption);
 
-            if (SnapClient.getInstance().isReachable()) {
-                // get the image data ready for uploading via the API
-                PhotoUploadTask uploadTask = new PhotoUploadTask(event, caption.getText().toString(), imagePath);
-                uploadTask.execute();
-            } else {
-                Toast.makeText(this, getString(R.string.api__unreachable), Toast.LENGTH_LONG).show();
-            }
-			break;
-
-		default:
-			break;
-		}
-
+        if (SnapClient.getInstance().isReachable()) {
+            // get the image data ready for uploading via the API
+            PhotoUploadTask uploadTask = new PhotoUploadTask(event, caption.getText().toString(), imagePath);
+            uploadTask.execute();
+        } else {
+            Toast.makeText(this, getString(R.string.api__unreachable), Toast.LENGTH_LONG).show();
+        }
 	}
 
 	private class PhotoUploadTask extends AsyncTask<Void, Void, Void> {

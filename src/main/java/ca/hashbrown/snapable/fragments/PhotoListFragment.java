@@ -73,22 +73,6 @@ public class PhotoListFragment extends SnapListFragment implements SwipeRefreshL
         // setup pull to refresh
         swipeLayout = (ScrollableSwipeRefreshLayout) view.findViewById(R.id.fragment_photo_list);
         swipeLayout.setOnRefreshListener(this);
-
-        ListView list = (ListView) view.findViewById(android.R.id.list);
-        list.setOnScrollListener(new AbsListView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(AbsListView view, int scrollState) {
-
-            }
-
-            @Override
-            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-                if (firstVisibleItem == 0)
-                    swipeLayout.setEnabled(true);
-                else
-                    swipeLayout.setEnabled(false);
-            }
-        });
     }
 
 	@Override
