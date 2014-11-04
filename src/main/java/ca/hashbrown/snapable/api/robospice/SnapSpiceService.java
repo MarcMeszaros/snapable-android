@@ -47,7 +47,7 @@ public class SnapSpiceService extends SpiceService {
     public void onCreate() {
         super.onCreate();
         apiClient = SnapClient.getInstance();
-        restAdapter = apiClient.createRestAdapterBuilder().build();
+        restAdapter = apiClient.getRestAdapter();
 
         // setup the interfaces
         retrofitInterfaceList.add(EventResource.class);

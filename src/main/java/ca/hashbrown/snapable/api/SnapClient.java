@@ -11,7 +11,6 @@ import ca.hashbrown.snapable.utils.Network;
 public class SnapClient extends Client {
 
     private static SnapClient instance;
-    private static HashMap<String,Object> resources;
 
     private SnapClient(String key, String secret, boolean useDevApi) {
         super(key, secret, useDevApi);
@@ -37,13 +36,7 @@ public class SnapClient extends Client {
      * @return Instance of resource interface.
      */
     public static synchronized <T> T getResource(Class<T> service){
-        if (resources == null)
-            resources = new HashMap<>(5);
-
-        if (!resources.containsKey(service.getName()))
-            resources.put(service.getName(), getInstance().getRestAdapter().create(service));
-
-        return (T) resources.get(service.getName());
+        return getInstance().create(service);
     }
 
     /**

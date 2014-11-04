@@ -33,12 +33,8 @@ public class Client extends BaseClient {
         snapApi = new SnapApi(VERSION, key, secret);
     }
 
-    public RestAdapter getRestAdapter() {
-        return createRestAdapterBuilder().build();
-    }
-
     @Override
-    public Converter getConverter() {
+    protected Converter getConverter() {
         // build the converter
         GsonBuilder builder = new GsonBuilder();
         builder.setDateFormat("yyyy-MM-dd'T'HH:mm:ss");
