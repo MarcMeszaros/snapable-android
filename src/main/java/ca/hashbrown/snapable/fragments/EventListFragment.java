@@ -1,6 +1,5 @@
 package ca.hashbrown.snapable.fragments;
 
-import android.app.ListFragment;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.*;
 import android.database.Cursor;
@@ -18,10 +17,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ListView;
 import android.widget.SearchView;
 
 import ca.hashbrown.snapable.R;
@@ -31,10 +28,9 @@ import ca.hashbrown.snapable.cursors.EventCursor;
 import ca.hashbrown.snapable.provider.SnapableContract;
 import ca.hashbrown.snapable.api.models.Event;
 import ca.hashbrown.snapable.ui.widgets.ScrollableSwipeRefreshLayout;
+import timber.log.Timber;
 
 public class EventListFragment extends SnapListFragment implements SearchView.OnQueryTextListener, LoaderCallbacks<Cursor>, OnItemClickListener, LocationListener, SwipeRefreshLayout.OnRefreshListener {
-
-	private static final String TAG = "EventListFragment";
 
     public static final class LOADERS {
 		public static final int EVENTS = 0x01;
@@ -143,7 +139,7 @@ public class EventListFragment extends SnapListFragment implements SearchView.On
 
     @Override
     public boolean onQueryTextSubmit(String query) {
-        Log.d(TAG, "search: " + query);
+        Timber.d("search: " + query);
         // build the search param
         mSearchQuery = query;
         Bundle args = new Bundle(1);
@@ -161,7 +157,7 @@ public class EventListFragment extends SnapListFragment implements SearchView.On
 
     @Override
     public boolean onQueryTextChange(String newText) {
-        Log.d(TAG, "new query: " + newText.isEmpty() + " " + newText);
+        Timber.d("new query: " + newText.isEmpty() + " " + newText);
         mSearchQuery = newText;
         if (newText.isEmpty()) {
             return false;
@@ -180,22 +176,22 @@ public class EventListFragment extends SnapListFragment implements SearchView.On
 
         // get the query string if required
         if (args != null && args.containsKey("q")) {
-            Log.d(TAG, "CursorLoader: q");
+            Timber.d("CursorLoader: q");
             String selection = "q=?";
             String[] selectionArgs = {args.getString("q")};
             return new CursorLoader(getActivity(), SnapableContract.Event.CONTENT_URI, null, selection, selectionArgs, null);
         } else if (args != null && args.containsKey("lat") && args.containsKey("lng")) {
-            Log.d(TAG, "CursorLoader: lat|lng");
+            Timber.d("CursorLoader: lat|lng");
             String selection = "lat=? lng=?";
             String[] selectionArgs = {args.getString("lat"), args.getString("lng")};
             return new CursorLoader(getActivity(), SnapableContract.Event.CONTENT_URI, null, selection, selectionArgs, null);
         } else {
-            Log.d(TAG, "CursorLoader: getLatLng()");
+            Timber.d("CursorLoader: getLatLng()");
             if (lastLatLng == null) {
                 getLatLng();
                 return new Loader<Cursor>(getActivity());
             } else {
-                Log.d(TAG, "CursorLoader: lat|lng");
+                Timber.d("CursorLoader: lat|lng");
                 String selection = "lat=? lng=?";
                 String[] selectionArgs = {lastLatLng.getString("lat"), lastLatLng.getString("lng")};
                 return new CursorLoader(getActivity(), SnapableContract.Event.CONTENT_URI, null, selection, selectionArgs, null);
@@ -247,7 +243,7 @@ public class EventListFragment extends SnapListFragment implements SearchView.On
 	}
 
 	public void onLocationChanged(Location location) {
-		Log.d(TAG, location.getLatitude() + " | " + location.getLongitude());
+        Timber.d(location.getLatitude() + " | " + location.getLongitude());
 
 		if (lastLatLng == null) {
             lastLatLng = new Bundle(2);
@@ -289,7 +285,7 @@ public class EventListFragment extends SnapListFragment implements SearchView.On
                 return result.getString(result.getColumnIndex(SnapableContract.EventCredentials.PIN)).equals(event.pin);
             }
         } catch (NullPointerException e) {
-            Log.e(TAG, "Null pointer while trying to access cached event PIN", e);
+            Timber.e(e, "Null pointer while trying to access cached event PIN");
             return false;
         }
 
@@ -298,7 +294,7 @@ public class EventListFragment extends SnapListFragment implements SearchView.On
 	}
 
 	private void getLatLng() {
-		Log.d(TAG, "getLatLng()");
+        Timber.d("getLatLng()");
 		// Retrieve a list of location providers that have fine accuracy, no monetary cost, etc
     	Criteria criteria = new Criteria();
     	criteria.setAccuracy(Criteria.ACCURACY_COARSE);
@@ -326,7 +322,7 @@ public class EventListFragment extends SnapListFragment implements SearchView.On
     		}
 
     		public void run() {
-    			Log.d(TAG, "kill the location updates");
+                Timber.d("kill the location updates");
 				locationManager.removeUpdates(locationListener);
                 fragmentReference.setListShown(true);
 			}

@@ -6,8 +6,6 @@ import ca.hashbrown.snapable.R;
 
 public class EventList extends BaseActivity {
 
-	private static final String TAG = "EventList";
-
 	@Override
     public void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);

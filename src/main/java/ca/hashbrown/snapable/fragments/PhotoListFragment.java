@@ -10,8 +10,6 @@ import android.provider.MediaStore;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.*;
-import android.widget.AbsListView;
-import android.widget.ListView;
 
 import ca.hashbrown.snapable.R;
 import ca.hashbrown.snapable.activities.PhotoUpload;
@@ -20,10 +18,9 @@ import ca.hashbrown.snapable.provider.SnapableContract;
 
 import ca.hashbrown.snapable.api.models.Event;
 import ca.hashbrown.snapable.ui.widgets.ScrollableSwipeRefreshLayout;
+import timber.log.Timber;
 
 public class PhotoListFragment extends SnapListFragment implements SwipeRefreshLayout.OnRefreshListener, LoaderCallbacks<Cursor> {
-
-	private static final String TAG = "PhotoListFragment";
 
 	private static final int PHOTOS = 0x01;
     public static final int GALLERY_ACTION = 0x02;
@@ -125,7 +122,6 @@ public class PhotoListFragment extends SnapListFragment implements SwipeRefreshL
     }
 
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        Log.d(TAG, "onCreateLoader");
         // This is called when a new Loader needs to be created.
 		// First, pick the base URI to use depending on whether we are
 		// currently filtering.
@@ -139,15 +135,13 @@ public class PhotoListFragment extends SnapListFragment implements SwipeRefreshL
 	}
 
 	public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        Log.d(TAG, "onLoadFinished");
-		// Swap the new cursor in. (The framework will take care of closing the
+        // Swap the new cursor in. (The framework will take care of closing the
 		// old cursor once we return.)
         photoAdapter.swapCursor(data);
         setRefreshing(false);
 	}
 
 	public void onLoaderReset(Loader<Cursor> loader) {
-        Log.d(TAG, "onLoaderReset");
         // This is called when the last Cursor provided to onLoadFinished()
 		// above is about to be closed. We need to make sure we are no
 		// longer using it.

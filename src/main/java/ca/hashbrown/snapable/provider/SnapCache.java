@@ -15,6 +15,7 @@ import android.widget.ImageView;
 
 import com.snapable.api.SnapImage;
 
+import ca.hashbrown.snapable.BuildConfig;
 import ca.hashbrown.snapable.Snapable;
 import ca.hashbrown.snapable.api.SnapClient;
 import ca.hashbrown.snapable.api.resources.EventResource;
@@ -193,7 +194,7 @@ public class SnapCache {
 
         public static DiskLruImageCache getDiskCache() {
             if (diskCache == null) {
-                diskCache = new DiskLruImageCache(new File(Snapable.getContext().getExternalCacheDir(), "cache_event"), Snapable.getVersionCode(), 1, (DCACHE_SIZE));
+                diskCache = new DiskLruImageCache(new File(Snapable.FILE_CACHE_DIR, "cache_event"), BuildConfig.VERSION_CODE, 1, (DCACHE_SIZE));
             }
             return diskCache;
         }
@@ -258,7 +259,7 @@ public class SnapCache {
 
         public static DiskLruImageCache getDiskCache() {
             if (diskCache == null) {
-                diskCache = new DiskLruImageCache(new File(Snapable.getContext().getExternalCacheDir(), "cache_photo"), Snapable.getVersionCode(), 1, (DCACHE_SIZE));
+                diskCache = new DiskLruImageCache(new File(Snapable.FILE_CACHE_DIR, "cache_photo"), BuildConfig.VERSION_CODE, 1, (DCACHE_SIZE));
             }
             return diskCache;
         }

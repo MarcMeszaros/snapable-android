@@ -2,9 +2,10 @@ package ca.hashbrown.snapable;
 
 import android.app.Application;
 import android.content.Context;
-import android.content.pm.PackageInfo;
-import android.util.Log;
+
 import com.google.analytics.tracking.android.GoogleAnalytics;
+
+import java.io.File;
 
 import ca.hashbrown.snapable.utils.CrashlyticsTree;
 import timber.log.Timber;
@@ -18,11 +19,16 @@ public class Snapable extends Application {
 
 	private static Snapable instance;
 
+    public static File FILE_CACHE_DIR;
+
 	@Override
 	public void onCreate() {
 		super.onCreate();
         instance = this;
         Timber.v("+++ BUILD VERSION: %s(%d) +++", BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE);
+
+        // Some context sensitive variables.
+        FILE_CACHE_DIR = getExternalCacheDir();
 
         if(BuildConfig.DEBUG) {
 		    // set google analytics to be in debug mode
@@ -45,26 +51,6 @@ public class Snapable extends Application {
     @Deprecated
     public static Context getContext() {
         return instance;
-    }
-
-    /**
-     * Return the application's version code defined in the manifest file.
-     *
-     * @return int of the android application version code
-     */
-    @Deprecated
-    public static int getVersionCode() {
-        return BuildConfig.VERSION_CODE;
-    }
-
-    /**
-     * Return the applications version name defined in the manifest file.
-     *
-     * @return a string representing the version name
-     */
-    @Deprecated
-    public static String getVersionName() {
-        return BuildConfig.VERSION_NAME;
     }
 
 }

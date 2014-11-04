@@ -5,22 +5,18 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.*;
 
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import ca.hashbrown.snapable.R;
 import ca.hashbrown.snapable.provider.SnapableContract;
-import com.crashlytics.android.Crashlytics;
 import com.snapable.api.SnapImage;
 import com.snapable.api.private_v1.Client;
 
@@ -29,6 +25,7 @@ import ca.hashbrown.snapable.api.models.Event;
 import ca.hashbrown.snapable.api.resources.PhotoResource;
 import ca.hashbrown.snapable.utils.SnapBitmapFactory;
 import retrofit.mime.TypedString;
+import timber.log.Timber;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -36,8 +33,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 public class PhotoUpload extends BaseActivity {
-
-	private static final String TAG = "PhotoUpload";
 
 	private Event event;
 	private String imagePath;
@@ -68,7 +63,7 @@ public class PhotoUpload extends BaseActivity {
     protected void onStart() {
         super.onStart();
         // quick memory usage sanity check
-        Log.d(TAG, String.format("Free: %,d B | Total: %,d B | Max: %,d B", Runtime.getRuntime().freeMemory(), Runtime.getRuntime().totalMemory(), Runtime.getRuntime().maxMemory()));
+        Timber.d("Free: %,d B | Total: %,d B | Max: %,d B", Runtime.getRuntime().freeMemory(), Runtime.getRuntime().totalMemory(), Runtime.getRuntime().maxMemory());
 
         // create a scaled bitmap
         Resources r = getResources();
@@ -145,7 +140,7 @@ public class PhotoUpload extends BaseActivity {
                 options.inTempStorage = new byte[32 * 1024]; // 32KB of temp decoding storage
                 // original photo to upload
                 Bitmap photo = SnapBitmapFactory.decodeFile(photoPath, options);
-                Crashlytics.log(Log.DEBUG, TAG, "ByteCount of photo: " + photo.getByteCount());
+                Timber.i("ByteCount of photo: " + photo.getByteCount());
                 ExifInterface exif = new ExifInterface(photoPath);
                 int exifRotation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
 
@@ -157,13 +152,13 @@ public class PhotoUpload extends BaseActivity {
                 photo.recycle();
                 photo = null;
                 System.gc();
-                Log.d(TAG, "Created temp file");
+                Timber.d("Created temp file");
 
                 // re-apply the exif rotation
                 ExifInterface exifComp = new ExifInterface(photoPath + ".tmp");
                 exifComp.setAttribute(ExifInterface.TAG_ORIENTATION, String.valueOf(exifRotation));
                 exifComp.saveAttributes();
-                Log.d(TAG, "Re-applied exif data to temp file");
+                Timber.d("Re-applied exif data to temp file");
 
                 // decode temp file
                 File tempFile = new File(photoPath + ".tmp");
@@ -189,19 +184,16 @@ public class PhotoUpload extends BaseActivity {
 	        		photoRes.postPhoto(tempImage, new TypedString(event.resource_uri), new TypedString(caption));
 				}
 	        } catch(FileNotFoundException e) {
-                Log.e(TAG, "problem finding a file", e);
-                Crashlytics.logException(e);
+                Timber.e(e, "problem finding a file");
                 errorMsg = "There was a problem uploading the photo.";
             } catch (IOException e) {
-                Log.e(TAG, "some IO exception", e);
+                Timber.e(e, "some IO exception");
                 errorMsg = "There was a problem uploading the photo.";
             } catch (OutOfMemoryError e) {
-                Log.e(TAG, "We ran out of memory!", e);
-                Crashlytics.log(String.format("Free: %,d B | Total: %,d B | Max: %,d B", Runtime.getRuntime().freeMemory(), Runtime.getRuntime().totalMemory(), Runtime.getRuntime().maxMemory()));
-                Crashlytics.logException(e);
+                Timber.e(e, "Free: %,d B | Total: %,d B | Max: %,d B", Runtime.getRuntime().freeMemory(), Runtime.getRuntime().totalMemory(), Runtime.getRuntime().maxMemory());
                 errorMsg = getString(R.string.api__unable_to_upload);
             } finally {
-                Log.d(TAG, "delete temp file");
+                Timber.d("delete temp file");
                 File tmpFile = new File(photoPath + ".tmp");
                 tmpFile.delete();
             }
@@ -221,7 +213,7 @@ public class PhotoUpload extends BaseActivity {
 			// stop the progress bar
 			ProgressBar pb = (ProgressBar) findViewById(R.id.fragment_photo_upload__progressBar);
 			pb.setVisibility(View.GONE);
-			Log.d(TAG, "upload complete");
+			Timber.d("upload complete");
 
             // Go back to the photo list when we are done uploading.
             Intent parentActivityIntent = new Intent(getApplicationContext(), EventPhotoList.class);

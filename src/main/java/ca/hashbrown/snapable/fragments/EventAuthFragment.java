@@ -28,10 +28,9 @@ import ca.hashbrown.snapable.R;
 import ca.hashbrown.snapable.activities.EventPhotoList;
 import ca.hashbrown.snapable.provider.SnapableContract;
 import ca.hashbrown.snapable.api.models.Event;
+import timber.log.Timber;
 
 public class EventAuthFragment extends SnapDialogFragment implements OnEditorActionListener {
-
-	private static final String TAG = "EventAuthFragment";
 
     private AlertDialog mDialog;
 
@@ -52,7 +51,6 @@ public class EventAuthFragment extends SnapDialogFragment implements OnEditorAct
 		this.event = event;
 	}
 
-    @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = super.onCreateView(inflater, container, savedInstanceState);
@@ -192,7 +190,7 @@ public class EventAuthFragment extends SnapDialogFragment implements OnEditorAct
             }
         }
         catch (Exception e) {
-            Log.e(TAG, "something went terribly wrong while trying to compare pins", e);
+            Timber.e(e, "something went terribly wrong while trying to compare pins");
             return false;
         }
     }

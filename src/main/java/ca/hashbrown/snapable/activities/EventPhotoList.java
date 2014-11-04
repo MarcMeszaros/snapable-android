@@ -24,8 +24,6 @@ import java.io.File;
 
 public class EventPhotoList extends BaseActivity {
 
-	private static final String TAG = "EventPhotoList";
-
     public static final int PHOTO_ACTION = 0x01;
 
     private Event event;
