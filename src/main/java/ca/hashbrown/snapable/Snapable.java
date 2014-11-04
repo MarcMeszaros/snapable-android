@@ -6,6 +6,9 @@ import android.content.pm.PackageInfo;
 import android.util.Log;
 import com.google.analytics.tracking.android.GoogleAnalytics;
 
+import ca.hashbrown.snapable.utils.CrashlyticsTree;
+import timber.log.Timber;
+
 /**
  * Set some defaults for the Android application based on the build type.
  *
@@ -13,29 +16,25 @@ import com.google.analytics.tracking.android.GoogleAnalytics;
  */
 public class Snapable extends Application {
 
-	private static final String TAG = "Snapable";
-    private static Snapable instance;
+	private static Snapable instance;
 
 	@Override
 	public void onCreate() {
 		super.onCreate();
         instance = this;
+        Timber.v("+++ BUILD VERSION: %s(%d) +++", BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE);
 
-        // print the version
-        Log.i(TAG, String.format("+++ BUILD VERSION: %s(%d) +++", getVersionName(), getVersionCode()));
-
-		// if we are in release mode
-		if(!BuildConfig.DEBUG) {
-			Log.i(TAG, "Starting in release mode.");
-
-			// set google analytics to be in release mode
-			// TODO implement release mode
-		} else {
-			Log.i(TAG, "Starting in debug mode.");
-
-			// set google analytics to be in debug mode
+        if(BuildConfig.DEBUG) {
+		    // set google analytics to be in debug mode
 			GoogleAnalytics.getInstance(this).setAppOptOut(true);
 		}
+
+        // Initialize the logging library
+        if (BuildConfig.DEBUG) {
+            Timber.plant(new Timber.DebugTree());
+        } else {
+            Timber.plant(new CrashlyticsTree(this));
+        }
 	}
 
     /**
@@ -43,6 +42,7 @@ public class Snapable extends Application {
      *
      * @return the application {@link android.content.Context}
      */
+    @Deprecated
     public static Context getContext() {
         return instance;
     }
@@ -52,13 +52,9 @@ public class Snapable extends Application {
      *
      * @return int of the android application version code
      */
+    @Deprecated
     public static int getVersionCode() {
-        try {
-            PackageInfo packageInfo = instance.getPackageManager().getPackageInfo(instance.getPackageName(), 0);
-            return packageInfo.versionCode;
-        } catch (android.content.pm.PackageManager.NameNotFoundException e) {
-            return -1;
-        }
+        return BuildConfig.VERSION_CODE;
     }
 
     /**
@@ -66,13 +62,9 @@ public class Snapable extends Application {
      *
      * @return a string representing the version name
      */
+    @Deprecated
     public static String getVersionName() {
-        try {
-            PackageInfo packageInfo = instance.getPackageManager().getPackageInfo(instance.getPackageName(), 0);
-            return packageInfo.versionName;
-        } catch (android.content.pm.PackageManager.NameNotFoundException e) {
-            return null;
-        }
+        return BuildConfig.VERSION_NAME;
     }
 
 }
