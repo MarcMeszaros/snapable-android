@@ -1,9 +1,8 @@
 package ca.hashbrown.snapable.api;
 
-
-import android.os.Build;
-
 import com.snapable.api.private_v1.Client;
+
+import java.util.HashMap;
 
 import ca.hashbrown.snapable.BuildConfig;
 import ca.hashbrown.snapable.Snapable;
@@ -11,8 +10,8 @@ import ca.hashbrown.snapable.utils.Network;
 
 public class SnapClient extends Client {
 
-    private static SnapClient instance = null;
-    private static Object instanceMutex = new Object();
+    private static SnapClient instance;
+    private static HashMap<String,Object> resources;
 
     private SnapClient(String key, String secret, boolean useDevApi) {
         super(key, secret, useDevApi);
@@ -24,13 +23,27 @@ public class SnapClient extends Client {
      *
      * @return An instance of {@link ca.hashbrown.snapable.api.SnapClient}.
      */
-    public static SnapClient getInstance() {
-        if (instance == null) {
-            synchronized (instanceMutex) {
-                instance = new SnapClient(BuildConfig.API_KEY, BuildConfig.API_SECRET, BuildConfig.API_DEV);
-            }
-        }
+    public static synchronized SnapClient getInstance() {
+        if (instance == null)
+            instance = new SnapClient(BuildConfig.API_KEY, BuildConfig.API_SECRET, BuildConfig.API_DEV);
+
         return instance;
+    }
+
+    /**
+     * A helper method to get instance of resource.
+     *
+     * @param service the type of resource interface.
+     * @return Instance of resource interface.
+     */
+    public static synchronized <T> T getResource(Class<T> service){
+        if (resources == null)
+            resources = new HashMap<>(5);
+
+        if (!resources.containsKey(service.getName()))
+            resources.put(service.getName(), getInstance().getRestAdapter().create(service));
+
+        return (T) resources.get(service.getName());
     }
 
     /**

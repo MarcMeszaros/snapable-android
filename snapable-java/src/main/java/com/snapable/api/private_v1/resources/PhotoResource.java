@@ -14,6 +14,12 @@ public interface PhotoResource {
     @Headers("Accept: application/json")
     Pager<Photo> getPhotos();
 
+    @GET("/{uri}")
+    @Headers("Accept: application/json")
+    Pager<Photo> getPhotos(
+            @Path(value="uri", encode=false) String uri
+    );
+
     @GET("/"+RESOURCE_NAME+"/")
     @Headers("Accept: application/json")
     Pager<Photo> getPhotos(
