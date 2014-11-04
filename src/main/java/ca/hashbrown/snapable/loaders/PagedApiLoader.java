@@ -69,6 +69,14 @@ abstract class PagedApiLoader<E> extends AsyncTaskLoader<LoaderResponse<E>> {
         }
     }
 
+    @Override
+    protected void onReset() {
+        super.onReset();
+        mNextPage = null;
+        mPreviousPage = null;
+        hasNextPage = true;
+    }
+
     /**
      * Try and load the next API page.
      */
@@ -112,6 +120,10 @@ abstract class PagedApiLoader<E> extends AsyncTaskLoader<LoaderResponse<E>> {
      */
     public boolean isProcessing() {
         return processing;
+    }
+
+    public boolean hasNextPage() {
+        return hasNextPage;
     }
 
     /**

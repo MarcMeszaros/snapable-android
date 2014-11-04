@@ -1,46 +1,63 @@
 package ca.hashbrown.snapable.fragments;
 
 import android.app.LoaderManager.LoaderCallbacks;
-import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.util.Log;
 import android.view.*;
 
+import com.snapable.api.private_v1.objects.Photo;
+
+import butterknife.ButterKnife;
+import butterknife.InjectView;
 import ca.hashbrown.snapable.R;
 import ca.hashbrown.snapable.activities.PhotoUpload;
 import ca.hashbrown.snapable.adapters.PhotoListAdapter;
-import ca.hashbrown.snapable.provider.SnapableContract;
+import ca.hashbrown.snapable.loaders.LoaderResponse;
+import ca.hashbrown.snapable.loaders.PhotoLoader;
 
 import ca.hashbrown.snapable.api.models.Event;
 import ca.hashbrown.snapable.ui.widgets.ScrollableSwipeRefreshLayout;
-import timber.log.Timber;
 
-public class PhotoListFragment extends SnapListFragment implements SwipeRefreshLayout.OnRefreshListener, LoaderCallbacks<Cursor> {
+public class PhotoListFragment extends SnapListFragment implements SwipeRefreshLayout.OnRefreshListener,
+        LoaderCallbacks<LoaderResponse<Photo>>, SnapListFragment.LoadMoreListener {
 
-	private static final int PHOTOS = 0x01;
-    public static final int GALLERY_ACTION = 0x02;
+	public static final int ACTION_GALLERY = 0x02;
 
-	PhotoListAdapter photoAdapter;
-	Event event;
-    private SwipeRefreshLayout swipeLayout;
+    private static final String ARG_EVENT = "arg.event";
+    private static final String ARG_LOADER_EVENT_ID = "arg.loader.event.id";
+    private static final String ARG_LOADER_EVENT_IS_STREAMABLE = "arg.loader.event.streamable";
+
+    private static final int LOADER_PHOTOS = "PhotoLoader".hashCode();
+
+	private PhotoListAdapter mAdapter;
+	private Event mEvent;
+
+    @InjectView(R.id.fragment_photo_list)
+    SwipeRefreshLayout mSwipeLayout;
+
+    public static PhotoListFragment getInstance(Event event) {
+        PhotoListFragment photoListFragment = new PhotoListFragment();
+        Bundle args = new Bundle(1);
+        args.putParcelable(ARG_EVENT, event);
+        photoListFragment.setArguments(args);
+        return photoListFragment;
+    }
 
     // never used, but we need it to compile
 	public PhotoListFragment() {
     }
 
-	public PhotoListFragment(Event event) {
-        this.event = event;
-	}
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+        if (getArguments() != null) {
+            mEvent = getArguments().getParcelable(ARG_EVENT);
+        }
     }
 
     @Override
@@ -48,39 +65,35 @@ public class PhotoListFragment extends SnapListFragment implements SwipeRefreshL
 		super.onActivityCreated(savedInstanceState);
 
         setListShownNoAnimation(false);
-		photoAdapter = new PhotoListAdapter(getActivity(), null);
-        setListAdapter(photoAdapter);
+		mAdapter = new PhotoListAdapter(getActivity());
+        setListAdapter(mAdapter);
 
 		// Prepare the loader. (Re-connect with an existing one, or start a new one.)
-		getLoaderManager().initLoader(PHOTOS, null, this);
+        Bundle args = new Bundle(2);
+        args.putLong(ARG_LOADER_EVENT_ID, mEvent.getPk());
+        args.putBoolean(ARG_LOADER_EVENT_IS_STREAMABLE, true);
+		getLoaderManager().initLoader(LOADER_PHOTOS, args, this);
 	}
 
     @Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		return inflater.inflate(R.layout.fragment_photo_list, null);
+		View v = inflater.inflate(R.layout.fragment_photo_list, null);
+        ButterKnife.inject(this, v);
+        return v;
 	}
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        setLoadMoreListener(this);
+
         // make the list go into "loading"
         setListShownNoAnimation(false);
 
         // setup pull to refresh
-        swipeLayout = (ScrollableSwipeRefreshLayout) view.findViewById(R.id.fragment_photo_list);
-        swipeLayout.setOnRefreshListener(this);
+        mSwipeLayout.setOnRefreshListener(this);
     }
-
-	@Override
-	public void onResume() {
-		super.onResume();
-
-		// if the loader is already started, reload it
-		if(getLoaderManager().getLoader(PHOTOS).isStarted()) {
-			getLoaderManager().getLoader(PHOTOS).forceLoad();
-		}
-	}
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -94,7 +107,7 @@ public class PhotoListFragment extends SnapListFragment implements SwipeRefreshL
             case R.id.menu__fragment_photo_list__upload:
                 Intent intent = new Intent(Intent.ACTION_PICK);
                 intent.setType("image/jpeg");
-                startActivityForResult(intent, GALLERY_ACTION);
+                startActivityForResult(intent, ACTION_GALLERY);
                 return true;
 
             default:
@@ -112,7 +125,7 @@ public class PhotoListFragment extends SnapListFragment implements SwipeRefreshL
 
             // pass all the data to the photo upload activity
             Intent upload = new Intent(getActivity(), PhotoUpload.class);
-            upload.putExtra("event", event);
+            upload.putExtra("event", mEvent);
             upload.putExtra("imagePath", fileSrc);
             startActivity(upload);
         } else {
@@ -121,50 +134,55 @@ public class PhotoListFragment extends SnapListFragment implements SwipeRefreshL
         }
     }
 
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        // This is called when a new Loader needs to be created.
-		// First, pick the base URI to use depending on whether we are
-		// currently filtering.
-        if (this.event != null) {
-            String selection = "event=?";
-            String[] selectionArgs = {String.valueOf(event.getId())};
-            return new CursorLoader(getActivity(), SnapableContract.Photo.CONTENT_URI, null, selection, selectionArgs, null);
+    public Loader<LoaderResponse<Photo>> onCreateLoader(int id, Bundle args) {
+        if (args != null) {
+            return new PhotoLoader(getActivity(), args.getLong(ARG_LOADER_EVENT_ID), args.getBoolean(ARG_LOADER_EVENT_IS_STREAMABLE));
         } else {
             return null;
         }
 	}
 
-	public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        // Swap the new cursor in. (The framework will take care of closing the
-		// old cursor once we return.)
-        photoAdapter.swapCursor(data);
-        setRefreshing(false);
+	public void onLoadFinished(Loader<LoaderResponse<Photo>> loader, LoaderResponse<Photo> response) {
+        setListShown(true);
+        // For the first page, clear the data from adapter.
+        if(response.type == LoaderResponse.TYPE.FIRST)
+            mAdapter.clear();
+
+        mAdapter.addAll(response.data);
+        if (isResumed()) {
+            setListShown(true); // make sure the list is displayed
+        } else {
+            setListShownNoAnimation(true);
+        }
 	}
 
-	public void onLoaderReset(Loader<Cursor> loader) {
-        // This is called when the last Cursor provided to onLoadFinished()
-		// above is about to be closed. We need to make sure we are no
-		// longer using it.
-        photoAdapter.swapCursor(null);
+	public void onLoaderReset(Loader<LoaderResponse<Photo>> loader) {
+        mAdapter.clear();
 	}
 
 	public void setEvent(Event event) {
-		this.event = event;
-		this.getLoaderManager().initLoader(PHOTOS, null, this);
+		mEvent = event;
+        Bundle args = new Bundle(2);
+        args.putLong(ARG_LOADER_EVENT_ID, mEvent.getPk());
+        args.putBoolean(ARG_LOADER_EVENT_IS_STREAMABLE, true);
+        getLoaderManager().restartLoader(LOADER_PHOTOS, args, this);
 	}
-
-    private void setRefreshing(boolean refreshing) {
-        if (swipeLayout != null) {
-            swipeLayout.setRefreshing(refreshing);
-        }
-        if (refreshing == false) {
-            setListShown(true);
-        }
-    }
 
     @Override
     public void onRefresh() {
-        getLoaderManager().restartLoader(PHOTOS, null, this);
+        Bundle args = new Bundle(2);
+        args.putLong(ARG_LOADER_EVENT_ID, mEvent.getPk());
+        args.putBoolean(ARG_LOADER_EVENT_IS_STREAMABLE, true);
+        getLoaderManager().restartLoader(LOADER_PHOTOS, args, this);
+    }
+
+    //==== SnapListFragment.LoadMoreListener ====\\
+    @Override
+    public void loadMore() {
+        Loader<LoaderResponse<Photo>> loader = getLoaderManager().getLoader(LOADER_PHOTOS);
+        if (loader != null && !((PhotoLoader) loader).isProcessing() && ((PhotoLoader) loader).hasNextPage()) {
+            ((PhotoLoader) loader).loadNextPage();
+        }
     }
 
 }

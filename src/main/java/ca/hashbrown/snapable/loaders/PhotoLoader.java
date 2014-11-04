@@ -34,5 +34,4 @@ public class PhotoLoader extends PagedApiLoader<Photo> {
         super.onStartLoading();
         super.forceLoad();
     }
-
 }

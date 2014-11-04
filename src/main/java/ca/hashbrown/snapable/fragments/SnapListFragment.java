@@ -1,8 +1,10 @@
 package ca.hashbrown.snapable.fragments;
 
 import android.app.ListFragment;
+import android.os.Bundle;
 import android.view.View;
 import android.view.animation.AnimationUtils;
+import android.widget.AbsListView;
 
 import com.octo.android.robospice.SpiceManager;
 
@@ -17,9 +19,15 @@ import ca.hashbrown.snapable.api.robospice.SnapSpiceService;
  * @see <a href="https://android.googlesource.com/platform/frameworks/base/+/master/core/java/android/app/ListFragment.java">Android Source File</a>
  * @see <a href="https://android.googlesource.com/platform/frameworks/base/+/master/core/res/res/layout/list_content.xml">Android Layout File<a/>
  */
-public abstract class SnapListFragment extends ListFragment {
+public abstract class SnapListFragment extends ListFragment implements AbsListView.OnScrollListener {
 
     protected SpiceManager apiRequestManager = new SpiceManager(SnapSpiceService.class);
+
+    private final int AUTOLOAD_THRESHOLD = 4;
+
+    private boolean isMoreLoading = false;
+    private int mScrollState = SCROLL_STATE_IDLE;
+    private LoadMoreListener mLoadMoreListener;
 
     @Override
     public void onStart() {
@@ -31,6 +39,12 @@ public abstract class SnapListFragment extends ListFragment {
     public void onStop() {
         apiRequestManager.shouldStop();
         super.onStop();
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        getListView().setOnScrollListener(this);
     }
 
     /**
@@ -70,16 +84,33 @@ public abstract class SnapListFragment extends ListFragment {
      * new state.
      */
     private void setListShown(boolean shown, boolean animate) {
+        if (getView() == null)
+            return;
+
         View mProgressContainer = getView().findViewById(R.id.progressContainer);
         View mListContainer = getView().findViewById(R.id.listContainer);
-        boolean mListShown = (mListContainer.getVisibility() == View.VISIBLE);
-        if (mProgressContainer == null) {
-            throw new IllegalStateException("Can't be used with a custom content view");
+        if (mListContainer == null) {
+            throw new IllegalStateException("Can't be used with a custom content view.");
         }
-        if (mListShown == shown) {
+
+        boolean mListShown = (mListContainer.getVisibility() == View.VISIBLE);
+        boolean mProgressShown = mProgressContainer != null && (mProgressContainer.getVisibility() == View.VISIBLE);
+        if (mListShown == shown && mProgressShown != shown) {
             return;
         }
-        mListShown = shown;
+
+        // if the progress container is missing, just show the list container
+        if (mProgressContainer == null) {
+            if (animate) {
+                mListContainer.startAnimation(AnimationUtils.loadAnimation(getActivity(), android.R.anim.fade_in));
+            } else {
+                mListContainer.clearAnimation();
+            }
+            mListContainer.setVisibility(View.VISIBLE);
+            return;
+        }
+
+        // toggle the containers if both the list container and the progress containers are available
         if (shown) {
             if (animate) {
                 mProgressContainer.startAnimation(AnimationUtils.loadAnimation(getActivity(), android.R.anim.fade_out));
@@ -101,6 +132,45 @@ public abstract class SnapListFragment extends ListFragment {
             mProgressContainer.setVisibility(View.VISIBLE);
             mListContainer.setVisibility(View.GONE);
         }
+    }
+
+    // ==== AbsListView.OnScrollListener ====\\
+    @Override
+    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+        // if we can load more
+        if (mLoadMoreListener != null && !isMoreLoading && mScrollState != SCROLL_STATE_IDLE) {
+            // check if we should load
+            final int lastItem = firstVisibleItem + visibleItemCount;
+            if ((totalItemCount - AUTOLOAD_THRESHOLD) <= lastItem) {
+                isMoreLoading = true;
+                mLoadMoreListener.loadMore();
+                isMoreLoading = false;
+            }
+        }
+    }
+
+    @Override
+    public void onScrollStateChanged(AbsListView view, int scrollState) {
+        mScrollState = scrollState;
+    }
+
+    //==== LoadMore Interface ====\\
+
+    /**
+     * Set the {@link LoadMoreListener} listener for the
+     * list.
+     *
+     * @param listener The listener to associate.
+     */
+    public void setLoadMoreListener(LoadMoreListener listener) {
+        mLoadMoreListener = listener;
+    }
+
+    /**
+     * Callbacks to load more data based on various events such as scrolling.
+     */
+    public interface LoadMoreListener {
+        public void loadMore();
     }
 
 }
