@@ -62,8 +62,7 @@ public class PhotoListFragment extends SnapListFragment implements SwipeRefreshL
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 
-        setListShownNoAnimation(false);
-		mAdapter = new PhotoListAdapter(getActivity());
+        mAdapter = new PhotoListAdapter(getActivity());
         setListAdapter(mAdapter);
 
 		// Prepare the loader. (Re-connect with an existing one, or start a new one.)
@@ -117,15 +116,13 @@ public class PhotoListFragment extends SnapListFragment implements SwipeRefreshL
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (data != null) {
             Cursor cursor = getActivity().getContentResolver().query(data.getData(), null, null, null, null);
-            cursor.moveToFirst();  //if not doing this, 01-22 19:17:04.564: ERROR/AndroidRuntime(26264): Caused by: android.database.CursorIndexOutOfBoundsException: Index -1 requested, with a size of 1
+            cursor.moveToFirst();
             int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
             String fileSrc = cursor.getString(idx);
+            cursor.close();
 
             // pass all the data to the photo upload activity
             startActivity(PhotoUpload.initIntent(getActivity(), mEvent, fileSrc));
-        } else {
-            // the unhandled result calls the super (and passes it down to fragments)
-            super.onActivityResult(requestCode, resultCode, data);
         }
     }
 
@@ -138,7 +135,6 @@ public class PhotoListFragment extends SnapListFragment implements SwipeRefreshL
 	}
 
 	public void onLoadFinished(Loader<LoaderResponse<Photo>> loader, LoaderResponse<Photo> response) {
-        setListShown(true);
         // For the first page, clear the data from adapter.
         if(response.type == LoaderResponse.TYPE.FIRST)
             mAdapter.clear();
@@ -149,18 +145,11 @@ public class PhotoListFragment extends SnapListFragment implements SwipeRefreshL
         } else {
             setListShownNoAnimation(true);
         }
-	}
+        mSwipeLayout.setRefreshing(false);
+    }
 
 	public void onLoaderReset(Loader<LoaderResponse<Photo>> loader) {
         mAdapter.clear();
-	}
-
-	public void setEvent(Event event) {
-		mEvent = event;
-        Bundle args = new Bundle(2);
-        args.putLong(ARG_LOADER_EVENT_ID, mEvent.getPk());
-        args.putBoolean(ARG_LOADER_EVENT_IS_STREAMABLE, true);
-        getLoaderManager().restartLoader(LOADER_PHOTOS, args, this);
 	}
 
     @Override

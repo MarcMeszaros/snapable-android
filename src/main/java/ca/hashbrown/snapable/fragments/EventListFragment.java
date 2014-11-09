@@ -142,7 +142,7 @@ public class EventListFragment extends SnapListFragment implements SearchView.On
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.fragment_event_list, menu);
         mSearchView = (SearchView) menu.findItem(R.id.menu__fragment_event_list__search).getActionView();
-        mSearchView.setQueryHint("Event Title or URL");
+        mSearchView.setQueryHint(getString(R.string.fragment_event_list__search_hint));
         mSearchView.setOnQueryTextListener(this);
     }
 
@@ -195,8 +195,7 @@ public class EventListFragment extends SnapListFragment implements SearchView.On
 	}
 
     public void onLoadFinished(Loader<LoaderResponse<Event>> loader, LoaderResponse<Event> response) {
-		setListShown(true);
-        // For the first page, clear the data from adapter.
+		// For the first page, clear the data from adapter.
         if(response.type == LoaderResponse.TYPE.FIRST)
             mAdapter.clear();
 
@@ -206,6 +205,7 @@ public class EventListFragment extends SnapListFragment implements SearchView.On
         } else {
             setListShownNoAnimation(true);
         }
+        setRefreshing(false);
 	}
 
 	public void onLoaderReset(Loader<LoaderResponse<Event>> loader) {

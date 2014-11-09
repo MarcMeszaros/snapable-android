@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.TypedValue;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.*;
 
@@ -66,8 +67,10 @@ public class PhotoUpload extends BaseActivity {
         }
 
     	// set the action bar title
-        if (getActionBar() != null)
-    	    getActionBar().setTitle(mEvent.title);
+        if (getActionBar() != null) {
+            getActionBar().setTitle(mEvent.title);
+            getActionBar().setDisplayHomeAsUpEnabled(true);
+        }
     }
 
     @Override
@@ -116,7 +119,18 @@ public class PhotoUpload extends BaseActivity {
         }
 	}
 
-	private class PhotoUploadTask extends AsyncTask<Void, Void, Void> {
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private class PhotoUploadTask extends AsyncTask<Void, Void, Void> {
 
 		private Event event;
 		private String caption;

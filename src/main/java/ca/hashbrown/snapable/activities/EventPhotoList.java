@@ -49,21 +49,16 @@ public class EventPhotoList extends BaseActivity {
         // try and save/resume the activity
         if (savedInstanceState != null) {
             mEvent = (Event) savedInstanceState.getSerializable(STATE_EVENT);
-            mImageUri = savedInstanceState.getParcelable(STATE_IMAGE_URI);
         } else {
             mEvent = (Event) getIntent().getSerializableExtra(ARG_EVENT);
+            getFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_container, PhotoListFragment.getInstance(mEvent), PhotoListFragment.class.getCanonicalName())
+                    .commit();
         }
-
-		// Create the list fragment and add it as our sole content.
-		PhotoListFragment photoListFragment = (PhotoListFragment) getFragmentManager().findFragmentById(R.id.activity_photo_list__fragment_photo_list);
-		if (photoListFragment != null) {
-			photoListFragment.setEvent(mEvent);
-		}
 
 		// make the action bar button home button go back
         if (getActionBar() != null) {
             getActionBar().setDisplayHomeAsUpEnabled(true);
-            getActionBar().setTitle(mEvent.title);
         }
 	}
 

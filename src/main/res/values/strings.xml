@@ -1,8 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Snapable</string>
-    <string name="loading">Loading\u2026</string>
 
     <string name="api__unreachable">Unable to connect to Snapable.</string>
     <string name="api__unable_to_upload">This is embarrassing… we couldn\'t upload the photo. We saved a copy on your device.</string>
+
+    <!-- event list -->
+    <string name="fragment_event_list__empty">Sorry, we couldn\'t find a nearby event. Try using the search field.</string>
+    <string name="fragment_event_list__search">Search</string>
+    <string name="fragment_event_list__search_hint">Event Title or URL</string>
+
+    <!-- photo upload -->
+    <string name="fragment_photo_upload__caption_hint">Caption (Optional)</string>
+    <string name="fragment_photo_upload__button_done">Upload</string>
+    <string name="fragment_photo_upload__upload_gallery">Upload from Gallery</string>
+
+    <!-- photo list -->
+    <string name="fragment_photo_list__empty_omg">OMG!</string>
+    <string name="fragment_photo_list__empty_no_photos">No one\'s shared\n a photo yet!</string>
+    <string name="fragment_photo_list__empty_be_first">Quick,\n be first!</string>
 </resources>
