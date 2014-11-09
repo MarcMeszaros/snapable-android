@@ -40,7 +40,7 @@
                 android:divider="@android:color/transparent"
                 android:dividerHeight="12dp"
                 android:padding="12dp"
-                android:scrollbars="none"
+                android:scrollbarStyle="outsideOverlay"
                 tools:listitem="@layout/listview_row_event"
                 tools:visibility="visible" />
 
@@ -54,7 +54,7 @@
                 android:padding="20dp"
                 android:text="@string/fragment_event_list__empty"
                 android:textSize="18sp"
-                tools:visibility="gone"/>
+                tools:visibility="gone" />
 
         </RelativeLayout>
 

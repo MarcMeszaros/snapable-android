@@ -2,15 +2,12 @@ package ca.hashbrown.snapable.fragments;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,14 +20,17 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
+import com.snapable.api.private_v1.objects.Event;
+
 import butterknife.ButterKnife;
 import ca.hashbrown.snapable.R;
 import ca.hashbrown.snapable.activities.EventPhotoList;
 import ca.hashbrown.snapable.provider.SnapableContract;
-import ca.hashbrown.snapable.api.models.Event;
 import timber.log.Timber;
 
 public class EventAuthFragment extends SnapDialogFragment implements OnEditorActionListener {
+
+    private static final String ARG_EVENT = "arg.event";
 
     private AlertDialog mDialog;
 
@@ -38,18 +38,27 @@ public class EventAuthFragment extends SnapDialogFragment implements OnEditorAct
 	private EditText name;
 	private EditText email;
 	// data passed in from initializer
-	private Event event;
+	private Event mEvent;
+
+    public static EventAuthFragment getInstance(Event event) {
+        EventAuthFragment fragment = new EventAuthFragment();
+        Bundle args = new Bundle(1);
+        args.putSerializable(ARG_EVENT, event);
+        fragment.setArguments(args);
+        return fragment;
+    }
 
 	public EventAuthFragment() {
 		// empty
 	}
 
-	@Override
-	public void setArguments(Bundle args) {
-		super.setArguments(args);
-		Event event = args.getParcelable("event");
-		this.event = event;
-	}
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+            mEvent = (Event) getArguments().getSerializable(ARG_EVENT);
+        }
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -70,7 +79,7 @@ public class EventAuthFragment extends SnapDialogFragment implements OnEditorAct
         name = ButterKnife.findById(view, R.id.fragment_event_auth__name);
         email = ButterKnife.findById(view, R.id.fragment_event_auth__email);
 
-        if (this.event != null && this.event.is_public == true) {
+        if (mEvent != null && mEvent.is_public) {
             // hide the pin stuff because the event is public
             ((LinearLayout)view).removeView(view.findViewById(R.id.fragment_event_auth__pin_group));
             // Show soft keyboard automatically
@@ -137,13 +146,13 @@ public class EventAuthFragment extends SnapDialogFragment implements OnEditorAct
 
             // store the event as data to be passed
             Intent intent = new Intent(getActivity(), EventPhotoList.class);
-            intent.putExtra("event", this.event);
+            intent.putExtra("event", mEvent);
 
             // if the event is public login
-            if (this.event.is_public == true && cachedPinMatchesEventPin(this.event) == false) {
+            if (mEvent.is_public && cachedPinMatchesEventPin(mEvent) == false) {
                 // save the details in the local storage
                 ContentValues values = new ContentValues(3);
-                values.put(SnapableContract.EventCredentials._ID, this.event.getId());
+                values.put(SnapableContract.EventCredentials._ID, mEvent.getId());
                 values.put(SnapableContract.EventCredentials.NAME, name.getText().toString());
                 values.put(SnapableContract.EventCredentials.EMAIL, email.getText().toString());
                 values.put(SnapableContract.EventCredentials.TYPE_ID, 6);
@@ -157,7 +166,7 @@ public class EventAuthFragment extends SnapDialogFragment implements OnEditorAct
                 return true;
             }
             // if the event is private and the pins match
-            else if (this.event.is_public != true && this.event.pin.equals(pin.getText().toString())) {
+            else if (!mEvent.is_public && mEvent.pin.equals(pin.getText().toString())) {
                 // save the details in the local storage
                 ContentValues values = new ContentValues(3);
                 values.put(SnapableContract.EventCredentials.PIN, pin.getText().toString());
@@ -166,15 +175,15 @@ public class EventAuthFragment extends SnapDialogFragment implements OnEditorAct
                 values.put(SnapableContract.EventCredentials.TYPE_ID, 5);
 
                 // check if a cached version exists
-                Uri requestUri = ContentUris.withAppendedId(SnapableContract.EventCredentials.CONTENT_URI, this.event.getId());
+                Uri requestUri = ContentUris.withAppendedId(SnapableContract.EventCredentials.CONTENT_URI, mEvent.getId());
                 Cursor query = getActivity().getContentResolver().query(requestUri, null, null, null, null);
 
                 // insert the event details
                 if (query.getCount() <= 0) {
-                    values.put(SnapableContract.EventCredentials._ID, this.event.getId());
+                    values.put(SnapableContract.EventCredentials._ID, mEvent.getId());
                     getActivity().getContentResolver().insert(SnapableContract.EventCredentials.CONTENT_URI, values);
                 } else {
-                    Uri updateUri = ContentUris.withAppendedId(SnapableContract.EventCredentials.CONTENT_URI, this.event.getId());
+                    Uri updateUri = ContentUris.withAppendedId(SnapableContract.EventCredentials.CONTENT_URI, mEvent.getId());
                     getActivity().getContentResolver().update(updateUri, values, null, null);
                 }
                 // launch the event photo list

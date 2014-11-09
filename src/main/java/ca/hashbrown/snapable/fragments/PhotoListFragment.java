@@ -9,6 +9,7 @@ import android.provider.MediaStore;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.*;
 
+import com.snapable.api.private_v1.objects.Event;
 import com.snapable.api.private_v1.objects.Photo;
 
 import butterknife.ButterKnife;
@@ -18,9 +19,6 @@ import ca.hashbrown.snapable.activities.PhotoUpload;
 import ca.hashbrown.snapable.adapters.PhotoListAdapter;
 import ca.hashbrown.snapable.loaders.LoaderResponse;
 import ca.hashbrown.snapable.loaders.PhotoLoader;
-
-import ca.hashbrown.snapable.api.models.Event;
-import ca.hashbrown.snapable.ui.widgets.ScrollableSwipeRefreshLayout;
 
 public class PhotoListFragment extends SnapListFragment implements SwipeRefreshLayout.OnRefreshListener,
         LoaderCallbacks<LoaderResponse<Photo>>, SnapListFragment.LoadMoreListener {
@@ -42,7 +40,7 @@ public class PhotoListFragment extends SnapListFragment implements SwipeRefreshL
     public static PhotoListFragment getInstance(Event event) {
         PhotoListFragment photoListFragment = new PhotoListFragment();
         Bundle args = new Bundle(1);
-        args.putParcelable(ARG_EVENT, event);
+        args.putSerializable(ARG_EVENT, event);
         photoListFragment.setArguments(args);
         return photoListFragment;
     }
@@ -56,7 +54,7 @@ public class PhotoListFragment extends SnapListFragment implements SwipeRefreshL
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
         if (getArguments() != null) {
-            mEvent = getArguments().getParcelable(ARG_EVENT);
+            mEvent = (Event) getArguments().getSerializable(ARG_EVENT);
         }
     }
 
@@ -124,10 +122,7 @@ public class PhotoListFragment extends SnapListFragment implements SwipeRefreshL
             String fileSrc = cursor.getString(idx);
 
             // pass all the data to the photo upload activity
-            Intent upload = new Intent(getActivity(), PhotoUpload.class);
-            upload.putExtra("event", mEvent);
-            upload.putExtra("imagePath", fileSrc);
-            startActivity(upload);
+            startActivity(PhotoUpload.initIntent(getActivity(), mEvent, fileSrc));
         } else {
             // the unhandled result calls the super (and passes it down to fragments)
             super.onActivityResult(requestCode, resultCode, data);

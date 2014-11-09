@@ -1,6 +1,8 @@
 package com.snapable.api;
 
-public abstract class BaseObject {
+import java.io.Serializable;
+
+public abstract class BaseObject implements Serializable {
 
     public String resource_uri;
 

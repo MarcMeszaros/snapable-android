@@ -1,5 +1,6 @@
 package ca.hashbrown.snapable.activities;
 
+import android.app.Activity;
 import android.content.ContentUris;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -19,9 +20,9 @@ import ca.hashbrown.snapable.R;
 import ca.hashbrown.snapable.provider.SnapableContract;
 import com.snapable.api.SnapImage;
 import com.snapable.api.private_v1.Client;
+import com.snapable.api.private_v1.objects.Event;
 
 import ca.hashbrown.snapable.api.SnapClient;
-import ca.hashbrown.snapable.api.models.Event;
 import ca.hashbrown.snapable.api.resources.PhotoResource;
 import ca.hashbrown.snapable.utils.SnapBitmapFactory;
 import retrofit.mime.TypedString;
@@ -34,9 +35,20 @@ import java.io.IOException;
 
 public class PhotoUpload extends BaseActivity {
 
-	private Event event;
-	private String imagePath;
+    public static final String EXTRA_EVENT = "extra.mEvent";
+    public static final String EXTRA_IMAGE_PATH = "extra.image.path";
+
+	private Event mEvent;
+	private String mImagePath;
     private Bitmap bmScaled;
+
+    public static Intent initIntent(Activity activity, Event event, String imagePath) {
+        // pass all the data to the photo upload activity
+        Intent intent = new Intent(activity, PhotoUpload.class);
+        intent.putExtra(PhotoUpload.EXTRA_EVENT, event);
+        intent.putExtra(PhotoUpload.EXTRA_IMAGE_PATH, imagePath);
+        return intent;
+    }
 
 	@Override
     public void onCreate(Bundle savedInstanceState) {
@@ -45,18 +57,17 @@ public class PhotoUpload extends BaseActivity {
         ButterKnife.inject(this);
 
         // get the bundle from the saved state or try and get it from the intent
-        Bundle bundle = null;
         if (savedInstanceState != null) {
-            bundle = savedInstanceState.getBundle("bundle");
+            mEvent = (Event) savedInstanceState.getSerializable(EXTRA_EVENT);
+            mImagePath = savedInstanceState.getString(EXTRA_IMAGE_PATH);
         } else {
-            bundle = getIntent().getExtras();
+            mEvent = (Event) getIntent().getSerializableExtra(EXTRA_EVENT);
+            mImagePath = getIntent().getStringExtra(EXTRA_IMAGE_PATH);
         }
-        event = bundle.getParcelable("event");
-        imagePath = bundle.getString("imagePath");
 
     	// set the action bar title
         if (getActionBar() != null)
-    	    getActionBar().setTitle(event.title);
+    	    getActionBar().setTitle(mEvent.title);
     }
 
     @Override
@@ -70,7 +81,7 @@ public class PhotoUpload extends BaseActivity {
         int dpSize = 275;
         int pxSize = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dpSize, r.getDisplayMetrics());
         ImageView photo = (ImageView) findViewById(R.id.fragment_photo_upload__image);
-        bmScaled = SnapBitmapFactory.decodeSampledBitmapFromPath(imagePath, pxSize, pxSize);
+        bmScaled = SnapBitmapFactory.decodeSampledBitmapFromPath(mImagePath, pxSize, pxSize);
 
         // set the scaled image in the image view
         photo.setImageBitmap(bmScaled);
@@ -79,12 +90,8 @@ public class PhotoUpload extends BaseActivity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        // create the save bundle
-        Bundle save = new Bundle();
-        save.putParcelable("event", this.event);
-        save.putString("imagePath", this.imagePath);
-        // and the bundle data to the saved state
-        outState.putBundle("bundle", save);
+        outState.putSerializable(EXTRA_EVENT, mEvent);
+        outState.putString(EXTRA_IMAGE_PATH, mImagePath);
     }
 
     @Override
@@ -102,7 +109,7 @@ public class PhotoUpload extends BaseActivity {
 
         if (SnapClient.getInstance().isReachable()) {
             // get the image data ready for uploading via the API
-            PhotoUploadTask uploadTask = new PhotoUploadTask(event, caption.getText().toString(), imagePath);
+            PhotoUploadTask uploadTask = new PhotoUploadTask(mEvent, caption.getText().toString(), mImagePath);
             uploadTask.execute();
         } else {
             Toast.makeText(this, getString(R.string.api__unreachable), Toast.LENGTH_LONG).show();
@@ -164,7 +171,7 @@ public class PhotoUpload extends BaseActivity {
                 File tempFile = new File(photoPath + ".tmp");
                 SnapImage tempImage = new SnapImage(tempFile);
 
-                // get local cached event info
+                // get local cached mEvent info
                 Uri queryUri = ContentUris.withAppendedId(SnapableContract.EventCredentials.CONTENT_URI, event.getPk());
                 Cursor c = getContentResolver().query(queryUri, null, null, null, null);
 
@@ -213,13 +220,8 @@ public class PhotoUpload extends BaseActivity {
 			// stop the progress bar
 			ProgressBar pb = (ProgressBar) findViewById(R.id.fragment_photo_upload__progressBar);
 			pb.setVisibility(View.GONE);
-			Timber.d("upload complete");
 
             // Go back to the photo list when we are done uploading.
-            Intent parentActivityIntent = new Intent(getApplicationContext(), EventPhotoList.class);
-            parentActivityIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-            parentActivityIntent.putExtra("event", event);
-            startActivity(parentActivityIntent);
             finish();
 		}
 

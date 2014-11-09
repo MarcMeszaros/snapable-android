@@ -46,7 +46,6 @@ public class PhotoListAdapter extends ArrayAdapter<Photo> {
             convertView.setTag(holder);
         }
 
-
         // populate the holder
         final com.snapable.api.private_v1.objects.Photo photo = getItem(position);
 

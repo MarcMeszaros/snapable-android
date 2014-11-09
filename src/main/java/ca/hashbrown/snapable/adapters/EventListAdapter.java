@@ -8,32 +8,30 @@ import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CursorAdapter;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.snapable.api.private_v1.objects.Event;
+
+import butterknife.ButterKnife;
+import butterknife.InjectView;
 import ca.hashbrown.snapable.R;
 import ca.hashbrown.snapable.provider.SnapCache;
 import ca.hashbrown.snapable.provider.SnapCache.AsyncDrawable;
 import ca.hashbrown.snapable.provider.SnapCache.EventWorkerTask;
-import ca.hashbrown.snapable.api.models.Event;
+
 
 import java.util.TimeZone;
 
-public class EventListAdapter extends CursorAdapter {
+public class EventListAdapter extends ArrayAdapter<Event> {
 
-	private static final String TAG = "EventListAdapter";
 	private final Bitmap placeholder;
 
-	public EventListAdapter(Context context, Cursor c) {
-		super(context, c);
+	public EventListAdapter(Context context) {
+		super(context, R.layout.listview_row_event);
 		this.placeholder = BitmapFactory.decodeResource(context.getResources(), R.drawable.photo_blank);
 	}
-
-	static class ViewHolder {
-        protected TextView title;
-        protected TextView date;
-        protected ImageView cover;
-    }
 
 	@Override
 	public boolean hasStableIds() {
@@ -41,41 +39,51 @@ public class EventListAdapter extends CursorAdapter {
 	}
 
 	@Override
-	public void bindView(View view, Context context, Cursor cursor) {
-		ViewHolder viewHolder = (ViewHolder) view.getTag();
+    public View getView(int position, View convertView, ViewGroup parent) {
+        final ViewHolder holder;
+        if (convertView != null) {
+            holder = (ViewHolder) convertView.getTag();
+        } else {
+            LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            convertView = inflater.inflate(R.layout.listview_row_event, parent, false);
+            holder = new ViewHolder(convertView);
+            convertView.setTag(holder);
+        }
+
+        // populate the holder
+        final com.snapable.api.private_v1.objects.Event event = getItem(position);
 
 		// set the title
-		viewHolder.title.setText(cursor.getString(cursor.getColumnIndex(Event.FIELD_TITLE)));
-		long start = cursor.getLong(cursor.getColumnIndex(Event.FIELD_START));
+        holder.title.setText(event.title);
+		long start = event.start_at.getTime();
         start += TimeZone.getDefault().getRawOffset(); // add the device offset
-        viewHolder.date.setText(DateFormat.format("EEE MMMM d, h:mm a", start));
+        holder.date.setText(DateFormat.format("EEE MMMM d, h:mm a", start));
 
 		// get the image, if there is one
-		final String imageKey = cursor.getLong(cursor.getColumnIndex(Event.FIELD_ID)) + "_480x480";
+		final String imageKey = event.getPk() + "_480x480";
 		Bitmap bm = new EventWorkerTask(null).getBitmapFromCache(imageKey);
 		if (bm != null) {
-			viewHolder.cover.setImageBitmap(bm);
-		} else if (SnapCache.EventWorkerTask.cancelPotentialWork(cursor.getLong(cursor.getColumnIndex(Event.FIELD_ID)), viewHolder.cover)) {
-            final EventWorkerTask task = new EventWorkerTask(viewHolder.cover);
-            final AsyncDrawable asyncDrawable = new AsyncDrawable(context.getResources(), this.placeholder, task);
-            viewHolder.cover.setImageDrawable(asyncDrawable);
-            task.execute(cursor.getLong(cursor.getColumnIndex(Event.FIELD_ID)));
+			holder.cover.setImageBitmap(bm);
+		} else if (SnapCache.EventWorkerTask.cancelPotentialWork(event.getPk(), holder.cover)) {
+            final EventWorkerTask task = new EventWorkerTask(holder.cover);
+            final AsyncDrawable asyncDrawable = new AsyncDrawable(getContext().getResources(), this.placeholder, task);
+            holder.cover.setImageDrawable(asyncDrawable);
+            task.execute(event.getPk());
         }
+
+		return convertView;
 	}
 
-	@Override
-	public View newView(Context context, Cursor cursor, ViewGroup parent) {
-		LayoutInflater inflater = LayoutInflater.from(context);
-		View v = inflater.inflate(R.layout.listview_row_event, parent, false);
+    static class ViewHolder {
+        @InjectView(R.id.listview_row_event__cover)
+        ImageView cover;
+        @InjectView(R.id.listview_row_event__title)
+        TextView title;
+        @InjectView(R.id.listview_row_event__date)
+        TextView date;
 
-		// bind the various views to the viewholder
-		final ViewHolder viewHolder = new ViewHolder();
-		viewHolder.title = (TextView) v.findViewById(R.id.listview_row_event__title);
-		viewHolder.date = (TextView) v.findViewById(R.id.listview_row_event__date);
-		viewHolder.cover = (ImageView) v.findViewById(R.id.listview_row_event__cover);
-		v.setTag(viewHolder);
-
-		bindView(v, context, cursor);
-		return v;
-	}
+        ViewHolder(View view) {
+            ButterKnife.inject(this, view);
+        }
+    }
 }

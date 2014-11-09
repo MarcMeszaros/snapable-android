@@ -1,5 +1,6 @@
 package ca.hashbrown.snapable.activities;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
@@ -12,13 +13,13 @@ import com.google.analytics.tracking.android.EasyTracker;
 import com.google.analytics.tracking.android.Fields;
 import com.google.analytics.tracking.android.MapBuilder;
 import com.google.analytics.tracking.android.Tracker;
+import com.snapable.api.private_v1.objects.Event;
 
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import ca.hashbrown.snapable.R;
 import ca.hashbrown.snapable.fragments.PhotoListFragment;
 import ca.hashbrown.snapable.utils.SnapStorage;
-import ca.hashbrown.snapable.api.models.Event;
 
 import java.io.File;
 
@@ -26,8 +27,18 @@ public class EventPhotoList extends BaseActivity {
 
     public static final int PHOTO_ACTION = 0x01;
 
-    private Event event;
-    private Uri imageUri;
+    public static final String ARG_EVENT = "arg.event";
+    private static final String STATE_EVENT = "state.event";
+    private static final String STATE_IMAGE_URI = "state.image.uri";
+
+    private Event mEvent;
+    private Uri mImageUri;
+
+    public static Intent initIntent(Activity activity, Event event) {
+        Intent intent = new Intent(activity, EventPhotoList.class);
+        intent.putExtra(ARG_EVENT, event);
+        return intent;
+    }
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -37,32 +48,30 @@ public class EventPhotoList extends BaseActivity {
 
         // try and save/resume the activity
         if (savedInstanceState != null) {
-            this.event = savedInstanceState.getParcelable("event");
-            this.imageUri = savedInstanceState.getParcelable("imageUri");
+            mEvent = (Event) savedInstanceState.getSerializable(STATE_EVENT);
+            mImageUri = savedInstanceState.getParcelable(STATE_IMAGE_URI);
         } else {
-            // get the extra bundle data for the fragment
-            Bundle bundle = getIntent().getExtras();
-            event = bundle.getParcelable("event");
+            mEvent = (Event) getIntent().getSerializableExtra(ARG_EVENT);
         }
 
 		// Create the list fragment and add it as our sole content.
 		PhotoListFragment photoListFragment = (PhotoListFragment) getFragmentManager().findFragmentById(R.id.activity_photo_list__fragment_photo_list);
 		if (photoListFragment != null) {
-			photoListFragment.setEvent(event);
+			photoListFragment.setEvent(mEvent);
 		}
 
 		// make the action bar button home button go back
         if (getActionBar() != null) {
             getActionBar().setDisplayHomeAsUpEnabled(true);
-            getActionBar().setTitle(event.title);
+            getActionBar().setTitle(mEvent.title);
         }
 	}
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putParcelable("event", this.event);
-        outState.putParcelable("imageUri", this.imageUri);
+        outState.putSerializable(STATE_EVENT, mEvent);
+        outState.putParcelable(STATE_IMAGE_URI, mImageUri);
     }
 
     @OnClick(R.id.activity_photo_list__photo_button)
@@ -80,26 +89,23 @@ public class EventPhotoList extends BaseActivity {
         );
 
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        this.imageUri = SnapStorage.getOutputMediaFileUri(SnapStorage.MEDIA_TYPE_IMAGE);
-        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, this.imageUri);
+        mImageUri = SnapStorage.getOutputMediaFileUri(SnapStorage.MEDIA_TYPE_IMAGE);
+        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mImageUri);
         startActivityForResult(takePictureIntent, PHOTO_ACTION);
 	}
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == PHOTO_ACTION && resultCode == RESULT_OK) {
-            File filename = new File(this.imageUri.getPath());
+            File filename = new File(mImageUri.getPath());
 
             // alert the media scanner of new file
             Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-            mediaScanIntent.setData(this.imageUri);
+            mediaScanIntent.setData(mImageUri);
             this.sendBroadcast(mediaScanIntent);
 
             // pass all the data to the photo upload activity
-            Intent upload = new Intent(this, PhotoUpload.class);
-            upload.putExtra("event", event);
-            upload.putExtra("imagePath", filename.getAbsolutePath());
-            startActivity(upload);
+            startActivity(PhotoUpload.initIntent(this, mEvent, filename.getAbsolutePath()));
         } else {
             // the unhandled result calls the super (and passes it down to fragments)
             super.onActivityResult(requestCode, resultCode, data);

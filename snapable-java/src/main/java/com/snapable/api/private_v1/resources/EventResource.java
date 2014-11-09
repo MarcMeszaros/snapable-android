@@ -13,6 +13,12 @@ public interface EventResource {
     @Headers("Accept: application/json")
     Pager<Event> getEvents();
 
+    @GET("/{uri}")
+    @Headers("Accept: application/json")
+    Pager<Event> getEventsNext(
+            @Path(value="uri", encode=false) String uri
+    );
+
     @GET("/"+RESOURCE_NAME+"/")
     @Headers("Accept: application/json")
     Pager<Event> getEvents(
