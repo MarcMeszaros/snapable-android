@@ -21,9 +21,9 @@ import ca.hashbrown.snapable.provider.SnapableContract;
 import com.snapable.api.SnapImage;
 import com.snapable.api.private_v1.Client;
 import com.snapable.api.private_v1.objects.Event;
+import com.snapable.api.private_v1.resources.PhotoResource;
 
 import ca.hashbrown.snapable.api.SnapClient;
-import ca.hashbrown.snapable.api.resources.PhotoResource;
 import ca.hashbrown.snapable.utils.SnapBitmapFactory;
 import retrofit.mime.TypedString;
 import timber.log.Timber;

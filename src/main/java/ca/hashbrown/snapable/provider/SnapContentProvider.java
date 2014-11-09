@@ -11,22 +11,11 @@ import android.provider.BaseColumns;
 import android.util.Log;
 
 import com.snapable.api.private_v1.Client;
+import com.snapable.api.private_v1.objects.Guest;
 import com.snapable.api.private_v1.objects.Pager;
+import com.snapable.api.private_v1.resources.GuestResource;
 
-import ca.hashbrown.snapable.cursors.EventCursor;
-import ca.hashbrown.snapable.cursors.PhotoCursor;
 import ca.hashbrown.snapable.api.SnapClient;
-import ca.hashbrown.snapable.api.models.Event;
-import ca.hashbrown.snapable.api.models.Guest;
-import ca.hashbrown.snapable.api.models.Photo;
-import ca.hashbrown.snapable.api.resources.EventResource;
-import ca.hashbrown.snapable.api.resources.GuestResource;
-import ca.hashbrown.snapable.api.resources.PhotoResource;
-import retrofit.RetrofitError;
-
-import java.util.HashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class SnapContentProvider extends ContentProvider {
 
@@ -44,22 +33,6 @@ public class SnapContentProvider extends ContentProvider {
 	 * 2xyy = DB (x = resource id, y = endpoint id)
 	*/
 
-	/* ==== API ==== */
-	//private static final int ACCOUNT = 1101;
-	//private static final int ACCOUNT_ID = 1102;
-
-	private static final int EVENT = 1201;
-	private static final int EVENT_ID = 1202;
-
-	private static final int GUEST = 1301;
-	private static final int GUEST_ID = 1302;
-
-	private static final int PHOTO = 1401;
-	private static final int PHOTO_ID = 1402;
-
-	//private static final int USER = 1501;
-	//private static final int USER_ID = 1502;
-
 	/* ==== DB ==== */
 	private static final int EVENT_CREDENTIALS = 2101;
 	private static final int EVENT_CREDENTIALS_ID = 2102;
@@ -68,22 +41,6 @@ public class SnapContentProvider extends ContentProvider {
 	private static final UriMatcher uriMatcher;
 	static {
 		uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-
-		/* == API == */
-		//uriMatcher.addURI(AUTHORITY, "account", ACCOUNT);
-		//uriMatcher.addURI(AUTHORITY, "account/#", ACCOUNT_ID);
-
-		uriMatcher.addURI(AUTHORITY, "event", EVENT);
-		uriMatcher.addURI(AUTHORITY, "event/#", EVENT_ID);
-
-		//uriMatcher.addURI(AUTHORITY, "guest", GUEST);
-		//uriMatcher.addURI(AUTHORITY, "guest/#", GUEST_ID);
-
-		uriMatcher.addURI(AUTHORITY, "photo", PHOTO);
-		uriMatcher.addURI(AUTHORITY, "photo/#", PHOTO_ID);
-
-		//uriMatcher.addURI(AUTHORITY, "user", USER);
-		//uriMatcher.addURI(AUTHORITY, "user/#", USERS_ID);
 
 		/* == DB == */
 		uriMatcher.addURI(AUTHORITY, "event_credentials", EVENT_CREDENTIALS);
@@ -110,22 +67,7 @@ public class SnapContentProvider extends ContentProvider {
 
 	@Override
 	public String getType(Uri uri) {
-		switch (uriMatcher.match(uri)) {
-			case EVENT:
-				return ContentResolver.CURSOR_DIR_BASE_TYPE+"/vnd.com.snapable.api.event";
-			case EVENT_ID:
-				return ContentResolver.CURSOR_ITEM_BASE_TYPE+"/vnd.com.snapable.api.event";
-			case GUEST:
-				return ContentResolver.CURSOR_DIR_BASE_TYPE+"/vnd.com.snapable.api.guest";
-			case GUEST_ID:
-				return ContentResolver.CURSOR_ITEM_BASE_TYPE+"/vnd.com.snapable.api.guest";
-			case PHOTO:
-				return ContentResolver.CURSOR_DIR_BASE_TYPE+"/vnd.com.snapable.api.photo";
-			case PHOTO_ID:
-				return ContentResolver.CURSOR_ITEM_BASE_TYPE+"/vnd.com.snapable.api.photo";
-			default:
-				throw new IllegalArgumentException("Unsupported URI: " + uri);
-		}
+		return "";
 	}
 
 	@Override
@@ -169,73 +111,8 @@ public class SnapContentProvider extends ContentProvider {
 	public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
 		// create the empty results cursor
 		Cursor result = null;
-		EventResource eventRes = snapClient.getRestAdapter().create(EventResource.class);
-		PhotoResource photoRes = snapClient.getRestAdapter().create(PhotoResource.class);
 
 		switch (uriMatcher.match(uri)) {
-			// handle the case for all events
-			case EVENT: {
-				// set the column names or a default
-				EventCursor eventsCursor = (projection != null) ? new EventCursor(projection) : new EventCursor();
-
-				Pager<Event> events = null;
-				HashMap<String, String> hMap = getHashmap(selection, selectionArgs);
-				try {
-                    if (hMap != null && hMap.containsKey("lat") && hMap.containsKey("lng")) {
-                        float lat =  Float.parseFloat(hMap.get("lat"));
-                        float lng =  Float.parseFloat(hMap.get("lng"));
-                        events = eventRes.getEvents(lat, lng);
-                    } else if (hMap != null && hMap.containsKey("q")) {
-                        String query = hMap.get("q");
-                        events = eventRes.getEvents(query);
-                    } else {
-                        // make the api call
-                        events = eventRes.getEvents();
-                    }
-                    // add the event objects to the resulting cursor
-                    for (Event event : events.objects) {
-                        eventsCursor.add(event);
-                    }
-                } catch (RetrofitError e) {
-                    Log.e(TAG, "event API error", e);
-                }
-
-				// set or temporary cursor as the return cursor
-				result = eventsCursor;
-				break;
-			}
-
-			case EVENT_ID: {
-				// set the column names or a default
-				EventCursor eventCursor = (projection != null) ? new EventCursor(projection) : new EventCursor();
-
-				// make the api call
-				Event event = eventRes.getEvent(ContentUris.parseId(uri));
-
-				// add the event objects to the resulting cursor
-				eventCursor.add(event);
-
-				// set or temporary cursor as the return cursor
-				result = eventCursor;
-				break;
-			}
-
-			case PHOTO: {
-				// set tge column names or a default
-				PhotoCursor photosCursor = new PhotoCursor();
-
-				// make the API call
-				Pager<Photo> photos = (selectionArgs.length == 1) ? photoRes.getPhotos(Long.valueOf(selectionArgs[0]), true) : photoRes.getPhotos();
-
-				// add the event objects to the resulting cursor
-				for (Photo photo : photos.objects) {
-					photosCursor.add(photo);
-				}
-
-				// set or temporary cursor as the return cursor
-				result = photosCursor;
-				break;
-			}
 
 			case EVENT_CREDENTIALS_ID: {
 				String dbSelect = DBHelper.EVENT_CREDENTIALS.FIELD_ID + " = ?";
@@ -273,29 +150,6 @@ public class SnapContentProvider extends ContentProvider {
 		// we successfully updated, close the db, notify of change and return
 		getContext().getContentResolver().notifyChange(uri, null);
 		return rowsAffected;
-	}
-
-
-	// http://stackoverflow.com/questions/12949730/contentprovider-implementation-how-to-convert-selection-and-selectionargs
-	public static HashMap<String, String> getHashmap(String selection, String[] selectionArgs) {
-		try {
-			HashMap<String, String> result = new HashMap<String, String>();
-
-		    Pattern pattern = Pattern.compile("[a-z]*(\\s)*=\\?", Pattern.CASE_INSENSITIVE);
-		    Matcher matcher = pattern.matcher(selection);
-
-		    int pos = 0;
-		    while (matcher.find()) {
-		        String[] selParts = matcher.group(0).split("=");
-		        result.put(selParts[0], selectionArgs[pos]);
-		        pos++;
-		    }
-
-		    return result;
-	    } catch (Exception e) {
-	    	Log.e(TAG, "error creating hashmap from selection string", e);
-	    	return null;
-	    }
 	}
 
 	/**

@@ -14,15 +14,14 @@ import android.util.LruCache;
 import android.widget.ImageView;
 
 import com.snapable.api.SnapImage;
+import com.snapable.api.private_v1.resources.EventResource;
+import com.snapable.api.private_v1.resources.PhotoResource;
 
 import ca.hashbrown.snapable.BuildConfig;
 import ca.hashbrown.snapable.Snapable;
 import ca.hashbrown.snapable.api.SnapClient;
-import ca.hashbrown.snapable.api.resources.EventResource;
-import ca.hashbrown.snapable.api.resources.PhotoResource;
 import retrofit.RetrofitError;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.lang.ref.WeakReference;
 
