@@ -3,6 +3,7 @@ package ca.hashbrown.snapable.activities;
 import android.os.Bundle;
 
 import ca.hashbrown.snapable.R;
+import ca.hashbrown.snapable.fragments.EventListFragment;
 
 public class EventList extends BaseActivity {
 

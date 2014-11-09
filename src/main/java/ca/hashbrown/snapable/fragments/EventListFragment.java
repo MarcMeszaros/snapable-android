@@ -11,17 +11,19 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ListView;
 import android.widget.SearchView;
 
 import com.snapable.api.private_v1.objects.Event;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
 import ca.hashbrown.snapable.R;
 import ca.hashbrown.snapable.activities.EventPhotoList;
 import ca.hashbrown.snapable.adapters.EventListAdapter;
@@ -32,7 +34,7 @@ import ca.hashbrown.snapable.ui.widgets.ScrollableSwipeRefreshLayout;
 import timber.log.Timber;
 
 public class EventListFragment extends SnapListFragment implements SearchView.OnQueryTextListener,
-        LoaderCallbacks<LoaderResponse<Event>>, OnItemClickListener, LocationListener,
+        LoaderCallbacks<LoaderResponse<Event>>, LocationListener,
         SwipeRefreshLayout.OnRefreshListener, SnapListFragment.LoadMoreListener {
 
     public static final int LOADER_EVENTS = "EventLoader".hashCode();
@@ -45,41 +47,25 @@ public class EventListFragment extends SnapListFragment implements SearchView.On
 
 	private EventListAdapter mAdapter;
 	private LocationManager locationManager;
-    private SwipeRefreshLayout swipeLayout;
 	private Handler msgHandler;
 	private Bundle lastLatLng;
 
     private SearchView mSearchView = null;
     private String mSearchQuery = "";
 
-	@Override
-	public void onActivityCreated(Bundle savedInstanceState) {
-		super.onActivityCreated(savedInstanceState);
+    @InjectView(R.id.fragment_event_list)
+    ScrollableSwipeRefreshLayout mSwipeLayout;
 
-        // initialize/setup some basic stuff
-        msgHandler = new Handler();
-        getListView().setOnItemClickListener(this);
+    public static EventListFragment getInstance() {
+        return new EventListFragment();
+    }
 
-		mAdapter = new EventListAdapter(getActivity());
-        setListAdapter(mAdapter);
-
-        // try and restore the saved state
-        if (savedInstanceState != null) {
-            mSearchQuery = savedInstanceState.getString(STATE_QUERY, "");
-        }
-
-		// initialize the loader
-        Bundle args = new Bundle(1);
-        if (mSearchQuery.length() > 0) {
-            args.putString(ARG_LOADER_QUERY, mSearchQuery);
-        }
-		getLoaderManager().initLoader(LOADER_EVENTS, args, this);
-	}
-
+    //==== LifeCycle ====\\
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+        msgHandler = new Handler();
 
         // try and restore the saved state
         if (savedInstanceState != null) {
@@ -89,7 +75,9 @@ public class EventListFragment extends SnapListFragment implements SearchView.On
 
     @Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		return inflater.inflate(R.layout.fragment_event_list, container, false);
+		View v = inflater.inflate(R.layout.fragment_event_list, container, false);
+        ButterKnife.inject(this, v);
+        return v;
 	}
 
     @Override
@@ -102,20 +90,24 @@ public class EventListFragment extends SnapListFragment implements SearchView.On
         setListShownNoAnimation(false);
 
         // setup pull to refresh
-        swipeLayout = (ScrollableSwipeRefreshLayout) view.findViewById(R.id.fragment_event_list);
-        swipeLayout.setOnRefreshListener(this);
+        mSwipeLayout.setOnRefreshListener(this);
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        if (locationManager != null && msgHandler != null) {
-            // restart the loader
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        // initialize/setup some basic stuff
+        mAdapter = new EventListAdapter(getActivity());
+        setListAdapter(mAdapter);
+
+        // initialize the loader
+        if (!TextUtils.isEmpty(mSearchQuery)) {
             Bundle args = new Bundle(1);
-            if (mSearchQuery.length() > 0) {
-                args.putString(ARG_LOADER_QUERY, mSearchQuery);
-            }
+            args.putString(ARG_LOADER_QUERY, mSearchQuery);
             getLoaderManager().initLoader(LOADER_EVENTS, args, this);
+        } else {
+            getLatLng(this);
         }
     }
 
@@ -131,6 +123,7 @@ public class EventListFragment extends SnapListFragment implements SearchView.On
         }
     }
 
+    //==== State ====\\
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -148,13 +141,12 @@ public class EventListFragment extends SnapListFragment implements SearchView.On
 
     @Override
     public boolean onQueryTextSubmit(String query) {
-        Timber.d("search: " + query);
         // build the search param
         mSearchQuery = query;
-        Bundle args = new Bundle(1);
-        args.putString(ARG_LOADER_QUERY, mSearchQuery);
 
         // get the fragment, and init the new search loader (using the search param)
+        Bundle args = new Bundle(1);
+        args.putString(ARG_LOADER_QUERY, mSearchQuery);
         getLoaderManager().restartLoader(LOADER_EVENTS, args, this);
 
         // clear focus
@@ -166,31 +158,23 @@ public class EventListFragment extends SnapListFragment implements SearchView.On
 
     @Override
     public boolean onQueryTextChange(String newText) {
-        Timber.d("new query: " + newText);
         mSearchQuery = newText;
-        if (newText.isEmpty()) {
+        if (TextUtils.isEmpty(newText)) {
             return false;
         } else {
             return false;
         }
     }
 
+    //==== Loaders ====\\
     public Loader<LoaderResponse<Event>> onCreateLoader(int id, Bundle args) {
-        // start the refresh animation
-        setRefreshing(true);
-
         // get the query string if required
         if (args != null && args.containsKey(ARG_LOADER_QUERY)) {
             return new EventLoader(getActivity(), args.getString(ARG_LOADER_QUERY));
         } else if (args != null && args.containsKey(ARG_LOADER_LAT) && args.containsKey(ARG_LOADER_LNG)) {
             return new EventLoader(getActivity(), args.getFloat(ARG_LOADER_LAT), args.getFloat(ARG_LOADER_LNG));
         } else {
-            if (lastLatLng == null) {
-                getLatLng();
-                return new EventLoader(getActivity(), "");
-            } else {
-                return new EventLoader(getActivity(), args.getFloat(ARG_LOADER_LAT), args.getFloat(ARG_LOADER_LNG));
-            }
+            throw new RuntimeException("This should never happen.");
         }
 	}
 
@@ -205,24 +189,23 @@ public class EventListFragment extends SnapListFragment implements SearchView.On
         } else {
             setListShownNoAnimation(true);
         }
-        setRefreshing(false);
+        mSwipeLayout.setRefreshing(false);
 	}
 
 	public void onLoaderReset(Loader<LoaderResponse<Event>> loader) {
 		mAdapter.clear();
 	}
 
-	// click
-	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-		Event event = mAdapter.getItem(position);
-        // if there are stored, make sure pins match
-		if(cachedPinMatchesEventPin(event)) {
-			// store the event as data to be passed
+	//==== OnClick ====\\
+    @Override
+    public void onListItemClick(ListView list, View view, int position, long id) {
+        super.onListItemClick(list, view, position, id);
+    	Event event = mAdapter.getItem(position);
+
+        //
+        if(cachedPinMatchesEventPin(event)) {
 			startActivity(EventPhotoList.initIntent(getActivity(), event));
-		}
-		// no stored pin or pins don't match, launch dialog
-		else {
-			// start the dialog with the event object
+		} else {
 			EventAuthFragment login = EventAuthFragment.getInstance(event);
 			login.show(getFragmentManager(), EventAuthFragment.class.getCanonicalName());
 		}
@@ -259,24 +242,27 @@ public class EventListFragment extends SnapListFragment implements SearchView.On
 	private boolean cachedPinMatchesEventPin(Event event) {
 		Uri requestUri = ContentUris.withAppendedId(SnapableContract.EventCredentials.CONTENT_URI, event.getPk());
 		Cursor result = getActivity().getContentResolver().query(requestUri, null, null, null, null);
+        boolean isAllowed = false;
 
         try {
             // we have a result
             if (result.getCount() > 0 && event.is_public) {
-                return true;
+                isAllowed = true;
             } else if (result.getCount() > 0 && result.moveToFirst()) {
-                return result.getString(result.getColumnIndex(SnapableContract.EventCredentials.PIN)).equals(event.pin);
+                isAllowed = result.getString(result.getColumnIndex(SnapableContract.EventCredentials.PIN)).equals(event.pin);
             }
         } catch (NullPointerException e) {
             Timber.e(e, "Null pointer while trying to access cached event PIN");
-            return false;
+            isAllowed = false;
+        } finally {
+            result.close();
         }
 
 		// there was no result
-		return false;
+		return isAllowed;
 	}
 
-	private void getLatLng() {
+	private void getLatLng(LocationListener locationListener) {
         // Retrieve a list of location providers that have fine accuracy, no monetary cost, etc
     	Criteria criteria = new Criteria();
     	criteria.setAccuracy(Criteria.ACCURACY_COARSE);
@@ -293,42 +279,31 @@ public class EventListFragment extends SnapListFragment implements SearchView.On
     	// add a message to kill the location updater if it takes more than 5 sec.
     	class GpsTimeout implements Runnable {
 
-            private EventListFragment fragmentReference;
-    		private LocationManager locationManager;
-			private LocationListener locationListener;
+            private LocationListener mLocationListener;
 
-    		public GpsTimeout(EventListFragment fragmentReference, LocationManager locationManager, LocationListener locationListener) {
-    			this.fragmentReference = fragmentReference;
-                this.locationManager = locationManager;
-    			this.locationListener = locationListener;
+    		public GpsTimeout(LocationListener locationListener) {
+    			mLocationListener = locationListener;
     		}
 
     		public void run() {
                 Timber.d("kill the location updates");
-				locationManager.removeUpdates(locationListener);
-                fragmentReference.setListShown(true);
+				locationManager.removeUpdates(mLocationListener);
+                setListShown(true);
+                mSwipeLayout.setRefreshing(false);
 			}
 		}
-    	msgHandler.postDelayed(new GpsTimeout(this, locationManager, this), 5000);
+    	msgHandler.postDelayed(new GpsTimeout(locationListener), 5000);
 	}
-
-    private void setRefreshing(boolean refreshing) {
-        if (swipeLayout != null) {
-            swipeLayout.setRefreshing(refreshing);
-        }
-        if (refreshing == false) {
-            setListShown(true);
-        }
-    }
 
     @Override
     public void onRefresh() {
-        Bundle args = new Bundle();
-        if (mSearchQuery.length() > 0) {
+        if (!TextUtils.isEmpty(mSearchQuery)) {
+            Bundle args = new Bundle();
             args.putString(ARG_LOADER_QUERY, mSearchQuery);
+            getLoaderManager().restartLoader(LOADER_EVENTS, args, this);
+        } else {
+            getLatLng(this);
         }
-
-        getLoaderManager().restartLoader(LOADER_EVENTS, args, this);
     }
 
     //==== SnapListFragment.LoadMoreListener ====\\

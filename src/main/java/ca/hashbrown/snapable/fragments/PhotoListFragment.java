@@ -28,6 +28,7 @@ public class PhotoListFragment extends SnapListFragment implements SwipeRefreshL
     private static final String ARG_EVENT = "arg.event";
     private static final String ARG_LOADER_EVENT_ID = "arg.loader.event.id";
     private static final String ARG_LOADER_EVENT_IS_STREAMABLE = "arg.loader.event.streamable";
+    private static final String STATE_EVENT = "state.event";
 
     private static final int LOADER_PHOTOS = "PhotoLoader".hashCode();
 
@@ -45,16 +46,17 @@ public class PhotoListFragment extends SnapListFragment implements SwipeRefreshL
         return photoListFragment;
     }
 
-    // never used, but we need it to compile
-	public PhotoListFragment() {
-    }
-
+    //==== LifeCycle ====\\
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
         if (getArguments() != null) {
             mEvent = (Event) getArguments().getSerializable(ARG_EVENT);
+        } else if (savedInstanceState != null) {
+            mEvent = (Event) savedInstanceState.getSerializable(STATE_EVENT);
+        } else {
+            throw new RuntimeException("Should always have an event");
         }
     }
 
@@ -92,6 +94,16 @@ public class PhotoListFragment extends SnapListFragment implements SwipeRefreshL
         mSwipeLayout.setOnRefreshListener(this);
     }
 
+    //==== State ====\\
+
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putSerializable(STATE_EVENT, mEvent);
+    }
+
+    //==== Menu ====\\
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.fragment_photo_list, menu);
