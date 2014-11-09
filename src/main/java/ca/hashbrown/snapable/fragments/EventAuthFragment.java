@@ -2,6 +2,7 @@ package ca.hashbrown.snapable.fragments;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.DialogFragment;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Intent;
@@ -28,7 +29,7 @@ import ca.hashbrown.snapable.activities.EventPhotoList;
 import ca.hashbrown.snapable.provider.SnapableContract;
 import timber.log.Timber;
 
-public class EventAuthFragment extends SnapDialogFragment implements OnEditorActionListener {
+public class EventAuthFragment extends DialogFragment implements OnEditorActionListener {
 
     private static final String ARG_EVENT = "arg.event";
 

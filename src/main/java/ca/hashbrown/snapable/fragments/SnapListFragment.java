@@ -6,10 +6,7 @@ import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.widget.AbsListView;
 
-import com.octo.android.robospice.SpiceManager;
-
 import ca.hashbrown.snapable.R;
-import ca.hashbrown.snapable.api.robospice.SnapSpiceService;
 
 /**
  * The source code is almost identical to the function found in AOSP (Android Open Source Project).
@@ -21,25 +18,11 @@ import ca.hashbrown.snapable.api.robospice.SnapSpiceService;
  */
 public abstract class SnapListFragment extends ListFragment implements AbsListView.OnScrollListener {
 
-    protected SpiceManager apiRequestManager = new SpiceManager(SnapSpiceService.class);
-
     private final int AUTOLOAD_THRESHOLD = 4;
 
     private boolean isMoreLoading = false;
     private int mScrollState = SCROLL_STATE_IDLE;
     private LoadMoreListener mLoadMoreListener;
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        apiRequestManager.start(getActivity());
-    }
-
-    @Override
-    public void onStop() {
-        apiRequestManager.shouldStop();
-        super.onStop();
-    }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {

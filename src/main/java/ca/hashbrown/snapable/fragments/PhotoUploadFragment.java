@@ -1,5 +1,6 @@
 package ca.hashbrown.snapable.fragments;
 
+import android.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -7,14 +8,9 @@ import android.view.ViewGroup;
 
 import ca.hashbrown.snapable.R;
 
-public class PhotoUploadFragment extends SnapFragment {
+public class PhotoUploadFragment extends Fragment {
 
 	public PhotoUploadFragment() {
-	}
-
-	@Override
-	public void onActivityCreated(Bundle savedInstanceState) {
-		super.onActivityCreated(savedInstanceState);
 	}
 
 	@Override
