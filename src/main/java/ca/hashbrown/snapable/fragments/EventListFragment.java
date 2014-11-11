@@ -10,6 +10,7 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -43,6 +44,7 @@ public class EventListFragment extends SnapListFragment implements SearchView.On
     private static final String ARG_LOADER_LAT = "arg.loader.lat";
     private static final String ARG_LOADER_LNG = "arg.loader.lng";
 
+    private static final String STATE_LAST_LOCATION = "state.last.location";
     private static final String STATE_QUERY = "state.query";
 
 	private EventListAdapter mAdapter;
@@ -65,11 +67,12 @@ public class EventListFragment extends SnapListFragment implements SearchView.On
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-        msgHandler = new Handler();
+        msgHandler = new Handler(Looper.myLooper());
 
         // try and restore the saved state
         if (savedInstanceState != null) {
             mSearchQuery = savedInstanceState.getString(STATE_QUERY, "");
+            lastLatLng = savedInstanceState.getBundle(STATE_LAST_LOCATION);
         }
     }
 
@@ -116,7 +119,6 @@ public class EventListFragment extends SnapListFragment implements SearchView.On
         super.onPause();
         if (locationManager != null) {
             locationManager.removeUpdates(this); // stop GPS updates
-            setListShownNoAnimation(false);
         }
         if (msgHandler != null) {
             msgHandler.removeCallbacksAndMessages(null); // remove all messages in the handler
@@ -128,8 +130,10 @@ public class EventListFragment extends SnapListFragment implements SearchView.On
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString(STATE_QUERY, mSearchQuery);
+        outState.putBundle(STATE_LAST_LOCATION, lastLatLng);
     }
 
+    //==== Menu ====\\
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
@@ -139,6 +143,7 @@ public class EventListFragment extends SnapListFragment implements SearchView.On
         mSearchView.setOnQueryTextListener(this);
     }
 
+    //==== Search ====\\
     @Override
     public boolean onQueryTextSubmit(String query) {
         // build the search param
@@ -180,7 +185,7 @@ public class EventListFragment extends SnapListFragment implements SearchView.On
 
     public void onLoadFinished(Loader<LoaderResponse<Event>> loader, LoaderResponse<Event> response) {
 		// For the first page, clear the data from adapter.
-        if(response.type == LoaderResponse.TYPE.FIRST)
+        if(response.type == LoaderResponse.TYPE.FIRST && !response.data.isEmpty())
             mAdapter.clear();
 
         mAdapter.addAll(response.data);
@@ -202,7 +207,7 @@ public class EventListFragment extends SnapListFragment implements SearchView.On
         super.onListItemClick(list, view, position, id);
     	Event event = mAdapter.getItem(position);
 
-        //
+        // check the event pins
         if(cachedPinMatchesEventPin(event)) {
 			startActivity(EventPhotoList.initIntent(getActivity(), event));
 		} else {
@@ -211,16 +216,12 @@ public class EventListFragment extends SnapListFragment implements SearchView.On
 		}
 	}
 
+    //==== Location ====\\
 	public void onLocationChanged(Location location) {
-        if (lastLatLng == null) {
-            lastLatLng = new Bundle(2);
-        }
-        lastLatLng.putFloat(ARG_LOADER_LAT, (float) location.getLatitude());
-		lastLatLng.putFloat(ARG_LOADER_LNG, (float) location.getLongitude());
+        startLoader(location);
 
 		// Prepare the loader. (Re-connect with an existing one, or start a new one.)
 		locationManager.removeUpdates(this); // stop updates
-		getLoaderManager().restartLoader(LOADER_EVENTS, lastLatLng, this);
 		msgHandler.removeCallbacksAndMessages(null); // remove all messages in the handler
 	}
 
@@ -239,6 +240,16 @@ public class EventListFragment extends SnapListFragment implements SearchView.On
 
 	}
 
+    public void startLoader(Location location) {
+        if (lastLatLng == null) {
+            lastLatLng = new Bundle(2);
+        }
+        lastLatLng.putFloat(ARG_LOADER_LAT, (float) location.getLatitude());
+        lastLatLng.putFloat(ARG_LOADER_LNG, (float) location.getLongitude());
+        getLoaderManager().initLoader(LOADER_EVENTS, lastLatLng, this);
+    }
+
+    //==== Helpers ====\\
 	private boolean cachedPinMatchesEventPin(Event event) {
 		Uri requestUri = ContentUris.withAppendedId(SnapableContract.EventCredentials.CONTENT_URI, event.getPk());
 		Cursor result = getActivity().getContentResolver().query(requestUri, null, null, null, null);
@@ -268,31 +279,28 @@ public class EventListFragment extends SnapListFragment implements SearchView.On
     	criteria.setAccuracy(Criteria.ACCURACY_COARSE);
     	criteria.setCostAllowed(false);
 
+        // get location
     	locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
     	String providerName = locationManager.getBestProvider(criteria, true);
 
     	// If no suitable provider is found, null is returned.
-    	if (providerName != null) {
+    	if (!TextUtils.isEmpty(providerName)) {
+            Location location = locationManager.getLastKnownLocation(providerName);
     		locationManager.requestLocationUpdates(providerName, 1000, 1, this);
+            if (location != null) {
+                startLoader(location);
+            }
     	}
 
     	// add a message to kill the location updater if it takes more than 5 sec.
-    	class GpsTimeout implements Runnable {
-
-            private LocationListener mLocationListener;
-
-    		public GpsTimeout(LocationListener locationListener) {
-    			mLocationListener = locationListener;
-    		}
-
-    		public void run() {
-                Timber.d("kill the location updates");
-				locationManager.removeUpdates(mLocationListener);
+    	msgHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                locationManager.removeUpdates(EventListFragment.this);
                 setListShown(true);
                 mSwipeLayout.setRefreshing(false);
-			}
-		}
-    	msgHandler.postDelayed(new GpsTimeout(locationListener), 5000);
+            }
+        }, 5000);
 	}
 
     @Override

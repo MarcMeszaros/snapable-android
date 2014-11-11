@@ -103,12 +103,6 @@ public class EventAuthFragment extends DialogFragment implements OnEditorActionL
         mDialog = builder.create();
         mDialog.getWindow().setSoftInputMode(LayoutParams.SOFT_INPUT_STATE_VISIBLE);
 
-        return mDialog;
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
         final Button positiveButton = mDialog.getButton(AlertDialog.BUTTON_POSITIVE);
         positiveButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -116,6 +110,8 @@ public class EventAuthFragment extends DialogFragment implements OnEditorActionL
                 loginUser();
             }
         });
+
+        return mDialog;
     }
 
     public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -146,14 +142,13 @@ public class EventAuthFragment extends DialogFragment implements OnEditorActionL
             pin.setError(null); // clear any errors
 
             // store the event as data to be passed
-            Intent intent = new Intent(getActivity(), EventPhotoList.class);
-            intent.putExtra("event", mEvent);
+            Intent intent = EventPhotoList.initIntent(getActivity(), mEvent);
 
             // if the event is public login
-            if (mEvent.is_public && cachedPinMatchesEventPin(mEvent) == false) {
+            if (mEvent.is_public && !cachedPinMatchesEventPin(mEvent)) {
                 // save the details in the local storage
                 ContentValues values = new ContentValues(3);
-                values.put(SnapableContract.EventCredentials._ID, mEvent.getId());
+                values.put(SnapableContract.EventCredentials._ID, mEvent.getPk());
                 values.put(SnapableContract.EventCredentials.NAME, name.getText().toString());
                 values.put(SnapableContract.EventCredentials.EMAIL, email.getText().toString());
                 values.put(SnapableContract.EventCredentials.TYPE_ID, 6);
@@ -162,7 +157,7 @@ public class EventAuthFragment extends DialogFragment implements OnEditorActionL
                 getActivity().getContentResolver().insert(SnapableContract.EventCredentials.CONTENT_URI, values);
 
                 // launch the event photo list
-                this.dismiss();
+                dismiss();
                 startActivity(intent);
                 return true;
             }
@@ -176,15 +171,15 @@ public class EventAuthFragment extends DialogFragment implements OnEditorActionL
                 values.put(SnapableContract.EventCredentials.TYPE_ID, 5);
 
                 // check if a cached version exists
-                Uri requestUri = ContentUris.withAppendedId(SnapableContract.EventCredentials.CONTENT_URI, mEvent.getId());
+                Uri requestUri = ContentUris.withAppendedId(SnapableContract.EventCredentials.CONTENT_URI, mEvent.getPk());
                 Cursor query = getActivity().getContentResolver().query(requestUri, null, null, null, null);
 
                 // insert the event details
                 if (query.getCount() <= 0) {
-                    values.put(SnapableContract.EventCredentials._ID, mEvent.getId());
+                    values.put(SnapableContract.EventCredentials._ID, mEvent.getPk());
                     getActivity().getContentResolver().insert(SnapableContract.EventCredentials.CONTENT_URI, values);
                 } else {
-                    Uri updateUri = ContentUris.withAppendedId(SnapableContract.EventCredentials.CONTENT_URI, mEvent.getId());
+                    Uri updateUri = ContentUris.withAppendedId(SnapableContract.EventCredentials.CONTENT_URI, mEvent.getPk());
                     getActivity().getContentResolver().update(updateUri, values, null, null);
                 }
                 // launch the event photo list

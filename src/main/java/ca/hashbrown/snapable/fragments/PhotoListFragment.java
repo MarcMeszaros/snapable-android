@@ -95,8 +95,6 @@ public class PhotoListFragment extends SnapListFragment implements SwipeRefreshL
     }
 
     //==== State ====\\
-
-
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
