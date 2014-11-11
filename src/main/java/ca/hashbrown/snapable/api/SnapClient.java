@@ -12,8 +12,8 @@ public class SnapClient extends Client {
 
     private static SnapClient instance;
 
-    private SnapClient(String key, String secret, boolean useDevApi) {
-        super(key, secret, useDevApi);
+    private SnapClient(String key, String secret, boolean useDevApi, boolean debug) {
+        super(key, secret, useDevApi, debug);
     }
 
     /**
@@ -24,7 +24,7 @@ public class SnapClient extends Client {
      */
     public static synchronized SnapClient getInstance() {
         if (instance == null)
-            instance = new SnapClient(BuildConfig.API_KEY, BuildConfig.API_SECRET, BuildConfig.API_DEV);
+            instance = new SnapClient(BuildConfig.API_KEY, BuildConfig.API_SECRET, BuildConfig.API_DEV, BuildConfig.DEBUG);
 
         return instance;
     }

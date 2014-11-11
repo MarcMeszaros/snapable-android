@@ -25,11 +25,11 @@ public class Client extends BaseClient {
     private final SnapApi snapApi;
 
     public Client(String key, String secret) {
-        this(key, secret, false);
+        this(key, secret, false, false);
     }
 
-    public Client(String key, String secret, boolean useDevApi) {
-        super(!useDevApi ? BASE_URL : BASE_URL_DEV);
+    public Client(String key, String secret, boolean useDevApi, boolean debug) {
+        super(!useDevApi ? BASE_URL : BASE_URL_DEV, debug);
         snapApi = new SnapApi(VERSION, key, secret);
     }
 

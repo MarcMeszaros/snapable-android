@@ -22,9 +22,15 @@ public abstract class BaseClient implements Client {
 
     private Client wrapped;
     private String baseUrl;
+    private boolean debug;
 
     public BaseClient(String baseUrl) {
+        this(baseUrl, false);
+    }
+
+    public BaseClient(String baseUrl, boolean debug) {
         this.baseUrl = baseUrl;
+        this.debug = debug;
 
         try {
             Class.forName("android.os.Build");
@@ -44,9 +50,11 @@ public abstract class BaseClient implements Client {
 
     protected RestAdapter.Builder createRestAdapterBuilder() {
         RestAdapter.Builder builder = new RestAdapter.Builder();
-        builder.setRequestInterceptor(this.getInterceptor());
-        builder.setConverter(this.getConverter());
-        builder.setEndpoint(this.baseUrl);
+        builder.setRequestInterceptor(getInterceptor());
+        builder.setConverter(getConverter());
+        builder.setEndpoint(baseUrl);
+        if (debug)
+            builder.setLogLevel(RestAdapter.LogLevel.FULL);
         builder.setClient(this);
         return builder;
     }
