@@ -146,7 +146,7 @@ public class PhotoListFragment extends SnapListFragment implements SwipeRefreshL
 
 	public void onLoadFinished(Loader<LoaderResponse<Photo>> loader, LoaderResponse<Photo> response) {
         // For the first page, clear the data from adapter.
-        if(response.type == LoaderResponse.TYPE.FIRST)
+        if(response.type == LoaderResponse.TYPE.FIRST && !response.data.isEmpty())
             mAdapter.clear();
 
         mAdapter.addAll(response.data);

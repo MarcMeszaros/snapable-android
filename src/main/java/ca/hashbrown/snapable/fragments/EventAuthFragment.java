@@ -5,41 +5,42 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.ContentUris;
 import android.content.ContentValues;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.WindowManager.LayoutParams;
 import android.view.inputmethod.EditorInfo;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
 import com.snapable.api.private_v1.objects.Event;
 
 import butterknife.ButterKnife;
+import butterknife.InjectView;
 import ca.hashbrown.snapable.R;
 import ca.hashbrown.snapable.activities.EventPhotoList;
 import ca.hashbrown.snapable.provider.SnapableContract;
 import timber.log.Timber;
 
-public class EventAuthFragment extends DialogFragment implements OnEditorActionListener {
+public class EventAuthFragment extends DialogFragment {
 
     private static final String ARG_EVENT = "arg.event";
 
-    private AlertDialog mDialog;
+    private Event mEvent;
 
-	private EditText pin;
-	private EditText name;
-	private EditText email;
-	// data passed in from initializer
-	private Event mEvent;
+    // injected views
+    @InjectView(R.id.fragment_event_auth__pin)
+    EditText mPinEditTextView;
+    @InjectView(R.id.fragment_event_auth__name)
+    EditText mNameEditTextView;
+    @InjectView(R.id.fragment_event_auth__email)
+    EditText mEmailEditTextView;
+    @InjectView(R.id.fragment_event_auth__pin_group)
+    View mPinGroupView;
 
     public static EventAuthFragment getInstance(Event event) {
         EventAuthFragment fragment = new EventAuthFragment();
@@ -49,9 +50,9 @@ public class EventAuthFragment extends DialogFragment implements OnEditorActionL
         return fragment;
     }
 
-	public EventAuthFragment() {
-		// empty
-	}
+    public EventAuthFragment() {
+        // empty
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -62,63 +63,47 @@ public class EventAuthFragment extends DialogFragment implements OnEditorActionL
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = super.onCreateView(inflater, container, savedInstanceState);
-        ButterKnife.inject(this, view);
-        return view;
-    }
-
-    @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         // setup the dialog builder
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        LayoutInflater inflater = getActivity().getLayoutInflater();
-        View view = inflater.inflate(R.layout.fragment_event_auth, null);
-
-        // setup the layout
-        pin = ButterKnife.findById(view, R.id.fragment_event_auth__pin);
-        name = ButterKnife.findById(view, R.id.fragment_event_auth__name);
-        email = ButterKnife.findById(view, R.id.fragment_event_auth__email);
+        View view = getActivity().getLayoutInflater().inflate(R.layout.fragment_event_auth, null);
+        ButterKnife.inject(this, view);
 
         if (mEvent != null && mEvent.is_public) {
-            // hide the pin stuff because the event is public
-            ((LinearLayout)view).removeView(view.findViewById(R.id.fragment_event_auth__pin_group));
-            // Show soft keyboard automatically
-            name.requestFocus();
+            mPinGroupView.setVisibility(View.GONE);
+            mNameEditTextView.requestFocus();
         } else {
             // Show soft keyboard automatically
-            pin.requestFocus();
+            mPinEditTextView.requestFocus();
         }
-        email.setOnEditorActionListener(this);
+        mEmailEditTextView.setOnEditorActionListener(new OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE)
+                    return loginUser();
+                return false;
+            }
+        });
 
+        // setup the click listener
+        DialogInterface.OnClickListener clickListener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if (which == DialogInterface.BUTTON_POSITIVE) {
+                    loginUser();
+                }
+            }
+        };
         // set the positive and negative buttons
         builder.setCancelable(true);
         // TODO figure out how to display the title without having the soft keyboard hide the buttons
         //builder.setTitle(R.string.fragment_event_auth__title);
-        builder.setPositiveButton(android.R.string.ok, null);
-        builder.setNegativeButton(android.R.string.cancel, null);
+        builder.setPositiveButton(android.R.string.ok, clickListener);
+        builder.setNegativeButton(android.R.string.cancel, clickListener);
 
         // set the alert dialog view
         builder.setView(view);
-        mDialog = builder.create();
-        mDialog.getWindow().setSoftInputMode(LayoutParams.SOFT_INPUT_STATE_VISIBLE);
-
-        final Button positiveButton = mDialog.getButton(AlertDialog.BUTTON_POSITIVE);
-        positiveButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                loginUser();
-            }
-        });
-
-        return mDialog;
-    }
-
-    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-        if (EditorInfo.IME_ACTION_DONE == actionId) {
-            return loginUser();
-        }
-        return false;
+        return builder.create();
     }
 
 	private boolean cachedPinMatchesEventPin(Event event) {
@@ -139,7 +124,7 @@ public class EventAuthFragment extends DialogFragment implements OnEditorActionL
 
     private boolean loginUser() {
         try {
-            pin.setError(null); // clear any errors
+            mPinEditTextView.setError(null); // clear any errors
 
             // store the event as data to be passed
             Intent intent = EventPhotoList.initIntent(getActivity(), mEvent);
@@ -149,8 +134,8 @@ public class EventAuthFragment extends DialogFragment implements OnEditorActionL
                 // save the details in the local storage
                 ContentValues values = new ContentValues(3);
                 values.put(SnapableContract.EventCredentials._ID, mEvent.getPk());
-                values.put(SnapableContract.EventCredentials.NAME, name.getText().toString());
-                values.put(SnapableContract.EventCredentials.EMAIL, email.getText().toString());
+                values.put(SnapableContract.EventCredentials.NAME, mNameEditTextView.getText().toString());
+                values.put(SnapableContract.EventCredentials.EMAIL, mEmailEditTextView.getText().toString());
                 values.put(SnapableContract.EventCredentials.TYPE_ID, 6);
 
                 // insert the event details
@@ -162,12 +147,12 @@ public class EventAuthFragment extends DialogFragment implements OnEditorActionL
                 return true;
             }
             // if the event is private and the pins match
-            else if (!mEvent.is_public && mEvent.pin.equals(pin.getText().toString())) {
+            else if (!mEvent.is_public && mEvent.pin.equals(mPinEditTextView.getText().toString())) {
                 // save the details in the local storage
                 ContentValues values = new ContentValues(3);
-                values.put(SnapableContract.EventCredentials.PIN, pin.getText().toString());
-                values.put(SnapableContract.EventCredentials.NAME, name.getText().toString());
-                values.put(SnapableContract.EventCredentials.EMAIL, email.getText().toString());
+                values.put(SnapableContract.EventCredentials.PIN, mPinEditTextView.getText().toString());
+                values.put(SnapableContract.EventCredentials.NAME, mNameEditTextView.getText().toString());
+                values.put(SnapableContract.EventCredentials.EMAIL, mEmailEditTextView.getText().toString());
                 values.put(SnapableContract.EventCredentials.TYPE_ID, 5);
 
                 // check if a cached version exists
@@ -189,8 +174,8 @@ public class EventAuthFragment extends DialogFragment implements OnEditorActionL
             }
             // the event is private and pins don't match
             else {
-                pin.requestFocus();
-                pin.setError(getString(R.string.fragment_event_auth__pin_invalid));
+                mPinEditTextView.setError(getString(R.string.fragment_event_auth__pin_invalid));
+                mPinEditTextView.requestFocus();
                 return false;
             }
         }
