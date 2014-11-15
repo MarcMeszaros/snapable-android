@@ -2,12 +2,12 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!-- ActionBar -->
-    <style name="Snapable.Widget.ActionBar" parent="@android:style/Widget.Holo.Light.ActionBar.Solid.Inverse">
+    <style name="Snapable.Widget.ActionBar" parent="android:Widget.Holo.Light.ActionBar.Solid.Inverse">
         <item name="android:background">@color/material_primary</item>
     </style>
 
     <!-- Buttons -->
-    <style name="Snapable.Widget.ImageButton.RoundedCorners" parent="@android:style/Widget.ImageButton">
+    <style name="Snapable.Widget.ImageButton.RoundedCorners" parent="android:style/Widget.ImageButton">
         <item name="android:background">@drawable/widget_imagebutton_background</item>
     </style>
 

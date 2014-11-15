@@ -3,7 +3,7 @@
     <color name="window_background">#ffe3e8eb</color>
 
     <color name="material_primary">#ff123444</color>
-    <color name="material_primary_dark">#ff101827</color>
+    <color name="material_primary_dark">#3F51B5</color>
     <color name="material_accent">#ff3949ab</color>
 
     <color name="progress_color_1">#ff104d5c</color>
