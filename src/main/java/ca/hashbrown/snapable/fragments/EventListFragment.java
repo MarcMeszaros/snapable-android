@@ -153,6 +153,7 @@ public class EventListFragment extends SnapListFragment implements SearchView.On
         Bundle args = new Bundle(1);
         args.putString(ARG_LOADER_QUERY, mSearchQuery);
         getLoaderManager().restartLoader(LOADER_EVENTS, args, this);
+        mSwipeLayout.setRefreshing(true);
 
         // clear focus
         if (mSearchView != null) {
