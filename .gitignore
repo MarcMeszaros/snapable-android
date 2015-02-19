@@ -25,6 +25,7 @@ crashlytics-build.properties
 ## ignore keystores related files
 /*.keystore
 /*.properties
+signing.gradle
 
 ## ignore temp files from various editors
 .DS_Store
