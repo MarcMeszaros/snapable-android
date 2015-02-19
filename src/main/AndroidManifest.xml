@@ -38,8 +38,8 @@
 
         <!-- Content Providers -->
         <provider
-            android:name="ca.hashbrown.snapable.provider.SnapContentProvider"
-            android:authorities="ca.hashbrown.snapable.provider"
+            android:name=".provider.SnapContentProvider"
+            android:authorities="${applicationId}.provider"
             android:exported="false" />
 
         <meta-data

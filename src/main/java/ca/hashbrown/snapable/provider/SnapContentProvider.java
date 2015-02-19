@@ -15,13 +15,14 @@ import com.snapable.api.private_v1.objects.Guest;
 import com.snapable.api.private_v1.objects.Pager;
 import com.snapable.api.private_v1.resources.GuestResource;
 
+import ca.hashbrown.snapable.BuildConfig;
 import ca.hashbrown.snapable.api.SnapClient;
 
 public class SnapContentProvider extends ContentProvider {
 
 	private static final String TAG = "SnapContentProvider";
 
-	public static final String AUTHORITY = SnapableContract.AUTHORITY;
+	public static final String AUTHORITY = BuildConfig.APPLICATION_ID + ".provider";
 
 	/*
 	 * Uri matching static variables.

@@ -3,6 +3,8 @@ package ca.hashbrown.snapable.provider;
 import android.net.Uri;
 import android.provider.BaseColumns;
 
+import ca.hashbrown.snapable.BuildConfig;
+
 /**
  * An Android Content Provider contract definition class. URI's are loosely based on
  * the equivalent resource they call when accessing data.
@@ -12,7 +14,7 @@ import android.provider.BaseColumns;
 public final class SnapableContract {
 	
 	/** The authority for the snapable provider */
-	public static final String AUTHORITY = "ca.hashbrown.snapable.provider";
+	public static final String AUTHORITY = BuildConfig.APPLICATION_ID + ".provider";
 	/** A content:// style uri to the authority for the snapable provider */
 	public static final Uri AUTHORITY_URI = Uri.parse("content://" + AUTHORITY);
 
