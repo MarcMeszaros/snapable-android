@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -29,8 +30,10 @@ import timber.log.Timber;
 public class EventAuthFragment extends DialogFragment {
 
     private static final String ARG_EVENT = "arg.event";
+    private static final String ARG_UPDATE_USER = "arg.update.user";
 
     private Event mEvent;
+    private boolean mUpdateUser = false;
 
     // injected views
     @InjectView(R.id.fragment_event_auth__pin)
@@ -43,9 +46,14 @@ public class EventAuthFragment extends DialogFragment {
     View mPinGroupView;
 
     public static EventAuthFragment getInstance(Event event) {
+        return getInstance(event, false);
+    }
+
+    public static EventAuthFragment getInstance(Event event, boolean updateUser) {
         EventAuthFragment fragment = new EventAuthFragment();
-        Bundle args = new Bundle(1);
+        Bundle args = new Bundle(2);
         args.putSerializable(ARG_EVENT, event);
+        args.putBoolean(ARG_UPDATE_USER, updateUser);
         fragment.setArguments(args);
         return fragment;
     }
@@ -59,6 +67,7 @@ public class EventAuthFragment extends DialogFragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             mEvent = (Event) getArguments().getSerializable(ARG_EVENT);
+            mUpdateUser = getArguments().getBoolean(ARG_UPDATE_USER, false);
         }
     }
 
@@ -69,7 +78,20 @@ public class EventAuthFragment extends DialogFragment {
         View view = getActivity().getLayoutInflater().inflate(R.layout.fragment_event_auth, null);
         ButterKnife.inject(this, view);
 
-        if (mEvent != null && mEvent.is_public) {
+        // preload data
+        Uri queryUri = ContentUris.withAppendedId(SnapableContract.EventCredentials.CONTENT_URI, mEvent.getPk());
+        Cursor result = getActivity().getContentResolver().query(queryUri, null, null, null, null);
+        result.moveToFirst();
+
+        // guest details preload
+        String name = result.getString(result.getColumnIndex(SnapableContract.EventCredentials.NAME));
+        String email = result.getString(result.getColumnIndex(SnapableContract.EventCredentials.EMAIL));
+        if (!TextUtils.isEmpty(name))
+            mNameEditTextView.setText(name);
+        if (!TextUtils.isEmpty(email))
+            mEmailEditTextView.setText(email);
+
+        if (mUpdateUser || (mEvent != null && mEvent.is_public)) {
             mPinGroupView.setVisibility(View.GONE);
             mNameEditTextView.requestFocus();
         } else {
@@ -129,8 +151,20 @@ public class EventAuthFragment extends DialogFragment {
             // store the event as data to be passed
             Intent intent = EventPhotoList.initIntent(getActivity(), mEvent);
 
+            if (mUpdateUser) {
+                // save the details in the local storage
+                ContentValues values = new ContentValues(3);
+                values.put(SnapableContract.EventCredentials._ID, mEvent.getPk());
+                values.put(SnapableContract.EventCredentials.NAME, mNameEditTextView.getText().toString());
+                values.put(SnapableContract.EventCredentials.EMAIL, mEmailEditTextView.getText().toString());
+
+                // insert the event details
+                Uri updateUri = ContentUris.withAppendedId(SnapableContract.EventCredentials.CONTENT_URI, mEvent.getPk());
+                getActivity().getContentResolver().update(updateUri, values, null, null);
+                return true;
+            }
             // if the event is public login
-            if (mEvent.is_public && !cachedPinMatchesEventPin(mEvent)) {
+            else if (mEvent.is_public && !cachedPinMatchesEventPin(mEvent)) {
                 // save the details in the local storage
                 ContentValues values = new ContentValues(3);
                 values.put(SnapableContract.EventCredentials._ID, mEvent.getPk());

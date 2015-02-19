@@ -140,7 +140,16 @@ public class SnapContentProvider extends ContentProvider {
 		switch (uriMatcher.match(uri)) {
 			case EVENT_CREDENTIALS_ID: {
 				rowsAffected = db.update(DBHelper.EVENT_CREDENTIALS.TABLE_NAME, values, null, null);
-				break;
+                // if we have a guest update the result
+                GuestResource guestResource = snapClient.getRestAdapter().create(GuestResource.class);
+                Guest guestPost = new Guest();
+                if (values.containsKey(SnapableContract.EventCredentials.NAME))
+                    guestPost.name = values.getAsString(SnapableContract.EventCredentials.NAME);
+                if (values.containsKey(SnapableContract.EventCredentials.EMAIL))
+                    guestPost.email = values.getAsString(SnapableContract.EventCredentials.EMAIL);
+
+                guestResource.putGuest(ContentUris.parseId(uri), guestPost);
+                break;
 			}
 			default: {
 				rowsAffected = 0;

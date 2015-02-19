@@ -13,7 +13,12 @@
     <item
         android:id="@+id/menu__fragment_photo_list__upload"
         android:icon="@drawable/ic_menu_gallery_upload"
-        android:showAsAction="always"
+        android:showAsAction="ifRoom"
         android:title="@string/fragment_photo_upload__upload_gallery" />
+
+    <item
+        android:id="@+id/menu__fragment_photo_list__credentials"
+        android:showAsAction="never"
+        android:title="@string/fragment_photo_upload__credentials" />
 
 </menu>

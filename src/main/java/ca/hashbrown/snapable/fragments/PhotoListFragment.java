@@ -117,6 +117,11 @@ public class PhotoListFragment extends SnapListFragment implements SwipeRefreshL
                 startActivityForResult(intent, ACTION_GALLERY);
                 return true;
 
+            case R.id.menu__fragment_photo_list__credentials:
+                EventAuthFragment login = EventAuthFragment.getInstance(mEvent, true);
+                login.show(getFragmentManager(), EventAuthFragment.class.getCanonicalName());
+                return true;
+
             default:
                 return super.onOptionsItemSelected(item);
         }
