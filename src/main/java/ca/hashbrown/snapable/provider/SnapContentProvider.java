@@ -17,6 +17,7 @@ import com.snapable.api.private_v1.resources.GuestResource;
 
 import ca.hashbrown.snapable.BuildConfig;
 import ca.hashbrown.snapable.api.SnapClient;
+import retrofit.RetrofitError;
 
 public class SnapContentProvider extends ContentProvider {
 
@@ -148,7 +149,9 @@ public class SnapContentProvider extends ContentProvider {
                 if (values.containsKey(SnapableContract.EventCredentials.EMAIL))
                     guestPost.email = values.getAsString(SnapableContract.EventCredentials.EMAIL);
 
-                guestResource.putGuest(ContentUris.parseId(uri), guestPost);
+                try {
+                    guestResource.putGuest(ContentUris.parseId(uri), guestPost);
+                } catch (RetrofitError ignored) {}
                 break;
 			}
 			default: {

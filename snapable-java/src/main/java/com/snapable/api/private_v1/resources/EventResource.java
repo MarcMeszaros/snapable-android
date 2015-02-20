@@ -1,6 +1,6 @@
 package com.snapable.api.private_v1.resources;
 
-import com.snapable.api.SnapImage;
+import com.snapable.utils.SnapImage;
 import com.snapable.api.private_v1.objects.*;
 
 import retrofit.http.*;

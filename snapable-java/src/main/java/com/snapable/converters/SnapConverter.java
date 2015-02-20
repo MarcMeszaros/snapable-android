@@ -1,6 +1,8 @@
-package com.snapable.api;
+package com.snapable.converters;
 
 import com.google.gson.Gson;
+import com.snapable.utils.SnapImage;
+
 import retrofit.converter.ConversionException;
 import retrofit.converter.GsonConverter;
 import retrofit.mime.TypedInput;
@@ -37,7 +39,6 @@ public class SnapConverter extends GsonConverter {
                 throw new ConversionException("Conversion failed");
             }
         } else {
-
             return super.fromBody(body, type);
         }
     }

@@ -18,49 +18,60 @@ import retrofit.converter.GsonConverter;
 
 public abstract class BaseClient implements Client {
 
-    private static HashMap<String, Object> resources;
-
     private Client wrapped;
-    private String baseUrl;
-    private boolean debug;
+    private String mBaseUrl;
+    private RestAdapter mRestAdapter;
+    private HashMap<String, Object> resources;
+
+    private boolean mDebug = false;
 
     public BaseClient(String baseUrl) {
         this(baseUrl, false);
     }
 
     public BaseClient(String baseUrl, boolean debug) {
-        this.baseUrl = baseUrl;
-        this.debug = debug;
+        mBaseUrl = baseUrl;
+        mDebug = debug;
+        resources = new HashMap<>(5);
 
-        try {
-            Class.forName("android.os.Build");
-            if (hasOkHttpOnClasspath()) {
-                wrapped = OkClientInstantiator.instantiate();
-            } else {
-                wrapped = new UrlConnectionClient();
-            }
-        } catch (ClassNotFoundException ignored) {
-            if (hasOkHttpOnClasspath()) {
-                wrapped = OkClientInstantiator.instantiate();
-            } else {
-                wrapped = new UrlConnectionClient();
-            }
+        if (hasOkHttpOnClasspath()) {
+            wrapped = OkClientInstantiator.instantiate();
+        } else {
+            wrapped = new UrlConnectionClient();
         }
     }
 
-    protected RestAdapter.Builder createRestAdapterBuilder() {
+    private RestAdapter.Builder createRestAdapterBuilder() {
         RestAdapter.Builder builder = new RestAdapter.Builder();
-        builder.setRequestInterceptor(getInterceptor());
-        builder.setConverter(getConverter());
-        builder.setEndpoint(baseUrl);
-        if (debug)
-            builder.setLogLevel(RestAdapter.LogLevel.FULL);
+        builder.setEndpoint(mBaseUrl);
         builder.setClient(this);
+
+        // set the converter
+        Converter converter = getConverter();
+        if (converter != null)
+            builder.setConverter(converter);
+
+        // set the interceptor
+        RequestInterceptor interceptor = getInterceptor();
+        if (interceptor != null)
+            builder.setRequestInterceptor(interceptor);
+
+        // enable debug
+        if (mDebug)
+            builder.setLogLevel(RestAdapter.LogLevel.FULL);
+
         return builder;
     }
 
     public RestAdapter getRestAdapter() {
-        return createRestAdapterBuilder().build();
+        if (mRestAdapter == null)
+            mRestAdapter = createRestAdapterBuilder().build();
+        return mRestAdapter;
+    }
+
+    @Override
+    public Response execute(Request request) throws IOException {
+        return wrapped.execute(sign(request));
     }
 
     /**
@@ -69,42 +80,32 @@ public abstract class BaseClient implements Client {
      * @param service the type of resource interface.
      * @return Instance of resource interface.
      */
-    public synchronized <T> T create(Class<T> service){
-        if (resources == null)
-            resources = new HashMap<>(5);
-
-        if (!resources.containsKey(service.getName()))
-            resources.put(service.getName(), getRestAdapter().create(service));
-
-        return (T) resources.get(service.getName());
-    }
-
-    @Override
-    public Response execute(Request request) throws IOException {
-        Request newRequest = sign(request);
-        return wrapped.execute(newRequest);
-    }
-
-    public String getBaseUrl() {
-        return this.baseUrl;
-    }
-
-    // stuff to overwrite
-    protected abstract Request sign(Request request);
-
-    protected RequestInterceptor getInterceptor() {
-        return new BaseInterceptor();
+    public synchronized <T> T create(Class<T> service) {
+        @SuppressWarnings("unchecked")
+        T serviceObject = (T) resources.get(service.getName());
+        if (serviceObject == null) {
+            serviceObject = getRestAdapter().create(service);
+            resources.put(service.getName(), serviceObject);
+        }
+        return serviceObject;
     }
 
     protected Converter getConverter() {
-        // build the converter
-        GsonBuilder builder = new GsonBuilder();
-        //builder.setDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-        Gson gson = builder.create();
-        return new GsonConverter(gson);
+        return null;
     }
 
-    /** Determine whether or not OkHttp is present on the runtime classpath. */
+    protected RequestInterceptor getInterceptor() {
+        return null;
+    }
+
+    // stuff to overwrite
+    protected Request sign(Request request) {
+        return request;
+    }
+
+    /**
+     * Determine whether or not OkHttp is present on the runtime classpath.
+     */
     private static boolean hasOkHttpOnClasspath() {
         try {
             Class.forName("com.squareup.okhttp.OkHttpClient");

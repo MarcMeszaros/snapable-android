@@ -1,4 +1,4 @@
-package com.snapable.api;
+package com.snapable.utils;
 
 import retrofit.mime.TypedInput;
 import retrofit.mime.TypedOutput;

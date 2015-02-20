@@ -1,6 +1,6 @@
 package ca.hashbrown.snapable.loaders;
 
-import com.snapable.util.ToStringHelper;
+import com.snapable.utils.ToStringHelper;
 
 import java.io.Serializable;
 import java.util.ArrayList;

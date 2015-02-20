@@ -5,11 +5,6 @@ import android.content.Context;
 import android.text.TextUtils;
 
 import com.snapable.api.private_v1.objects.Pager;
-import com.snapable.util.ToStringHelper;
-
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Timer;
 
 import retrofit.RetrofitError;
 import timber.log.Timber;

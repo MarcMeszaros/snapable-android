@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.snapable.util;
+package com.snapable.utils;
 
 
 public final class ToStringHelper {

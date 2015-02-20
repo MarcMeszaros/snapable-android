@@ -12,10 +12,10 @@ public abstract class BaseObject implements Serializable {
      * @return the resource primary key
      */
     public Long getPk() {
-        if (this.resource_uri != null) {
-            return getPkFromResourceUri(this.resource_uri);
+        if (resource_uri != null) {
+            return getPkFromResourceUri(resource_uri);
         } else {
-            return Long.valueOf(0);
+            return (long) 0;
         }
     }
 

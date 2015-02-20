@@ -13,7 +13,7 @@ import android.util.Log;
 import android.util.LruCache;
 import android.widget.ImageView;
 
-import com.snapable.api.SnapImage;
+import com.snapable.utils.SnapImage;
 import com.snapable.api.private_v1.resources.EventResource;
 import com.snapable.api.private_v1.resources.PhotoResource;
 

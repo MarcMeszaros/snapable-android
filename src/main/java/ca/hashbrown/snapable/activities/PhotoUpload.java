@@ -19,7 +19,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import ca.hashbrown.snapable.R;
 import ca.hashbrown.snapable.provider.SnapableContract;
-import com.snapable.api.SnapImage;
+import com.snapable.utils.SnapImage;
 import com.snapable.api.private_v1.Client;
 import com.snapable.api.private_v1.objects.Event;
 import com.snapable.api.private_v1.resources.PhotoResource;

@@ -1,4 +1,4 @@
-package com.snapable.api;
+package com.snapable.utils;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -12,7 +12,7 @@ import java.util.HashMap;
  *
  * @author Marc Meszaros (marc@snapable.com)
  */
-public class SnapApi {
+public class SnapSigning {
 
 	// API information
 	private final String api_version;
@@ -23,7 +23,7 @@ public class SnapApi {
 	private static final String HMAC_SHA1_ALGORITHM = "HmacSHA1";
 	private static final SecureRandom rand = new SecureRandom();
 
-    public SnapApi(String version, String key, String secret) {
+    public SnapSigning(String version, String key, String secret) {
         this.api_version = version;
         this.api_key = key;
         this.api_secret = secret;
@@ -65,7 +65,7 @@ public class SnapApi {
 	 * @param verb The HTTP verb for the request.
 	 * @param path The HTTP path of the request.
 	 * @return a HashMap containing the signature parts
-	 * @see SnapApi#sign(String, String, String, String)
+	 * @see SnapSigning#sign(String, String, String, String)
 	 */
 	public HashMap<String, String> sign(String verb, String path) {
 		return sign(verb, path, null, null);
@@ -83,8 +83,8 @@ public class SnapApi {
 	 */
 	public HashMap<String, String> sign(String verb, String path, String nonce, String timestamp) {
 		// build the string to sign
-		String snap_nonce = (nonce != null) ? nonce : SnapApi.getNonce(16);
-		String snap_timestamp = (timestamp != null) ? timestamp : SnapApi.getDate();
+		String snap_nonce = (nonce != null) ? nonce : SnapSigning.getNonce(16);
+		String snap_timestamp = (timestamp != null) ? timestamp : SnapSigning.getDate();
 		StringBuilder enc = new StringBuilder();
 		String raw_signature = api_key + verb.toUpperCase() + path + snap_nonce + snap_timestamp;
 		try {

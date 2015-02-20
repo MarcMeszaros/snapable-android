@@ -1,6 +1,8 @@
-package com.snapable.api.private_v1;
+package com.snapable.api.private_v1.objects;
 
-public abstract class BaseObject extends com.snapable.api.BaseObject {
+import com.snapable.api.private_v1.Client;
+
+abstract class BaseObject extends com.snapable.api.BaseObject {
 
     @Override
     public String getResourceUriFromLong(Long pk) {

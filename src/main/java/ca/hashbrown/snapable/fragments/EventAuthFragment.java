@@ -81,15 +81,15 @@ public class EventAuthFragment extends DialogFragment {
         // preload data
         Uri queryUri = ContentUris.withAppendedId(SnapableContract.EventCredentials.CONTENT_URI, mEvent.getPk());
         Cursor result = getActivity().getContentResolver().query(queryUri, null, null, null, null);
-        result.moveToFirst();
-
-        // guest details preload
-        String name = result.getString(result.getColumnIndex(SnapableContract.EventCredentials.NAME));
-        String email = result.getString(result.getColumnIndex(SnapableContract.EventCredentials.EMAIL));
-        if (!TextUtils.isEmpty(name))
-            mNameEditTextView.setText(name);
-        if (!TextUtils.isEmpty(email))
-            mEmailEditTextView.setText(email);
+        if (result.moveToFirst()) {
+            // guest details preload
+            String name = result.getString(result.getColumnIndex(SnapableContract.EventCredentials.NAME));
+            String email = result.getString(result.getColumnIndex(SnapableContract.EventCredentials.EMAIL));
+            if (!TextUtils.isEmpty(name))
+                mNameEditTextView.setText(name);
+            if (!TextUtils.isEmpty(email))
+                mEmailEditTextView.setText(email);
+        }
 
         if (mUpdateUser || (mEvent != null && mEvent.is_public)) {
             mPinGroupView.setVisibility(View.GONE);
