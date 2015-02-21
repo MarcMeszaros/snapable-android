@@ -49,21 +49,12 @@ public class SnapContentProvider extends ContentProvider {
 	}
 
 	// class variable
-	private Client snapClient;
 	private DBHelper dbHelper;
 
 	@Override
 	public boolean onCreate() {
-		snapClient = SnapClient.getInstance();
 		dbHelper = new DBHelper(getContext());
-
-		// return success or failure
-		if (snapClient != null && dbHelper != null) {
-			Log.d(TAG, "content provider created");
-			return true;
-		} else {
-			return false;
-		}
+        return true;
 	}
 
 	@Override
@@ -141,9 +132,9 @@ public class SnapContentProvider extends ContentProvider {
 			case EVENT_CREDENTIALS_ID: {
                 rowsAffected = db.update(DBHelper.EVENT_CREDENTIALS.TABLE_NAME, values, null, null);
                 // if we have a guest update the result
-                final GuestResource guestResource = snapClient.getRestAdapter().create(GuestResource.class);
+                final GuestResource guestResource = SnapClient.getResource(GuestResource.class);
                 final Guest guestPost = new Guest();
-                guestPost.setEvent(ContentUris.parseId(uri));
+                guestPost.setEventPk(ContentUris.parseId(uri));
                 if (values.containsKey(SnapableContract.EventCredentials.NAME))
                     guestPost.name = values.getAsString(SnapableContract.EventCredentials.NAME);
                 if (values.containsKey(SnapableContract.EventCredentials.EMAIL))
@@ -241,19 +232,20 @@ public class SnapContentProvider extends ContentProvider {
 
 		@Override
 		protected Void doInBackground(Void... params) {
-			// some values
-			String guest_email = values.getAsString(SnapableContract.EventCredentials.EMAIL);
-			String guest_event = "/" + snapClient.VERSION + "/event/" + values.getAsLong(SnapableContract.EventCredentials._ID) + "/";
-			String guest_name = values.getAsString(SnapableContract.EventCredentials.NAME);
+            // some values
+            Guest guest = new Guest();
+            guest.email = values.getAsString(SnapableContract.EventCredentials.EMAIL);
+            guest.name = values.getAsString(SnapableContract.EventCredentials.NAME);
+            guest.setEventPk(values.getAsLong(SnapableContract.EventCredentials._ID));
 
 			// setup the API client
-			GuestResource guestResource = snapClient.getRestAdapter().create(GuestResource.class);
-			Pager<Guest> guests = guestResource.getGuests(guest_email, values.getAsLong(SnapableContract.EventCredentials._ID));
+            GuestResource guestResource = SnapClient.getResource(GuestResource.class);
+			Pager<Guest> guests = guestResource.getGuests(guest.email, values.getAsLong(SnapableContract.EventCredentials._ID));
 
 			// if we have a guest update the result
 			if (guests.meta.totalCount == 1) {
                 Guest guestPost = new Guest();
-                guestPost.name = guest_name;
+                guestPost.name = guest.name;
 				guestResource.putGuest(guests.objects.get(0).getPk(), guestPost);
 
 				// update the local db with the guest id
@@ -263,11 +255,7 @@ public class SnapContentProvider extends ContentProvider {
 				getContext().getContentResolver().update(request_uri, vals, null, null);
 			} else {
 				// create the guest and update
-                Guest guestPost = new Guest();
-                guestPost.eventUri = guest_event;
-                guestPost.email = guest_email;
-                guestPost.name = guest_name;
-				Guest guest = guestResource.postGuest(guestPost);
+                guest = guestResource.postGuest(guest);
 
 				// update the local db with the guest id
 				Uri request_uri = ContentUris.withAppendedId(SnapableContract.EventCredentials.CONTENT_URI, values.getAsLong(SnapableContract.EventCredentials._ID));

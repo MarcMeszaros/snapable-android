@@ -22,12 +22,12 @@ public class Guest extends BaseObject {
 
     // virtual properties
     @JsonIgnore
-    public void setEvent(long eventId) {
-        eventUri = new Event().getResourceUriFromLong(eventId);
+    public void setEventPk(long eventId) {
+        eventUri = new Event().getResourceUriFromPk(eventId);
     }
 
     @JsonIgnore
     public Long getEventId() {
-        return BaseObject.getPkFromResourceUri(this.eventUri);
+        return getPkFromResourceUri(this.eventUri);
     }
 }

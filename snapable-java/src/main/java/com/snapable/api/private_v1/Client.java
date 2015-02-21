@@ -20,9 +20,9 @@ import retrofit.converter.JacksonConverter;
 
 public class Client extends BaseClient {
 
-    public static final String VERSION = "private_v1";
-    private static final String BASE_URL = "https://api.snapable.com/" + VERSION + "/";
-    private static final String BASE_URL_DEV = "http://devapi.snapable.com/" + VERSION + "/";
+    private static final String VERSION = "private_v1";
+    private static final String BASE_URL = "https://api.snapable.com/private_v1/";
+    private static final String BASE_URL_DEV = "http://devapi.snapable.com/private_v1/";
 
     private final SnapSigning snapSigning;
 

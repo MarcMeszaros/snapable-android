@@ -19,6 +19,8 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import ca.hashbrown.snapable.R;
 import ca.hashbrown.snapable.provider.SnapableContract;
+
+import com.snapable.api.private_v1.objects.Guest;
 import com.snapable.utils.SnapImage;
 import com.snapable.api.private_v1.Client;
 import com.snapable.api.private_v1.objects.Event;
@@ -197,7 +199,7 @@ public class PhotoUpload extends BaseActivity {
 	        	if (c.moveToFirst()) {
 	        		long guest_id = c.getLong(c.getColumnIndex(SnapableContract.EventCredentials.GUEST_ID));
                     if(guest_id > 0) {
-                        photoRes.postPhoto(tempImage, new TypedString(event.resourceUri), new TypedString("/"+ client.VERSION +"/guest/"+guest_id+"/"), new TypedString(caption));
+                        photoRes.postPhoto(tempImage, new TypedString(event.resourceUri), new TypedString(new Guest().getResourceUriFromPk(guest_id)), new TypedString(caption));
 	        		} else {
                         photoRes.postPhoto(tempImage, new TypedString(event.resourceUri), new TypedString(caption));
                     }

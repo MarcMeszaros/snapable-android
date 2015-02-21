@@ -213,8 +213,7 @@ public class SnapCache {
 				return bm;
 			} else{
 				try {
-                    SnapClient client = SnapClient.getInstance();
-                    SnapImage img = client.getRestAdapter().create(EventResource.class).getEventPhotoBinary(params[0], "150x150");
+                    SnapImage img = SnapClient.getResource(EventResource.class).getEventPhotoBinary(params[0], "150x150");
                     final byte[] bytes = img.getBytes();
                     bm = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
                     addBitmapToCache(params[0] + "_150x150", bm);
@@ -278,8 +277,7 @@ public class SnapCache {
 				return bm;
 			} else{
 				try {
-                    SnapClient client = SnapClient.getInstance();
-                    SnapImage img = client.getRestAdapter().create(PhotoResource.class).getPhotoBinary(params[0], "480x480");
+                    SnapImage img = SnapClient.getResource(PhotoResource.class).getPhotoBinary(params[0], "480x480");
                     final byte[] bytes = img.getBytes();
 					bm = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
                     addBitmapToCache(params[0] + "_480x480", bm);

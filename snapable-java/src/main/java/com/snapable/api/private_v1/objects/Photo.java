@@ -29,7 +29,7 @@ public class Photo extends BaseObject {
     // virtual properties
     @JsonIgnore
     public Long getEventId() {
-        return BaseObject.getPkFromResourceUri(this.eventUri);
+        return getPkFromResourceUri(this.eventUri);
     }
 
 }
