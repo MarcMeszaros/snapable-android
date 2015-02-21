@@ -8,9 +8,7 @@ import retrofit.mime.TypedString;
 
 public interface PhotoResource {
 
-	public static final String RESOURCE_NAME = "photo";
-
-	@GET("/"+RESOURCE_NAME+"/")
+	@GET("/photo/")
     @Headers("Accept: application/json")
     Pager<Photo> getPhotos();
 
@@ -20,33 +18,33 @@ public interface PhotoResource {
             @Path(value="uri", encode=false) String uri
     );
 
-    @GET("/"+RESOURCE_NAME+"/")
+    @GET("/photo/")
     @Headers("Accept: application/json")
     Pager<Photo> getPhotos(
     	@Query("event") long eventId
     );
 
-    @GET("/"+RESOURCE_NAME+"/")
+    @GET("/photo/")
     @Headers("Accept: application/json")
     Pager<Photo> getPhotos(
         @Query("event") long eventId,
         @Query("streamable") boolean streamable
     );
 
-    @GET("/"+RESOURCE_NAME+"/{id}/")
+    @GET("/photo/{id}/")
     @Headers("Accept: application/json")
     Photo getPhoto(
     	@Path("id") long id
     );
 
-    @GET("/"+RESOURCE_NAME+"/{id}/")
+    @GET("/photo/{id}/")
     @Headers("Accept: image/jpeg")
     SnapImage getPhotoBinary(
     	@Path("id") long id,
     	@Query("size") String size
     );
 
-    @POST("/"+RESOURCE_NAME+"/{id}/")
+    @POST("/photo/{id}/")
     @Headers({
         "Accept: application/json",
         "X-HTTP-Method-Override: PATCH" // retrofit doesn't support "PATCH" with response body
@@ -57,7 +55,7 @@ public interface PhotoResource {
     );
 
     @Multipart
-    @POST("/"+RESOURCE_NAME+"/")
+    @POST("/photo/")
     @Headers("Accept: application/json")
     Photo postPhoto(
         @Part("image") SnapImage photo,
@@ -66,7 +64,7 @@ public interface PhotoResource {
     );
 
     @Multipart
-    @POST("/"+RESOURCE_NAME+"/")
+    @POST("/photo/")
     @Headers("Accept: application/json")
     Photo postPhoto(
         @Part("image") SnapImage photo,

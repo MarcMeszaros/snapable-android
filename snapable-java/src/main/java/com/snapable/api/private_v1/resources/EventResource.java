@@ -7,9 +7,7 @@ import retrofit.http.*;
 
 public interface EventResource {
 
-	public static final String RESOURCE_NAME = "event";
-
-    @GET("/"+RESOURCE_NAME+"/")
+    @GET("/event/")
     @Headers("Accept: application/json")
     Pager<Event> getEvents();
 
@@ -19,26 +17,26 @@ public interface EventResource {
             @Path(value="uri", encode=false) String uri
     );
 
-    @GET("/"+RESOURCE_NAME+"/")
+    @GET("/event/")
     @Headers("Accept: application/json")
     Pager<Event> getEvents(
     	@Query("lat") float lat,
     	@Query("lng") float lng
     );
 
-    @GET("/"+RESOURCE_NAME+"/search/")
+    @GET("/event/search/")
     @Headers("Accept: application/json")
     Pager<Event> getEvents(
     	@Query("q") String query
     );
 
-    @GET("/"+RESOURCE_NAME+"/{id}/")
+    @GET("/event/{id}/")
     @Headers("Accept: application/json")
     Event getEvent(
     	@Path("id") long id
     );
 
-    @GET("/"+RESOURCE_NAME+"/{id}/")
+    @GET("/event/{id}/")
     @Headers("Accept: image/jpeg")
     SnapImage getEventPhotoBinary(
     	@Path("id") long id,
