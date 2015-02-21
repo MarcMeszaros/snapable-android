@@ -1,7 +1,6 @@
 package ca.hashbrown.snapable.adapters;
 
 import android.content.Context;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.text.format.DateFormat;
@@ -55,7 +54,7 @@ public class EventListAdapter extends ArrayAdapter<Event> {
 
 		// set the title
         holder.title.setText(event.title);
-		long start = event.start_at.getTime();
+		long start = event.startAt.getTime();
         start += TimeZone.getDefault().getRawOffset(); // add the device offset
         holder.date.setText(DateFormat.format("EEE MMMM d, h:mm a", start));
 

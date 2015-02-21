@@ -10,7 +10,6 @@ import android.os.AsyncTask;
 import android.provider.BaseColumns;
 import android.util.Log;
 
-import com.snapable.api.BaseObject;
 import com.snapable.api.private_v1.Client;
 import com.snapable.api.private_v1.objects.Guest;
 import com.snapable.api.private_v1.objects.Pager;
@@ -18,7 +17,6 @@ import com.snapable.api.private_v1.resources.GuestResource;
 
 import ca.hashbrown.snapable.BuildConfig;
 import ca.hashbrown.snapable.api.SnapClient;
-import retrofit.RetrofitError;
 
 public class SnapContentProvider extends ContentProvider {
 
@@ -253,20 +251,20 @@ public class SnapContentProvider extends ContentProvider {
 			Pager<Guest> guests = guestResource.getGuests(guest_email, values.getAsLong(SnapableContract.EventCredentials._ID));
 
 			// if we have a guest update the result
-			if (guests.meta.total_count == 1) {
+			if (guests.meta.totalCount == 1) {
                 Guest guestPost = new Guest();
                 guestPost.name = guest_name;
-				guestResource.putGuest(guests.objects.get(0).getId(), guestPost);
+				guestResource.putGuest(guests.objects.get(0).getPk(), guestPost);
 
 				// update the local db with the guest id
 				Uri request_uri = ContentUris.withAppendedId(SnapableContract.EventCredentials.CONTENT_URI, values.getAsLong(SnapableContract.EventCredentials._ID));
 				ContentValues vals = new ContentValues();
-				vals.put(SnapableContract.EventCredentials.GUEST_ID, guests.objects.get(0).getId());
+				vals.put(SnapableContract.EventCredentials.GUEST_ID, guests.objects.get(0).getPk());
 				getContext().getContentResolver().update(request_uri, vals, null, null);
 			} else {
 				// create the guest and update
                 Guest guestPost = new Guest();
-                guestPost.event_uri = guest_event;
+                guestPost.eventUri = guest_event;
                 guestPost.email = guest_email;
                 guestPost.name = guest_name;
 				Guest guest = guestResource.postGuest(guestPost);
@@ -274,7 +272,7 @@ public class SnapContentProvider extends ContentProvider {
 				// update the local db with the guest id
 				Uri request_uri = ContentUris.withAppendedId(SnapableContract.EventCredentials.CONTENT_URI, values.getAsLong(SnapableContract.EventCredentials._ID));
 				ContentValues vals = new ContentValues();
-				vals.put(SnapableContract.EventCredentials.GUEST_ID, guest.getId());
+				vals.put(SnapableContract.EventCredentials.GUEST_ID, guest.getPk());
 				getContext().getContentResolver().update(request_uri, vals, null, null);
 			}
 

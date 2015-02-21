@@ -58,7 +58,7 @@ public class PhotoListAdapter extends ArrayAdapter<Photo> {
         }
 
         // author name
-        holder.authorName.setText( TextUtils.isEmpty(photo.author_name) ? "Anonymous" : photo.author_name);
+        holder.authorName.setText( TextUtils.isEmpty(photo.authorName) ? "Anonymous" : photo.authorName);
 
 		// get the image, if there is one
 		final String imageKey = photo.getPk() + "_480x480";

@@ -258,7 +258,7 @@ public class EventListFragment extends SnapListFragment implements SearchView.On
 
         try {
             // we have a result
-            if (result.getCount() > 0 && event.is_public) {
+            if (result.getCount() > 0 && event.isPublic) {
                 isAllowed = true;
             } else if (result.getCount() > 0 && result.moveToFirst()) {
                 isAllowed = result.getString(result.getColumnIndex(SnapableContract.EventCredentials.PIN)).equals(event.pin);

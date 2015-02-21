@@ -197,12 +197,12 @@ public class PhotoUpload extends BaseActivity {
 	        	if (c.moveToFirst()) {
 	        		long guest_id = c.getLong(c.getColumnIndex(SnapableContract.EventCredentials.GUEST_ID));
                     if(guest_id > 0) {
-                        photoRes.postPhoto(tempImage, new TypedString(event.resource_uri), new TypedString("/"+ client.VERSION +"/guest/"+guest_id+"/"), new TypedString(caption));
+                        photoRes.postPhoto(tempImage, new TypedString(event.resourceUri), new TypedString("/"+ client.VERSION +"/guest/"+guest_id+"/"), new TypedString(caption));
 	        		} else {
-                        photoRes.postPhoto(tempImage, new TypedString(event.resource_uri), new TypedString(caption));
+                        photoRes.postPhoto(tempImage, new TypedString(event.resourceUri), new TypedString(caption));
                     }
 	        	} else {
-	        		photoRes.postPhoto(tempImage, new TypedString(event.resource_uri), new TypedString(caption));
+	        		photoRes.postPhoto(tempImage, new TypedString(event.resourceUri), new TypedString(caption));
 				}
 	        } catch(FileNotFoundException e) {
                 Timber.e(e, "problem finding a file");

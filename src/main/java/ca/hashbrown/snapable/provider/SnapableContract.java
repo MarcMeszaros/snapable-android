@@ -49,7 +49,7 @@ public final class SnapableContract {
 		 * The number of photos associated with the event.
 		 * <p>TYPE: INTEGER</p>
 		 */
-		public static final String PHOTO_COUNT = "photo_count";
+		public static final String PHOTO_COUNT = "photoCount";
 
 		/**
 		 * The event PIN.
@@ -102,7 +102,7 @@ public final class SnapableContract {
 		 * The photographer's name.
 		 * <p>TYPE: TEXT</p>
 		 */
-		public static final String AUTHOR_NAME = "author_name";
+		public static final String AUTHOR_NAME = "authorName";
 		
 		/**
 		 * The image caption specified by the uploader.

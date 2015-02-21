@@ -22,13 +22,13 @@ public class Pager<E> {
         public String next;
         public long offset;
         public String previous;
-        public long total_count;
+        public long totalCount;
 
         public String toString() {
             return ToStringHelper.getInstance(this)
                     .add("limit", limit)
                     .add("offset", offset)
-                    .add("total_count", total_count)
+                    .add("total_count", totalCount)
                     .toString();
         }
 

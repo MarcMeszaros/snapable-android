@@ -6,7 +6,7 @@ import java.io.Serializable;
 
 public abstract class BaseObject implements Serializable {
 
-    public String resource_uri;
+    public String resourceUri;
 
     /**
      * The primary key of the object based on the resource uri.
@@ -15,8 +15,8 @@ public abstract class BaseObject implements Serializable {
      */
     @JsonIgnore
     public Long getPk() {
-        if (resource_uri != null) {
-            return getPkFromResourceUri(resource_uri);
+        if (resourceUri != null) {
+            return getPkFromResourceUri(resourceUri);
         } else {
             return (long) 0;
         }
@@ -28,7 +28,7 @@ public abstract class BaseObject implements Serializable {
      * @param pk the primary key to set
      */
     public void setPk(Long pk) {
-        resource_uri = getResourceUriFromLong(pk);
+        resourceUri = getResourceUriFromLong(pk);
     }
 
     /**

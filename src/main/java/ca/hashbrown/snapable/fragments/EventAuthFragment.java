@@ -91,7 +91,7 @@ public class EventAuthFragment extends DialogFragment {
                 mEmailEditTextView.setText(email);
         }
 
-        if (mUpdateUser || (mEvent != null && mEvent.is_public)) {
+        if (mUpdateUser || (mEvent != null && mEvent.isPublic)) {
             mPinGroupView.setVisibility(View.GONE);
             mNameEditTextView.requestFocus();
         } else {
@@ -129,15 +129,15 @@ public class EventAuthFragment extends DialogFragment {
     }
 
 	private boolean cachedPinMatchesEventPin(Event event) {
-		Uri requestUri = ContentUris.withAppendedId(SnapableContract.EventCredentials.CONTENT_URI, event.getId());
+		Uri requestUri = ContentUris.withAppendedId(SnapableContract.EventCredentials.CONTENT_URI, event.getPk());
 		Cursor result = getActivity().getContentResolver().query(requestUri, null, null, null, null);
 
 		// we have a result
-		if (result.getCount() > 0 && event.is_public) {
+		if (result.getCount() > 0 && event.isPublic) {
 			return true;
 		}
 		else if (result.getCount() > 0 && result.moveToFirst()) {
-			return result.getString(result.getColumnIndex(SnapableContract.EventCredentials.PIN)).equals(event.is_public);
+			return result.getString(result.getColumnIndex(SnapableContract.EventCredentials.PIN)).equals(event.isPublic);
 		}
 
 		// there was no result
@@ -164,7 +164,7 @@ public class EventAuthFragment extends DialogFragment {
                 return true;
             }
             // if the event is public login
-            else if (mEvent.is_public && !cachedPinMatchesEventPin(mEvent)) {
+            else if (mEvent.isPublic && !cachedPinMatchesEventPin(mEvent)) {
                 // save the details in the local storage
                 ContentValues values = new ContentValues(3);
                 values.put(SnapableContract.EventCredentials._ID, mEvent.getPk());
@@ -181,7 +181,7 @@ public class EventAuthFragment extends DialogFragment {
                 return true;
             }
             // if the event is private and the pins match
-            else if (!mEvent.is_public && mEvent.pin.equals(mPinEditTextView.getText().toString())) {
+            else if (!mEvent.isPublic && mEvent.pin.equals(mPinEditTextView.getText().toString())) {
                 // save the details in the local storage
                 ContentValues values = new ContentValues(3);
                 values.put(SnapableContract.EventCredentials.PIN, mPinEditTextView.getText().toString());

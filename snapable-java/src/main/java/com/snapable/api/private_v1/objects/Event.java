@@ -1,43 +1,32 @@
 package com.snapable.api.private_v1.objects;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.snapable.utils.ToStringHelper;
 
 import java.util.Date;
 
 public class Event extends BaseObject {
 
-    public Date end_at;
-    public Long photo_count;
+    public Date endAt;
+    public Long photoCount;
     public String pin;
-    public Boolean is_enabled;
-    public Boolean is_public;
-    public Date start_at;
+    public Boolean isEnabled;
+    public Boolean isPublic;
+    public Date startAt;
     public String title;
     public String url;
-    @Deprecated public Boolean enabled;
-    @Deprecated public Date end;
-    @Deprecated public Date start;
 
     public String toString() {
         return ToStringHelper.getInstance(this)
             .add("pk", this.getPk())
-        	.add("end_at", this.end_at)
-        	.add("photo_count", this.photo_count)
+        	.add("end_at", this.endAt)
+        	.add("photo_count", this.photoCount)
         	.add("pin", this.pin)
-            .add("is_enable", this.is_enabled)
-            .add("is_public", this.is_public)
-            .add("start_at", start_at)
+            .add("is_enabled", this.isEnabled)
+            .add("is_public", this.isPublic)
+            .add("startAt", startAt)
             .add("title", this.title)
             .add("url", this.url)
             .toString();
-    }
-
-    // virtual properties
-    @JsonIgnore
-    @Deprecated
-    public Long getId() {
-    	return getPk();
     }
 
 }
