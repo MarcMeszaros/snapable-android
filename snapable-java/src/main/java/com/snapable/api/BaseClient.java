@@ -1,8 +1,5 @@
 package com.snapable.api;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 import java.io.IOException;
 import java.util.HashMap;
 
@@ -14,14 +11,13 @@ import retrofit.client.Request;
 import retrofit.client.Response;
 import retrofit.client.UrlConnectionClient;
 import retrofit.converter.Converter;
-import retrofit.converter.GsonConverter;
 
 public abstract class BaseClient implements Client {
 
     private Client wrapped;
     private String mBaseUrl;
     private RestAdapter mRestAdapter;
-    private HashMap<String, Object> resources;
+    private HashMap<String, Object> mResources;
 
     private boolean mDebug = false;
 
@@ -32,7 +28,7 @@ public abstract class BaseClient implements Client {
     public BaseClient(String baseUrl, boolean debug) {
         mBaseUrl = baseUrl;
         mDebug = debug;
-        resources = new HashMap<>(5);
+        mResources = new HashMap<>(5);
 
         if (hasOkHttpOnClasspath()) {
             wrapped = OkClientInstantiator.instantiate();
@@ -82,10 +78,10 @@ public abstract class BaseClient implements Client {
      */
     public synchronized <T> T create(Class<T> service) {
         @SuppressWarnings("unchecked")
-        T serviceObject = (T) resources.get(service.getName());
+        T serviceObject = (T) mResources.get(service.getName());
         if (serviceObject == null) {
             serviceObject = getRestAdapter().create(service);
-            resources.put(service.getName(), serviceObject);
+            mResources.put(service.getName(), serviceObject);
         }
         return serviceObject;
     }

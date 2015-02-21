@@ -154,7 +154,7 @@ public class EventAuthFragment extends DialogFragment {
             if (mUpdateUser) {
                 // save the details in the local storage
                 ContentValues values = new ContentValues(3);
-                values.put(SnapableContract.EventCredentials._ID, mEvent.getPk());
+                //values.put(SnapableContract.EventCredentials._ID, mEvent.getPk());
                 values.put(SnapableContract.EventCredentials.NAME, mNameEditTextView.getText().toString());
                 values.put(SnapableContract.EventCredentials.EMAIL, mEmailEditTextView.getText().toString());
 

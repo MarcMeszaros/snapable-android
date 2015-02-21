@@ -1,5 +1,6 @@
 package com.snapable.api.private_v1.objects;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.snapable.utils.ToStringHelper;
 
 import java.util.Date;
@@ -33,6 +34,7 @@ public class Event extends BaseObject {
     }
 
     // virtual properties
+    @JsonIgnore
     @Deprecated
     public Long getId() {
     	return getPk();

@@ -1,28 +1,25 @@
 package com.snapable.converters;
 
-import com.google.gson.Gson;
 import com.snapable.utils.SnapImage;
-
-import retrofit.converter.ConversionException;
-import retrofit.converter.GsonConverter;
-import retrofit.mime.TypedInput;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
 
-public class SnapConverter extends GsonConverter {
+import retrofit.converter.ConversionException;
+import retrofit.converter.Converter;
+import retrofit.mime.TypedInput;
+import retrofit.mime.TypedOutput;
 
-    public SnapConverter(Gson gson) {
-        super(gson);
+public class SnapConverter implements Converter {
+
+    Converter mWrappedConverter;
+
+    public SnapConverter(Converter converter) {
+        mWrappedConverter = converter;
     }
 
-    public SnapConverter(Gson gson, String encoding) {
-        super(gson, encoding);
-    }
-
-    @Override
     public Object fromBody(TypedInput body, Type type) throws ConversionException {
         if (body.mimeType().contains("image/jpeg") && type.getClass().isInstance(SnapImage.class)) {
             // if the output type is SnapImage, read the data and build the image object
@@ -30,7 +27,7 @@ public class SnapConverter extends GsonConverter {
                 ByteArrayOutputStream result = new ByteArrayOutputStream(2048);
                 InputStream in = body.in();
                 int b;
-                while ((b = in.read()) >= 0 ) {
+                while ((b = in.read()) >= 0) {
                     result.write(b);
                 }
 
@@ -39,7 +36,12 @@ public class SnapConverter extends GsonConverter {
                 throw new ConversionException("Conversion failed");
             }
         } else {
-            return super.fromBody(body, type);
+            return mWrappedConverter.fromBody(body, type);
         }
+    }
+
+    @Override
+    public TypedOutput toBody(Object object) {
+        return mWrappedConverter.toBody(object);
     }
 }

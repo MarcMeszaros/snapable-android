@@ -1,5 +1,7 @@
 package com.snapable.api;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.io.Serializable;
 
 public abstract class BaseObject implements Serializable {
@@ -11,6 +13,7 @@ public abstract class BaseObject implements Serializable {
      *
      * @return the resource primary key
      */
+    @JsonIgnore
     public Long getPk() {
         if (resource_uri != null) {
             return getPkFromResourceUri(resource_uri);
@@ -34,11 +37,13 @@ public abstract class BaseObject implements Serializable {
      * @param resource_uri the resource uri string to parse
      * @return the pk of the resource uri
      */
+    @JsonIgnore
     public static Long getPkFromResourceUri(String resource_uri) {
         String[] resourceParts = resource_uri.split("/");
         return Long.valueOf(resourceParts[resourceParts.length-1]);
     }
 
+    @JsonIgnore
     public abstract String getResourceUriFromLong(Long pk);
 
 }

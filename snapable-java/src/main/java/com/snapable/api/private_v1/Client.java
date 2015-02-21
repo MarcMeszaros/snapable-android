@@ -1,18 +1,30 @@
 package com.snapable.api.private_v1;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.snapable.api.BaseClient;
 import com.snapable.utils.SnapSigning;
 import com.snapable.converters.SnapConverter;
 
+import java.text.DateFormat;
+import java.text.FieldPosition;
+import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
 import retrofit.client.Header;
 import retrofit.client.Request;
 import retrofit.converter.Converter;
+import retrofit.converter.GsonConverter;
+import retrofit.converter.JacksonConverter;
 
 public class Client extends BaseClient {
 
@@ -33,11 +45,18 @@ public class Client extends BaseClient {
 
     @Override
     protected Converter getConverter() {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss"));
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        JacksonConverter jacksonConverter = new JacksonConverter(mapper);
+
         // build the converter
         GsonBuilder builder = new GsonBuilder();
         builder.setDateFormat("yyyy-MM-dd'T'HH:mm:ss");
         Gson gson = builder.create();
-        return new SnapConverter(gson);
+        GsonConverter gsonConverter = new GsonConverter(gson);
+        return new SnapConverter(jacksonConverter);
     }
 
     @Override

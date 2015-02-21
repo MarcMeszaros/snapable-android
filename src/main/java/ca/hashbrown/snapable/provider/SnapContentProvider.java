@@ -10,6 +10,7 @@ import android.os.AsyncTask;
 import android.provider.BaseColumns;
 import android.util.Log;
 
+import com.snapable.api.BaseObject;
 import com.snapable.api.private_v1.Client;
 import com.snapable.api.private_v1.objects.Guest;
 import com.snapable.api.private_v1.objects.Pager;
@@ -133,25 +134,31 @@ public class SnapContentProvider extends ContentProvider {
 	}
 
 	@Override
-	public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+	public int update(final Uri uri, ContentValues values, String selection, String[] selectionArgs) {
 		// create an SQL object and initialize some objects
 		SQLiteDatabase db = dbHelper.getWritableDatabase();
 		int rowsAffected = 0;
 
 		switch (uriMatcher.match(uri)) {
 			case EVENT_CREDENTIALS_ID: {
-				rowsAffected = db.update(DBHelper.EVENT_CREDENTIALS.TABLE_NAME, values, null, null);
+                rowsAffected = db.update(DBHelper.EVENT_CREDENTIALS.TABLE_NAME, values, null, null);
                 // if we have a guest update the result
-                GuestResource guestResource = snapClient.getRestAdapter().create(GuestResource.class);
-                Guest guestPost = new Guest();
+                final GuestResource guestResource = snapClient.getRestAdapter().create(GuestResource.class);
+                final Guest guestPost = new Guest();
+                guestPost.setEvent(ContentUris.parseId(uri));
                 if (values.containsKey(SnapableContract.EventCredentials.NAME))
                     guestPost.name = values.getAsString(SnapableContract.EventCredentials.NAME);
                 if (values.containsKey(SnapableContract.EventCredentials.EMAIL))
                     guestPost.email = values.getAsString(SnapableContract.EventCredentials.EMAIL);
 
                 try {
-                    guestResource.putGuest(ContentUris.parseId(uri), guestPost);
-                } catch (RetrofitError ignored) {}
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            guestResource.putGuest(ContentUris.parseId(uri), guestPost);
+                        }
+                    }).start();
+                } catch (Exception ignored) {}
                 break;
 			}
 			default: {

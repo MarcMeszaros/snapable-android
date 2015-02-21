@@ -1,5 +1,7 @@
 package com.snapable.api.private_v1.objects;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.annotations.SerializedName;
 import com.snapable.utils.ToStringHelper;
 
@@ -9,7 +11,7 @@ public class Photo extends BaseObject {
     public String author_name;
     public String caption;
     public Date created_at;
-    @SerializedName("event")
+    @JsonProperty("event")
     public String event_uri;
     public Boolean streamable;
     @Deprecated public Date timestamp;
@@ -25,11 +27,13 @@ public class Photo extends BaseObject {
     }
 
     // virtual properties
+    @JsonIgnore
     @Deprecated
     public Long getId() {
     	return getPk();
     }
 
+    @JsonIgnore
     public Long getEventId() {
         return BaseObject.getPkFromResourceUri(this.event_uri);
     }
