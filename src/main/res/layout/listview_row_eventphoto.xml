@@ -5,6 +5,7 @@
     android:id="@+id/listview_row_photo"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:layout_gravity="center_horizontal"
     card_view:cardCornerRadius="4dp"
     card_view:cardElevation="5dp">
 

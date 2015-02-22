@@ -20,6 +20,7 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="10dp"
-        android:background="@drawable/btn_camera" />
+        android:background="@drawable/btn_camera"
+        android:elevation="15dp" />
 
 </RelativeLayout>
