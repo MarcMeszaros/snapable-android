@@ -1,12 +1,16 @@
 package ca.hashbrown.snapable.fragments;
 
+import android.app.Fragment;
 import android.app.ListFragment;
 import android.os.Bundle;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.widget.AbsListView;
+import android.widget.ListAdapter;
 
 import ca.hashbrown.snapable.R;
+import ca.hashbrown.snapable.ui.widgets.EmptyRecyclerView;
 
 /**
  * The source code is almost identical to the function found in AOSP (Android Open Source Project).
@@ -16,18 +20,72 @@ import ca.hashbrown.snapable.R;
  * @see <a href="https://android.googlesource.com/platform/frameworks/base/+/master/core/java/android/app/ListFragment.java">Android Source File</a>
  * @see <a href="https://android.googlesource.com/platform/frameworks/base/+/master/core/res/res/layout/list_content.xml">Android Layout File<a/>
  */
-public abstract class SnapListFragment extends ListFragment implements AbsListView.OnScrollListener {
+public abstract class SnapListFragment extends Fragment implements AbsListView.OnScrollListener {
 
     private final int AUTOLOAD_THRESHOLD = 4;
 
+    private LoadMoreListener mLoadMoreListener;
     private boolean isMoreLoading = false;
     private int mScrollState = SCROLL_STATE_IDLE;
-    private LoadMoreListener mLoadMoreListener;
+    private AbsListView mList;
+    private RecyclerView mRecyclerView;
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        getListView().setOnScrollListener(this);
+        View list = view.findViewById(android.R.id.list);
+        if (list instanceof AbsListView)
+            mList = (AbsListView) list;
+        else if (list instanceof RecyclerView)
+            mRecyclerView = (RecyclerView) list;
+
+        View mEmptyView = view.findViewById(android.R.id.empty);
+        if(mEmptyView != null)
+            setEmptyView(mEmptyView);
+
+        setOnScrollListener(this);
+    }
+
+    /**
+     * Set the list adapter for the fragment.
+     *
+     * @param adapter The adapter to set.
+     */
+    public void setListAdapter(ListAdapter adapter){
+        if (mList != null)
+            mList.setAdapter(adapter);
+    }
+
+    /**
+     * Set the adapter for the recycler view if available.
+     *
+     * @param adapter The adapter to set.
+     */
+    public void setRecyclerAdapter(RecyclerView.Adapter adapter) {
+        if (mRecyclerView != null)
+            mRecyclerView.setAdapter(adapter);
+    }
+
+    /**
+     * Set the scroll listener.
+     *
+     * @param listener
+     */
+    public void setOnScrollListener(AbsListView.OnScrollListener listener) {
+        if (mList != null)
+            mList.setOnScrollListener(listener);
+    }
+
+    /**
+     * Set the empty on list types that support it.
+     *
+     * @param empty The empty view to set.
+     */
+    public void setEmptyView(View empty) {
+        if (mList != null)
+            mList.setEmptyView(empty);
+        if (mRecyclerView != null && mRecyclerView instanceof EmptyRecyclerView)
+            ((EmptyRecyclerView) mRecyclerView).setEmptyView(empty);
     }
 
     /**

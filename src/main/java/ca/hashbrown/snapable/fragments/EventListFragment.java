@@ -18,6 +18,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SearchView;
 
@@ -57,6 +58,9 @@ public class EventListFragment extends SnapListFragment implements SearchView.On
 
     @InjectView(R.id.fragment_event_list)
     ScrollableSwipeRefreshLayout mSwipeLayout;
+
+    @InjectView(android.R.id.list)
+    ListView mList;
 
     public static EventListFragment getInstance() {
         return new EventListFragment();
@@ -103,6 +107,20 @@ public class EventListFragment extends SnapListFragment implements SearchView.On
         // initialize/setup some basic stuff
         mAdapter = new EventListAdapter(getActivity());
         setListAdapter(mAdapter);
+        mList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Event event = mAdapter.getItem(position);
+
+                // check the event pins
+                if (cachedPinMatchesEventPin(event)) {
+                    startActivity(EventPhotoList.initIntent(getActivity(), event));
+                } else {
+                    EventAuthFragment login = EventAuthFragment.getInstance(event);
+                    login.show(getFragmentManager(), EventAuthFragment.class.getCanonicalName());
+                }
+            }
+        });
 
         // initialize the loader
         if (!TextUtils.isEmpty(mSearchQuery)) {
@@ -200,21 +218,6 @@ public class EventListFragment extends SnapListFragment implements SearchView.On
 
 	public void onLoaderReset(Loader<LoaderResponse<Event>> loader) {
 		mAdapter.clear();
-	}
-
-	//==== OnClick ====\\
-    @Override
-    public void onListItemClick(ListView list, View view, int position, long id) {
-        super.onListItemClick(list, view, position, id);
-    	Event event = mAdapter.getItem(position);
-
-        // check the event pins
-        if(cachedPinMatchesEventPin(event)) {
-			startActivity(EventPhotoList.initIntent(getActivity(), event));
-		} else {
-			EventAuthFragment login = EventAuthFragment.getInstance(event);
-			login.show(getFragmentManager(), EventAuthFragment.class.getCanonicalName());
-		}
 	}
 
     //==== Location ====\\
