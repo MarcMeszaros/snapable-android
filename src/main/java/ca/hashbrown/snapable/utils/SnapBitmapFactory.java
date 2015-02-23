@@ -41,7 +41,7 @@ public class SnapBitmapFactory extends BitmapFactory {
 					rotation = 270;
 					break;
 			}
-			
+
 			Bitmap bm = decodeFile(pathName, opts);
 			if (rotation != 0) {
                 Matrix matrix = new Matrix();
@@ -79,7 +79,7 @@ public class SnapBitmapFactory extends BitmapFactory {
 
         // Decode bitmap with inSampleSize set
         options.inJustDecodeBounds = false;
-        return decodeFile(path, options);
+        return decodeFileRotate(path, options);
     }
 
     /**

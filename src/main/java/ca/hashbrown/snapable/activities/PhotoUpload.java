@@ -9,41 +9,46 @@ import android.graphics.Bitmap;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.TypedValue;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.*;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.Toast;
 
-import butterknife.ButterKnife;
-import butterknife.OnClick;
-import ca.hashbrown.snapable.R;
-import ca.hashbrown.snapable.provider.SnapableContract;
-
-import com.snapable.api.private_v1.objects.Guest;
-import com.snapable.utils.SnapImage;
 import com.snapable.api.private_v1.Client;
 import com.snapable.api.private_v1.objects.Event;
+import com.snapable.api.private_v1.objects.Guest;
 import com.snapable.api.private_v1.resources.PhotoResource;
-
-import ca.hashbrown.snapable.api.SnapClient;
-import ca.hashbrown.snapable.utils.SnapBitmapFactory;
-import retrofit.RetrofitError;
-import retrofit.mime.TypedString;
-import timber.log.Timber;
+import com.snapable.utils.SnapImage;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
+import butterknife.OnClick;
+import ca.hashbrown.snapable.R;
+import ca.hashbrown.snapable.api.SnapClient;
+import ca.hashbrown.snapable.provider.SnapableContract;
+import ca.hashbrown.snapable.utils.SnapBitmapFactory;
+import retrofit.RetrofitError;
+import retrofit.mime.TypedString;
+import timber.log.Timber;
+
 public class PhotoUpload extends BaseActivity {
 
-    public static final String EXTRA_EVENT = "extra.mEvent";
+    public static final String EXTRA_EVENT = "extra.event";
     public static final String EXTRA_IMAGE_PATH = "extra.image.path";
 
-	private Event mEvent;
-	private String mImagePath;
+    private Event mEvent;
+    private String mImagePath;
     private Bitmap bmScaled;
 
     public static Intent initIntent(Activity activity, Event event, String imagePath) {
@@ -54,10 +59,11 @@ public class PhotoUpload extends BaseActivity {
         return intent;
     }
 
-	@Override
+    //region == LifeCycle ==
+    @Override
     public void onCreate(Bundle savedInstanceState) {
-    	super.onCreate(savedInstanceState);
-    	setContentView(R.layout.activity_photo_upload);
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_photo_upload);
         ButterKnife.inject(this);
 
         // get the bundle from the saved state or try and get it from the intent
@@ -69,7 +75,7 @@ public class PhotoUpload extends BaseActivity {
             mImagePath = getIntent().getStringExtra(EXTRA_IMAGE_PATH);
         }
 
-    	// set the action bar title
+        // set the action bar title
         if (getActionBar() != null) {
             getActionBar().setTitle(mEvent.title);
             getActionBar().setDisplayHomeAsUpEnabled(true);
@@ -83,10 +89,9 @@ public class PhotoUpload extends BaseActivity {
         Timber.d("Free: %,d B | Total: %,d B | Max: %,d B", Runtime.getRuntime().freeMemory(), Runtime.getRuntime().totalMemory(), Runtime.getRuntime().maxMemory());
 
         // create a scaled bitmap
-        Resources r = getResources();
         int dpSize = 275;
-        int pxSize = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dpSize, r.getDisplayMetrics());
-        ImageView photo = (ImageView) findViewById(R.id.fragment_photo_upload__image);
+        int pxSize = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dpSize, getResources().getDisplayMetrics());
+        ImageView photo = ButterKnife.findById(this, R.id.fragment_photo_upload__image);
         bmScaled = SnapBitmapFactory.decodeSampledBitmapFromPath(mImagePath, pxSize, pxSize);
 
         // set the scaled image in the image view
@@ -94,24 +99,26 @@ public class PhotoUpload extends BaseActivity {
     }
 
     @Override
+    protected void onStop() {
+        super.onStop();
+        bmScaled.recycle();
+        bmScaled = null;
+    }
+    //endregion
+
+    //region == State ==
+    @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putSerializable(EXTRA_EVENT, mEvent);
         outState.putString(EXTRA_IMAGE_PATH, mImagePath);
     }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        bmScaled.recycle();
-        bmScaled = null;
-        System.gc();
-    }
+    //endregion
 
     @OnClick(R.id.fragment_photo_upload__button_done)
     public void onClickUploadButton(View v) {
         // get the image caption
-        EditText caption = (EditText) findViewById(R.id.fragment_photo_upload__caption);
+        EditText caption = ButterKnife.findById(this, R.id.fragment_photo_upload__caption);
 
         if (SnapClient.getInstance().isReachable()) {
             // get the image data ready for uploading via the API
@@ -120,7 +127,7 @@ public class PhotoUpload extends BaseActivity {
         } else {
             Toast.makeText(this, getString(R.string.api__unreachable), Toast.LENGTH_LONG).show();
         }
-	}
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -135,38 +142,39 @@ public class PhotoUpload extends BaseActivity {
 
     private class PhotoUploadTask extends AsyncTask<Void, Void, Void> {
 
-		private Event event;
-		private String caption;
-		private String photoPath;
+        private Event event;
+        private String caption;
+        private String photoPath;
 
         private String errorMsg;
 
-		public PhotoUploadTask(Event event, String caption, String photoPath) {
-			this.event = event;
-			this.caption = caption;
-			this.photoPath = photoPath;
-		}
+        public PhotoUploadTask(Event event, String caption, String photoPath) {
+            this.event = event;
+            this.caption = caption;
+            this.photoPath = photoPath;
+        }
 
-		@Override
-		protected void onPreExecute() {
-			super.onPreExecute();
-			ProgressBar pb = (ProgressBar) findViewById(R.id.fragment_photo_upload__progressBar);
-			Button butt = (Button) findViewById(R.id.fragment_photo_upload__button_done);
-			pb.setVisibility(View.VISIBLE);
-			butt.setVisibility(View.GONE);
-		}
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            ProgressBar pb = (ProgressBar) findViewById(R.id.fragment_photo_upload__progressBar);
+            Button butt = (Button) findViewById(R.id.fragment_photo_upload__button_done);
+            pb.setVisibility(View.VISIBLE);
+            butt.setVisibility(View.GONE);
+        }
 
-		@Override
-		protected Void doInBackground(Void... params) {
+        @Override
+        protected Void doInBackground(Void... params) {
             try {
                 SnapBitmapFactory.Options options = new SnapBitmapFactory.Options();
-                options.inPurgeable = true;
-                options.inTempStorage = new byte[32 * 1024]; // 32KB of temp decoding storage
+                options.inTempStorage = new byte[256 * 1024]; // 256KB of temp decoding storage
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP)
+                    options.inPurgeable = true;
                 // original photo to upload
                 Bitmap photo = SnapBitmapFactory.decodeFile(photoPath, options);
                 Timber.i("ByteCount of photo: " + photo.getByteCount());
                 ExifInterface exif = new ExifInterface(photoPath);
-                int exifRotation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
+                int exifOrientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
 
                 // turn the bitmap into a temp compressed file
                 FileOutputStream tmpout = new FileOutputStream(photoPath + ".tmp");
@@ -175,12 +183,11 @@ public class PhotoUpload extends BaseActivity {
                 // make sure memory is released
                 photo.recycle();
                 photo = null;
-                System.gc();
                 Timber.d("Created temp file");
 
                 // re-apply the exif rotation
                 ExifInterface exifComp = new ExifInterface(photoPath + ".tmp");
-                exifComp.setAttribute(ExifInterface.TAG_ORIENTATION, String.valueOf(exifRotation));
+                exifComp.setAttribute(ExifInterface.TAG_ORIENTATION, String.valueOf(exifOrientation));
                 exifComp.saveAttributes();
                 Timber.d("Re-applied exif data to temp file");
 
@@ -192,22 +199,19 @@ public class PhotoUpload extends BaseActivity {
                 Uri queryUri = ContentUris.withAppendedId(SnapableContract.EventCredentials.CONTENT_URI, event.getPk());
                 Cursor c = getContentResolver().query(queryUri, null, null, null, null);
 
-	            // upload via the API
-                Client client = SnapClient.getInstance();
-                PhotoResource photoRes = client.getRestAdapter().create(PhotoResource.class);
-
-	        	// if we have a guest id, upload the photo with the id
-	        	if (c.moveToFirst()) {
-	        		long guest_id = c.getLong(c.getColumnIndex(SnapableContract.EventCredentials.GUEST_ID));
-                    if(guest_id > 0) {
+                // if we have a guest id, upload the photo with the id
+                PhotoResource photoRes = SnapClient.getResource(PhotoResource.class);
+                if (c.moveToFirst()) {
+                    long guest_id = c.getLong(c.getColumnIndex(SnapableContract.EventCredentials.GUEST_ID));
+                    if (guest_id > 0) {
                         photoRes.postPhoto(tempImage, new TypedString(event.resourceUri), new TypedString(new Guest().getResourceUriFromPk(guest_id)), new TypedString(caption));
-	        		} else {
+                    } else {
                         photoRes.postPhoto(tempImage, new TypedString(event.resourceUri), new TypedString(caption));
                     }
-	        	} else {
-	        		photoRes.postPhoto(tempImage, new TypedString(event.resourceUri), new TypedString(caption));
-				}
-	        } catch(FileNotFoundException e) {
+                } else {
+                    photoRes.postPhoto(tempImage, new TypedString(event.resourceUri), new TypedString(caption));
+                }
+            } catch (FileNotFoundException e) {
                 Timber.e(e, "problem finding a file");
                 errorMsg = "There was a problem uploading the photo.";
             } catch (IOException e) {
@@ -217,7 +221,7 @@ public class PhotoUpload extends BaseActivity {
                 Timber.e(e, "Free: %,d B | Total: %,d B | Max: %,d B", Runtime.getRuntime().freeMemory(), Runtime.getRuntime().totalMemory(), Runtime.getRuntime().maxMemory());
                 errorMsg = getString(R.string.api__unable_to_upload);
             } catch (RetrofitError error) {
-                if (error.getKind() == RetrofitError.Kind.NETWORK){
+                if (error.getKind() == RetrofitError.Kind.NETWORK) {
                     errorMsg = getString(R.string.api__unreachable);
                 } else {
                     errorMsg = getString(R.string.api__unable_to_upload);
@@ -229,26 +233,26 @@ public class PhotoUpload extends BaseActivity {
             }
 
             // return nothing
-			return null;
-		}
+            return null;
+        }
 
-		@Override
-		protected void onPostExecute(Void result) {
-			super.onPostExecute(result);
+        @Override
+        protected void onPostExecute(Void result) {
+            super.onPostExecute(result);
 
             // stop the progress bar
             ProgressBar pb = (ProgressBar) findViewById(R.id.fragment_photo_upload__progressBar);
             pb.setVisibility(View.GONE);
 
-			// if there is an error set, display it to the user
-			if (errorMsg != null && errorMsg.length() > 0) {
-				Toast.makeText(getApplicationContext(), errorMsg, Toast.LENGTH_LONG).show();
-			} else {
+            // if there is an error set, display it to the user
+            if (errorMsg != null && errorMsg.length() > 0) {
+                Toast.makeText(getApplicationContext(), errorMsg, Toast.LENGTH_LONG).show();
+            } else {
                 // Go back to the photo list when we are done uploading.
                 finish();
             }
 
-		}
+        }
 
-	}
+    }
 }
