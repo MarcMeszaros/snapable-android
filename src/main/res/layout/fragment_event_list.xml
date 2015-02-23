@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ca.hashbrown.snapable.ui.widgets.ScrollableSwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ca.hashbrown.snapable.ui.widgets.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/fragment_event_list"
     android:layout_width="match_parent"
@@ -60,4 +60,4 @@
 
     </LinearLayout>
 
-</ca.hashbrown.snapable.ui.widgets.ScrollableSwipeRefreshLayout>
+</ca.hashbrown.snapable.ui.widgets.SwipeRefreshLayout>

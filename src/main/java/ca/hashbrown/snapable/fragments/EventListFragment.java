@@ -32,7 +32,6 @@ import ca.hashbrown.snapable.adapters.EventListAdapter;
 import ca.hashbrown.snapable.loaders.EventLoader;
 import ca.hashbrown.snapable.loaders.LoaderResponse;
 import ca.hashbrown.snapable.provider.SnapableContract;
-import ca.hashbrown.snapable.ui.widgets.ScrollableSwipeRefreshLayout;
 import timber.log.Timber;
 
 public class EventListFragment extends SnapListFragment implements SearchView.OnQueryTextListener,
@@ -57,7 +56,7 @@ public class EventListFragment extends SnapListFragment implements SearchView.On
     private String mSearchQuery = "";
 
     @InjectView(R.id.fragment_event_list)
-    ScrollableSwipeRefreshLayout mSwipeLayout;
+    android.support.v4.widget.SwipeRefreshLayout mSwipeLayout;
 
     @InjectView(android.R.id.list)
     ListView mList;
