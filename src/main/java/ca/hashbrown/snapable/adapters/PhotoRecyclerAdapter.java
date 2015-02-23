@@ -21,7 +21,7 @@ import butterknife.InjectView;
 import ca.hashbrown.snapable.R;
 import ca.hashbrown.snapable.provider.SnapCache;
 
-public class PhotoRecyclerAdapter extends RecyclerView.Adapter<PhotoRecyclerAdapter.ViewHolder> {
+public class PhotoRecyclerAdapter extends BaseRecyclerAdapter<PhotoRecyclerAdapter.ViewHolder> {
 
     private Context mContext;
     private ArrayList<Photo> mItems;
@@ -89,11 +89,11 @@ public class PhotoRecyclerAdapter extends RecyclerView.Adapter<PhotoRecyclerAdap
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
-        @InjectView(R.id.listview_row_eventphoto_photo)
+        @InjectView(R.id.partial_photo_card__photo)
         ImageView photo;
-        @InjectView(R.id.listview_row_eventphoto_caption)
+        @InjectView(R.id.partial_photo_card__caption)
         TextView caption;
-        @InjectView(R.id.listview_row_eventphoto_author_name)
+        @InjectView(R.id.partial_photo_card__author_name)
         TextView authorName;
 
         public ViewHolder(View view) {

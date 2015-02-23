@@ -5,7 +5,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
 
-abstract class BaseRecyclerAdapter<T extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<T>  {
+public abstract class BaseRecyclerAdapter<T extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<T>  {
 
     // https://gist.github.com/ssinss/e06f12ef66c51252563e
     public static abstract class EndlessRecyclerOnScrollListener extends RecyclerView.OnScrollListener {

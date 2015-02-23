@@ -7,6 +7,8 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.GridLayoutManager;
 import android.view.*;
 
 import com.snapable.api.private_v1.objects.Event;
@@ -16,12 +18,13 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import ca.hashbrown.snapable.R;
 import ca.hashbrown.snapable.activities.PhotoUpload;
-import ca.hashbrown.snapable.adapters.PhotoListAdapter;
+import ca.hashbrown.snapable.adapters.BaseRecyclerAdapter;
+import ca.hashbrown.snapable.adapters.PhotoRecyclerAdapter;
 import ca.hashbrown.snapable.loaders.LoaderResponse;
 import ca.hashbrown.snapable.loaders.PhotoLoader;
+import ca.hashbrown.snapable.ui.widgets.EmptyRecyclerView;
 
-public class PhotoListFragment extends SnapListFragment implements SwipeRefreshLayout.OnRefreshListener,
-        LoaderCallbacks<LoaderResponse<Photo>>, SnapListFragment.LoadMoreListener {
+public class PhotoListFragment extends SnapListFragment implements SwipeRefreshLayout.OnRefreshListener, LoaderCallbacks<LoaderResponse<Photo>> {
 
 	public static final int ACTION_GALLERY = 0x02;
 
@@ -32,11 +35,14 @@ public class PhotoListFragment extends SnapListFragment implements SwipeRefreshL
 
     private static final int LOADER_PHOTOS = "PhotoLoader".hashCode();
 
-	private PhotoListAdapter mAdapter;
+	private PhotoRecyclerAdapter mAdapter;
 	private Event mEvent;
 
     @InjectView(R.id.fragment_photo_list)
     SwipeRefreshLayout mSwipeLayout;
+
+    @InjectView(android.R.id.list)
+    EmptyRecyclerView mRecyclerView;
 
     public static PhotoListFragment getInstance(Event event) {
         PhotoListFragment photoListFragment = new PhotoListFragment();
@@ -61,20 +67,6 @@ public class PhotoListFragment extends SnapListFragment implements SwipeRefreshL
     }
 
     @Override
-	public void onActivityCreated(Bundle savedInstanceState) {
-		super.onActivityCreated(savedInstanceState);
-
-        mAdapter = new PhotoListAdapter(getActivity());
-        setListAdapter(mAdapter);
-
-		// Prepare the loader. (Re-connect with an existing one, or start a new one.)
-        Bundle args = new Bundle(2);
-        args.putLong(ARG_LOADER_EVENT_ID, mEvent.getPk());
-        args.putBoolean(ARG_LOADER_EVENT_IS_STREAMABLE, true);
-		getLoaderManager().initLoader(LOADER_PHOTOS, args, this);
-	}
-
-    @Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View v = inflater.inflate(R.layout.fragment_photo_list, null);
         ButterKnife.inject(this, v);
@@ -84,14 +76,48 @@ public class PhotoListFragment extends SnapListFragment implements SwipeRefreshL
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        // use this setting to improve performance if you know that changes
+        // in content do not change the layout size of the RecyclerView
+        mRecyclerView.setHasFixedSize(true);
 
-        setLoadMoreListener(this);
+        // add some animation
+        mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+
+        // use a linear layout manager
+        final int numColumns = getResources().getInteger(R.integer.fragment_photo_list__columns);
+        final GridLayoutManager layoutManager = new GridLayoutManager(getActivity(), numColumns);
+        mRecyclerView.setLayoutManager(layoutManager);
+        mRecyclerView.setOnScrollListener(new BaseRecyclerAdapter.EndlessRecyclerOnScrollListener(layoutManager){
+            @Override
+            public void onLoadMore(int currentPage) {
+                Loader<LoaderResponse<Photo>> loader = getLoaderManager().getLoader(LOADER_PHOTOS);
+                if (loader != null && !((PhotoLoader) loader).isProcessing() && ((PhotoLoader) loader).hasNextPage()) {
+                    ((PhotoLoader) loader).loadNextPage();
+                }
+            }
+        });
 
         // make the list go into "loading"
         setListShownNoAnimation(false);
 
         // setup pull to refresh
         mSwipeLayout.setOnRefreshListener(this);
+    }
+
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        // setup the adapter
+        mAdapter = new PhotoRecyclerAdapter(getActivity());
+        setRecyclerAdapter(mAdapter);
+
+        // Prepare the loader. (Re-connect with an existing one, or start a new one.)
+        Bundle args = new Bundle(2);
+        args.putLong(ARG_LOADER_EVENT_ID, mEvent.getPk());
+        args.putBoolean(ARG_LOADER_EVENT_IS_STREAMABLE, true);
+        getLoaderManager().initLoader(LOADER_PHOTOS, args, this);
     }
 
     //==== State ====\\
@@ -173,15 +199,6 @@ public class PhotoListFragment extends SnapListFragment implements SwipeRefreshL
         args.putLong(ARG_LOADER_EVENT_ID, mEvent.getPk());
         args.putBoolean(ARG_LOADER_EVENT_IS_STREAMABLE, true);
         getLoaderManager().restartLoader(LOADER_PHOTOS, args, this);
-    }
-
-    //==== SnapListFragment.LoadMoreListener ====\\
-    @Override
-    public void loadMore() {
-        Loader<LoaderResponse<Photo>> loader = getLoaderManager().getLoader(LOADER_PHOTOS);
-        if (loader != null && !((PhotoLoader) loader).isProcessing() && ((PhotoLoader) loader).hasNextPage()) {
-            ((PhotoLoader) loader).loadNextPage();
-        }
     }
 
 }

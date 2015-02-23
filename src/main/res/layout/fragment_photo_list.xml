@@ -31,13 +31,11 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <ListView
+            <ca.hashbrown.snapable.ui.widgets.EmptyRecyclerView
                 android:id="@android:id/list"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:clipToPadding="false"
-                android:divider="@android:color/transparent"
-                android:dividerHeight="15dp"
                 android:drawSelectorOnTop="false"
                 android:paddingBottom="90dp"
                 android:paddingLeft="12dp"
