@@ -28,6 +28,7 @@ import com.snapable.api.private_v1.resources.PhotoResource;
 
 import ca.hashbrown.snapable.api.SnapClient;
 import ca.hashbrown.snapable.utils.SnapBitmapFactory;
+import retrofit.RetrofitError;
 import retrofit.mime.TypedString;
 import timber.log.Timber;
 
@@ -215,6 +216,12 @@ public class PhotoUpload extends BaseActivity {
             } catch (OutOfMemoryError e) {
                 Timber.e(e, "Free: %,d B | Total: %,d B | Max: %,d B", Runtime.getRuntime().freeMemory(), Runtime.getRuntime().totalMemory(), Runtime.getRuntime().maxMemory());
                 errorMsg = getString(R.string.api__unable_to_upload);
+            } catch (RetrofitError error) {
+                if (error.getKind() == RetrofitError.Kind.NETWORK){
+                    errorMsg = getString(R.string.api__unreachable);
+                } else {
+                    errorMsg = getString(R.string.api__unable_to_upload);
+                }
             } finally {
                 Timber.d("delete temp file");
                 File tmpFile = new File(photoPath + ".tmp");
@@ -228,17 +235,19 @@ public class PhotoUpload extends BaseActivity {
 		@Override
 		protected void onPostExecute(Void result) {
 			super.onPostExecute(result);
+
+            // stop the progress bar
+            ProgressBar pb = (ProgressBar) findViewById(R.id.fragment_photo_upload__progressBar);
+            pb.setVisibility(View.GONE);
+
 			// if there is an error set, display it to the user
 			if (errorMsg != null && errorMsg.length() > 0) {
 				Toast.makeText(getApplicationContext(), errorMsg, Toast.LENGTH_LONG).show();
-			}
+			} else {
+                // Go back to the photo list when we are done uploading.
+                finish();
+            }
 
-			// stop the progress bar
-			ProgressBar pb = (ProgressBar) findViewById(R.id.fragment_photo_upload__progressBar);
-			pb.setVisibility(View.GONE);
-
-            // Go back to the photo list when we are done uploading.
-            finish();
 		}
 
 	}
