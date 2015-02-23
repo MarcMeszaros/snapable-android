@@ -74,11 +74,11 @@ public class EventListAdapter extends ArrayAdapter<Event> {
 	}
 
     static class ViewHolder {
-        @InjectView(R.id.listview_row_event__cover)
+        @InjectView(R.id.partial_event_card__cover)
         ImageView cover;
-        @InjectView(R.id.listview_row_event__title)
+        @InjectView(R.id.partial_event_card__title)
         TextView title;
-        @InjectView(R.id.listview_row_event__date)
+        @InjectView(R.id.partial_event_card__date)
         TextView date;
 
         ViewHolder(View view) {

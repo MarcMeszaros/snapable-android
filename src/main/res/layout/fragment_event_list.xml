@@ -10,27 +10,26 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <RelativeLayout
+        <LinearLayout
             android:id="@id/progressContainer"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical"
             android:visibility="visible"
             tools:visibility="gone">
 
             <ProgressBar
                 style="?android:attr/progressBarStyleLarge"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:layout_marginTop="60dp" />
+                android:layout_height="wrap_content" />
 
-        </RelativeLayout>
+        </LinearLayout>
 
-        <RelativeLayout
+        <FrameLayout
             android:id="@id/listContainer"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center_horizontal">
+            android:layout_height="match_parent">
 
             <ListView
                 android:id="@android:id/list"
@@ -38,8 +37,7 @@
                 android:layout_height="match_parent"
                 android:clipToPadding="false"
                 android:divider="@android:color/transparent"
-                android:dividerHeight="12dp"
-                android:padding="12dp"
+                android:padding="10dp"
                 android:scrollbarStyle="outsideOverlay"
                 tools:listitem="@layout/listview_row_event"
                 tools:visibility="visible" />
@@ -56,7 +54,7 @@
                 android:textSize="18sp"
                 tools:visibility="gone" />
 
-        </RelativeLayout>
+        </FrameLayout>
 
     </LinearLayout>
 
