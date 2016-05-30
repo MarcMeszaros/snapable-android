@@ -2,26 +2,24 @@ package ca.hashbrown.snapable.utils;
 
 import android.content.Context;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import io.fabric.sdk.android.Fabric;
 import timber.log.Timber;
+
 
 /**
  * This Timber tree is a Crashlytics optimized Timber tree. It only sends logs to crashlytics on
  * error or warning level logs. It gets the current class as the TAG.
  */
-public class CrashlyticsTree extends Timber.HollowTree implements Timber.TaggedTree {
-    private static final Pattern ANONYMOUS_CLASS = Pattern.compile("\\$\\d+$");
-    private static final ThreadLocal<String> NEXT_TAG = new ThreadLocal<String>();
+public class CrashlyticsTree extends Timber.Tree {
 
     /**
      * Create the new Crashlytics tree with an {@link android.content.Context}.
      *
-     * @param context The context for {@link com.crashlytics.android.Crashlytics#start(android.content.Context)}.
+     * @param context The context to use.
      */
     public CrashlyticsTree(Context context) {
         this(context, null, null, null);
@@ -30,13 +28,13 @@ public class CrashlyticsTree extends Timber.HollowTree implements Timber.TaggedT
     /**
      * Create the new Crashlytics tree with an {@link android.content.Context} and various user details.
      *
-     * @param context The context for {@link com.crashlytics.android.Crashlytics#start(android.content.Context)}.
+     * @param context The context to use.
      * @param username The username for the current user or null.
      * @param email The email of the current user or null.
      * @param userIdentifier The user identifier or null (ex. user internal ID).
      */
     public CrashlyticsTree(Context context, String username, String email, String userIdentifier) {
-        Crashlytics.start(context);
+        Fabric.with(context, new Crashlytics());
 
         if (!TextUtils.isEmpty(username))
             Crashlytics.setUserName(username);
@@ -46,77 +44,60 @@ public class CrashlyticsTree extends Timber.HollowTree implements Timber.TaggedT
             Crashlytics.setUserIdentifier(userIdentifier);
     }
 
-    // https://github.com/JakeWharton/timber/blob/master/timber/src/main/java/timber/log/Timber.java#L209
-    private static String createTag() {
-        String tag = NEXT_TAG.get();
-        if (tag != null) {
-            NEXT_TAG.remove();
-            return tag;
-        }
-
-        StackTraceElement[] stackTrace = new Throwable().getStackTrace();
-        if (stackTrace.length < 6) {
-            throw new IllegalStateException("Synthetic stacktrace didn't have enough elements: are you using proguard?");
-        }
-        tag = stackTrace[5].getClassName();
-        Matcher m = ANONYMOUS_CLASS.matcher(tag);
-        if (m.find()) {
-            tag = m.replaceAll("");
-        }
-        return tag.substring(tag.lastIndexOf('.') + 1) + ".class";
-    }
-
     // https://github.com/JakeWharton/timber/blob/master/timber/src/main/java/timber/log/Timber.java#L229
     static String formatString(String message, Object... args) {
         // If no varargs are supplied, treat it as a request to log the string without formatting.
         return args.length == 0 ? message : String.format(message, args);
     }
 
-    // https://github.com/SimonVT/cathode/blob/master/cathode/src/main/java/net/simonvt/cathode/CrashlyticsTree.java#L63
-    private void log(String logType, String message, Object... args) {
-        if (message == null)
-            message = "";
+    @Override
+    protected void log(int priority, String tag, String message, Throwable t) {
+        // We don't want to deal with anything less than INFO.
+        if (priority < Log.INFO)
+            return;
+
         StringBuilder s = new StringBuilder();
-        String tag = createTag();
-        if (logType != null) {
-            s.append("[").append(logType).append("] ");
+
+        // add the error type to the Crashlytics string
+        s.append("[");
+        switch (priority) {
+            case Log.INFO:
+                s.append("INFO");
+                break;
+            case Log.WARN:
+                s.append("WARN");
+                break;
+            case Log.ERROR:
+                s.append("ERROR");
+                break;
         }
-        s.append(tag).append(" - ").append(formatString(message, args));
+        s.append("]");
+
+        // add the tag if it's not null, add it to the Crashlytics string
+        if (tag != null)
+            s.append(" ").append(tag);
+
+        // Prepare for adding message.
+        s.append(" - ");
+        boolean shouldLogException = t != null && priority > Log.INFO;
+
+        // Timber#prepareLog method appends the StackTrace to the message.
+        // We don't need to append the StackTrace
+        // if we're eventually logging the exception to Crashlytics.
+        if (message != null)
+            if (!shouldLogException)
+                s.append(message);
+            else
+                // Timber adds `\n` between message and the StackTrace.
+                // We'll detect that and strip the message. The down side is, that it'
+                s.append(message.substring(0, message.indexOf("\n")));
+
+        // actually send the log to crashlytics
         Crashlytics.log(s.toString());
-    }
 
-    @Override
-    public void tag(String tag) {
-        NEXT_TAG.set(tag);
-    }
-
-    @Override
-    public void i(String message, Object... args) {
-        log("INFO", message, args);
-    }
-
-    @Override
-    public void w(String message, Object... args) {
-        log("WARN", message, args);
-    }
-
-    @Override
-    public void w(Throwable t, String message, Object... args) {
-        if (!TextUtils.isEmpty(message))
-            Crashlytics.log(formatString("EXTRA DETAILS: " + message, args));
-        Crashlytics.logException(t);
-    }
-
-    @Override
-    public void e(String message, Object... args) {
-        log("ERROR", message, args);
-    }
-
-    @Override
-    public void e(Throwable t, String message, Object... args) {
-        if (!TextUtils.isEmpty(message))
-            Crashlytics.log(formatString("EXTRA DETAILS: " + message, args));
-        Crashlytics.logException(t);
+        // send the throwable to crashlytics
+        if (shouldLogException)
+            Crashlytics.logException(t);
     }
 
 }
