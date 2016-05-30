@@ -3,7 +3,7 @@
 
     <!-- ActionBar -->
     <style name="Snapable.Widget.ActionBar" parent="android:Widget.Holo.Light.ActionBar.Solid.Inverse">
-        <item name="android:background">@color/material_primary</item>
+        <item name="android:background">@color/snapable_color_primary</item>
     </style>
 
     <!-- Buttons -->

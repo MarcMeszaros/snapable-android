@@ -120,7 +120,7 @@ public class PhotoUpload extends BaseActivity {
         // get the image caption
         EditText caption = ButterKnife.findById(this, R.id.fragment_photo_upload__caption);
 
-        if (SnapClient.getInstance().isReachable()) {
+        if (SnapClient.isReachable(v.getContext())) {
             // get the image data ready for uploading via the API
             PhotoUploadTask uploadTask = new PhotoUploadTask(mEvent, caption.getText().toString(), mImagePath);
             uploadTask.execute();

@@ -21,10 +21,6 @@ public abstract class BaseClient implements Client {
 
     private boolean mDebug = false;
 
-    public BaseClient(String baseUrl) {
-        this(baseUrl, false);
-    }
-
     public BaseClient(String baseUrl, boolean debug) {
         mBaseUrl = baseUrl;
         mDebug = debug;

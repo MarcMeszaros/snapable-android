@@ -1,5 +1,7 @@
 package ca.hashbrown.snapable.api;
 
+import android.content.Context;
+
 import com.snapable.api.private_v1.Client;
 
 import java.util.HashMap;
@@ -12,8 +14,8 @@ public class SnapClient extends Client {
 
     private static SnapClient instance;
 
-    private SnapClient(String key, String secret, boolean useDevApi, boolean debug) {
-        super(key, secret, useDevApi, debug);
+    private SnapClient(String key, String secret, String baseUrl, boolean debug) {
+        super(key, secret, baseUrl, debug);
     }
 
     /**
@@ -24,7 +26,7 @@ public class SnapClient extends Client {
      */
     public static synchronized SnapClient getInstance() {
         if (instance == null)
-            instance = new SnapClient(BuildConfig.API_KEY, BuildConfig.API_SECRET, BuildConfig.API_DEV, BuildConfig.DEBUG);
+            instance = new SnapClient(BuildConfig.API_KEY, BuildConfig.API_SECRET, BuildConfig.API_BASE_URL, BuildConfig.DEBUG);
 
         return instance;
     }
@@ -44,8 +46,8 @@ public class SnapClient extends Client {
      *
      * @return a boolean representing if the Snapable API is reachable
      */
-    public boolean isReachable() {
-        Network netInfo = new Network(Snapable.getContext());
+    public static boolean isReachable(Context context) {
+        Network netInfo = new Network(context);
         return (netInfo.isConnected());
     }
 

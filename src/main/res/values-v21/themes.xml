@@ -2,10 +2,10 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
 
     <!--==== Base application theme. ====-->
-    <style name="SnapableTheme" parent="android:Theme.Material" tools:ignore="NewApi">
-        <item name="android:colorPrimary">@color/material_primary</item>
-        <item name="android:colorPrimaryDark">@color/material_primary_dark</item>
-        <item name="android:colorAccent">@color/material_accent</item>
+    <style name="SnapableTheme" parent="android:Theme.Material.Light.DarkActionBar" tools:ignore="NewApi">
+        <item name="android:colorPrimary">@color/snapable_color_primary</item>
+        <item name="android:colorPrimaryDark">@color/snapable_color_primary_dark</item>
+        <item name="android:colorAccent">@color/snapable_color_accent</item>
     </style>
 
 </resources>

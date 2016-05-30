@@ -21,17 +21,11 @@ import retrofit.converter.JacksonConverter;
 public class Client extends BaseClient {
 
     private static final String VERSION = "private_v1";
-    private static final String BASE_URL = "https://api.snapable.com/private_v1/";
-    private static final String BASE_URL_DEV = "http://devapi.snapable.com/private_v1/";
 
     private final SnapSigning snapSigning;
 
-    public Client(String key, String secret) {
-        this(key, secret, false, false);
-    }
-
-    public Client(String key, String secret, boolean useDevApi, boolean debug) {
-        super(!useDevApi ? BASE_URL : BASE_URL_DEV, debug);
+    public Client(String key, String secret, String baseUrl, boolean debug) {
+        super(baseUrl, debug);
         snapSigning = new SnapSigning(VERSION, key, secret);
     }
 
