@@ -1,0 +1,23 @@
+apply plugin: 'java'
+
+group = 'com.snapable.api'
+version = '0.0.4'
+
+allprojects {
+    sourceCompatibility = 1.7
+    targetCompatibility = 1.7
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // main codebase dependencies
+    compile 'com.squareup.retrofit:retrofit:1.9.0' // REST client
+    compile 'com.squareup.retrofit:converter-jackson:1.9.0' // extra converter
+    compile 'com.squareup.okhttp:okhttp:2.2.0' // optimized http client
+
+    // testing dependencies
+    testCompile 'junit:junit:4.12'
+}

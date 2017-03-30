@@ -1,0 +1,133 @@
+// build requirements
+buildscript {
+    // build dependency repositories
+    repositories {
+        jcenter()
+        maven { url 'https://maven.fabric.io/public' }
+    }
+    // build dependencies
+    dependencies {
+        classpath 'com.android.tools.build:gradle:2.1.+' // android build tools
+        classpath 'io.fabric.tools:gradle:1.19.+'
+    }
+}
+
+// build plugins
+apply from: 'git.gradle'
+apply plugin: 'com.android.application'
+apply plugin: 'io.fabric'
+
+// only import signing if available
+if (file('signing.gradle').exists()) {
+    apply from: 'signing.gradle'
+}
+
+// application dependency repositories
+repositories {
+    jcenter()
+    maven { url 'https://bitbucket.org/snapable/mvn-repo/raw/master/releases' } // analytics v3
+    maven { url 'https://bitbucket.org/snapable/mvn-repo/raw/master/snapshots' } // analytics v3
+    maven { url 'https://maven.fabric.io/public' }
+}
+
+// application dependencies
+dependencies {
+    // libs folder
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+
+    // internal projects
+    compile project(':snapable-java')
+
+    // support libraries
+    compile 'com.android.support:support-v4:21.0.3'
+    compile 'com.android.support:cardview-v7:21.0.3'
+    compile 'com.android.support:recyclerview-v7:21.0.3'
+
+    // project dependencies
+    compile 'com.jakewharton:disklrucache:2.0.2'
+
+    // ui
+    compile 'com.jakewharton:butterknife:6.1.0'
+
+    // analytics
+    compile('com.crashlytics.sdk.android:crashlytics:2.4.+@aar') {
+        transitive = true
+    }
+    compile 'com.google.android:analytics:3.01'
+
+    // logs
+    compile 'com.jakewharton.timber:timber:3.1.0'
+
+    // testing
+//    testCompile 'junit:junit:4.12'
+//    androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2.2'
+//    androidTestCompile 'com.android.support.test:runner:0.5'
+//    androidTestCompile 'com.android.support:support-annotations:23.4.0'
+}
+
+// android helpers
+def getVersionCode = { ->
+    return gitCommitCount()
+}
+def getVersionName = { ->
+    def versionTag = gitTag() ?: ''
+
+    if (gitCurrentBranch() != 'master' || versionTag.length() < 1) {
+        return gitHash() + gitDirty()
+    } else {
+        return versionTag
+    }
+}
+
+// android build settings
+android {
+    compileSdkVersion 21
+    buildToolsVersion "23.0.3"
+
+    defaultConfig {
+        applicationId 'ca.hasbrown.snapable'
+        versionCode = getVersionCode()
+        versionName = getVersionName()
+        minSdkVersion 15
+        targetSdkVersion 21
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+
+    lintOptions {
+        lintConfig file('lint.xml')
+        disable 'InvalidPackage'
+    }
+
+    // build types
+    buildTypes {
+        debug {
+            applicationIdSuffix '.debug'
+            debuggable true
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+            buildConfigField 'boolean', 'API_DEV', 'true'
+            buildConfigField 'String', 'API_BASE_URL', '"https://api.snapable.com/private_v1/"'
+            buildConfigField 'String', 'API_KEY', '"removed"'
+            buildConfigField 'String', 'API_SECRET', '"removed"'
+        }
+        release {
+            debuggable false
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+            signingConfig signingConfigs.release
+            buildConfigField 'boolean', 'API_DEV', 'false'
+            buildConfigField 'String', 'API_BASE_URL', '"https://api.snapable.com/private_v1/"'
+            buildConfigField 'String', 'API_KEY', '"removed"'
+            buildConfigField 'String', 'API_SECRET', '"removed"'
+        }
+    }
+
+    packagingOptions {
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/NOTICE'
+    }
+}
